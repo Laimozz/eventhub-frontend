@@ -10,8 +10,8 @@ React + Vite + TypeScript. Chỉ triển khai trong phạm vi yêu cầu; không
 
 ## Kiến trúc
 
-- `src/App.tsx`, `src/main.tsx`: điểm khởi tạo hiện tại theo template mặc định.
-- `src/app/`: dành cho cấu hình router và provider khi có yêu cầu; không tạo thêm `App.tsx` ở đây nếu component gốc vẫn nằm tại `src/App.tsx`.
+- `src/App.tsx`, `src/main.tsx`: điểm khởi tạo ứng dụng, BrowserRouter và AuthProvider.
+- `src/app/`: router và provider; không tạo thêm `App.tsx` ở đây nếu component gốc vẫn nằm tại `src/App.tsx`.
 - `src/features/example/`: khung tham khảo; đặt tên feature theo nghiệp vụ khi triển khai.
 - `src/features/<feature>/`: toàn bộ code riêng của một tính năng.
   - `pages/`: màn hình thuộc tính năng.
@@ -21,9 +21,9 @@ React + Vite + TypeScript. Chỉ triển khai trong phạm vi yêu cầu; không
   - `types/`: kiểu dữ liệu của tính năng.
   - `data/`: dữ liệu tĩnh khi thực sự cần.
 - `src/pages/`: page cấp ứng dụng không thuộc một tính năng cụ thể.
-- `src/components/ui/`: thành phần UI cơ bản dùng chung.
-- `src/components/common/`: thành phần giao diện dùng chung cấp ứng dụng.
-- `src/layouts/`: khung giao diện.
+- `src/components/ui/`: chỉ bổ sung khi được yêu cầu; hiện JSX được viết trực tiếp trong page auth.
+- `src/components/common/`: hiện chưa có component dùng chung.
+- Hiện không dùng layout riêng; header, nền, footer nằm trong từng page auth.
 - `src/hooks/`, `src/types/`, `src/utils/`: code dùng chung giữa các tính năng.
 - `src/lib/`: cấu hình thư viện hoặc HTTP client khi triển khai.
 - `src/config/`, `src/constants/`: cấu hình và hằng số dùng chung.
@@ -44,7 +44,7 @@ Không tạo thư mục con hoặc lớp trừu tượng khi chưa có nhu cầu
 - Giữ state cục bộ khi chỉ một component sử dụng; không thêm thư viện quản lý state khi chưa cần.
 - Đặt CSS riêng cạnh page/component dưới dạng `TenComponent.module.css`.
 - Chỉ đưa reset, font, biến CSS và kiểu thực sự dùng toàn ứng dụng vào CSS toàn cục.
-- `App.css` và `index.css` hiện là CSS mặc định. Khi thay giao diện và chuyển CSS sang `styles/`, cập nhật import, tránh sao chép cùng một bộ style ở nhiều nơi.
+- CSS toàn cục nằm trong `src/styles/global.css`; `App.css` và `index.css` mặc định đã được bỏ. Tránh sao chép cùng một bộ style ở nhiều nơi.
 - Hiện tại dùng import tương đối. Alias `@/` chưa được cấu hình; nếu thêm, cấu hình đồng bộ Vite và TypeScript.
 - Khi tích hợp API, đặt hàm gọi backend trong feature và cấu hình client dùng chung trong `lib/`; xử lý loading, lỗi và dữ liệu rỗng theo yêu cầu tính năng.
 - Không giả định endpoint, cơ chế xác thực hay hợp đồng backend khi chưa có thông tin.
@@ -52,8 +52,8 @@ Không tạo thư mục con hoặc lớp trừu tượng khi chưa có nhu cầu
 ## Dependency và cấu hình
 
 - Dùng npm và lockfile hiện có.
-- Hiện có React, React DOM, Vite, TypeScript và Oxlint theo template.
-- React Router, Axios, Prettier và công cụ test chưa được cài đặt. Chỉ bổ sung khi công việc cần.
+- Hiện có React, React DOM, Vite, TypeScript, Oxlint, React Router và Lucide React.
+- API dùng Axios trong `src/lib/http-client.ts`, có cookie, CSRF và interceptor tự refresh khi gặp 401. Các API nghiệp vụ phải dùng client này để được xử lý phiên thống nhất. Playwright kiểm thử auth và refresh với API giả lập. Prettier chưa được cài đặt.
 - Không tự nâng phiên bản hoặc đổi công cụ trong tác vụ không liên quan.
 - Không đưa thông tin bí mật vào frontend. Khi bổ sung cấu hình môi trường, dùng ví dụ công khai và cấu hình `.gitignore` phù hợp.
 
@@ -66,4 +66,4 @@ Không tạo thư mục con hoặc lớp trừu tượng khi chưa có nhu cầu
 5. Nếu chỉ sửa tài liệu, kiểm tra nội dung khớp với cây thư mục và script thực tế. Khi rà soát bộ khung, kiểm tra cả asset tham chiếu trong HTML/JSX; build thành công không đảm bảo file được gọi bằng URL như `/icons.svg` đang tồn tại.
 6. Báo rõ đã thay đổi gì, đã kiểm tra gì và phần nào còn chưa triển khai.
 
-Dự án chưa có test runner. Không báo đã chạy test nếu chưa có lệnh kiểm thử tương ứng. Không tự commit hoặc push nếu người dùng chưa yêu cầu.
+Dùng `npm run test:e2e` khi sửa luồng auth. Test Playwright giả lập API, không thay thế kiểm thử với backend/PostgreSQL thật. Không tự commit hoặc push nếu người dùng chưa yêu cầu.
