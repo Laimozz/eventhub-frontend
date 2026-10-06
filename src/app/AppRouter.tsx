@@ -3,6 +3,9 @@ import { useAuth } from '../features/auth/hooks/useAuth'
 import { LoginPage } from '../features/auth/pages/LoginPage'
 import { RegisterPage } from '../features/auth/pages/RegisterPage'
 import { HomePage } from '../pages/HomePage'
+import { OrganizerLayout } from '../features/organizer/pages/OrganizerLayout'
+import { OrganizerDashboard } from '../features/organizer/pages/OrganizerDashboard'
+import { CreateEventPage } from '../features/events/pages/CreateEventPage'
 
 function GuestRoute() {
   const { user } = useAuth()
@@ -12,6 +15,16 @@ function GuestRoute() {
 function ProtectedRoute() {
   const { user } = useAuth()
   return user ? <Outlet /> : <Navigate to="/login" replace />
+}
+
+function OrganizerRoute() {
+  const { user } = useAuth()
+  return user?.role === 'ORGANIZER' ? <Outlet /> : <Navigate to="/" replace />
+}
+
+function LandingPage() {
+  const { user } = useAuth()
+  return user?.role === 'ORGANIZER' ? <Navigate to="/organizer" replace /> : <HomePage />
 }
 
 export function AppRouter() {
@@ -25,7 +38,14 @@ export function AppRouter() {
         <Route path="/register" element={<RegisterPage />} />
       </Route>
       <Route element={<ProtectedRoute />}>
-        <Route index element={<HomePage />} />
+        <Route index element={<LandingPage />} />
+        <Route element={<OrganizerRoute />}>
+          <Route path="/organizer" element={<OrganizerLayout />}>
+            <Route index element={<OrganizerDashboard />} />
+            <Route path="events/new" element={<Navigate to="details" replace />} />
+            <Route path="events/new/:step" element={<CreateEventPage />} />
+          </Route>
+        </Route>
       </Route>
       <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>
