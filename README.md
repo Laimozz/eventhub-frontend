@@ -1,6 +1,6 @@
-﻿# EventHub Frontend — Tài Liệu Kiến Trúc & Hướng Dẫn Phát Triển
+# EventHub Frontend — Tài Liệu Kiến Trúc & Hướng Dẫn Phát Triển
 
-Dự án Frontend được xây dựng bằng **React 19 + Vite + TypeScript**, áp dụng kiến trúc **Feature-driven (hướng phân hệ và tính năng)** kết hợp với phân quyền người dùng **RBAC (Role-Based Access Control)** và cơ chế bảo mật xác thực qua **HttpOnly Cookie**.
+Dự án Frontend được xây dựng bằng **React 19 + Vite + TypeScript**, áp dụng kiến trúc **Feature-driven (hướng phân hệ và tính năng)** kết hợp với phân quyền người dùng **RBAC (Role-Based Access Control)** và cơ chế bảo mật xác thực qua **HttpOnly Cookie**. Đã triển khai đăng ký, đăng nhập; thông tin cá nhân và đổi mật khẩu; Organizer tạo sự kiện theo ba bước, xem danh sách/chi tiết, sửa và gửi yêu cầu hủy, kết nối API của `eventhub-backend`.
 
 Đã triển khai đầy đủ luồng xác thực (Đăng ký, Đăng nhập, Token Rotation), giao diện Ban tổ chức tạo sự kiện (`features/events` & `features/organizer`) và khung phân quyền cho cả 4 nhóm người dùng (`ADMIN`, `ORGANIZER`, `CUSTOMER`, `STAFF`).
 
@@ -23,7 +23,23 @@ npm run dev
 
 ## 2. Kiến Trúc Cốt Lõi (Architecture Overview)
 
-### 2.1. Mô hình phân tầng: Feature ➔ Pages ➔ Components ➔ API Services
+### 2.1. Danh mục đường dẫn chính
+
+| Đường dẫn | Hành vi |
+| --- | --- |
+| `/register` | Đăng ký CUSTOMER hoặc ORGANIZER; thành công chuyển sang đăng nhập, chưa tạo phiên. |
+| `/login` | Chỉ nhập email, mật khẩu và đăng nhập; không có đăng nhập mạng xã hội hoặc mô phỏng kiểm thử. |
+| `/` | Yêu cầu đăng nhập; Organizer được chuyển tới `/organizer`; các role còn lại có trang đăng xuất. |
+| `/customer` | Cổng thông tin khách hàng, xem chi tiết và cập nhật thông tin cá nhân, đổi mật khẩu. |
+| `/organizer` | Chỉ ORGANIZER; trang tổng quan theo mẫu, các số liệu minh họa và mục quản lý khác chưa kết nối API. |
+| `/organizer/events/new/details` | Bước 1: thông tin, địa điểm, thời gian, ảnh bìa/thumbnail/sơ đồ. |
+| `/organizer/events/new/category` | Bước 2: danh mục từ DB và khách mời (tùy chọn). |
+| `/organizer/events/new/tickets` | Bước 3: thêm/sửa/xóa/nhân bản loại vé, kiểm tra hồ sơ và gửi duyệt. |
+| `/organizer/events` | Danh sách từ API: tìm theo tên, lọc trạng thái và phân trang. |
+| `/organizer/events/:eventId` | Chi tiết, địa điểm, ảnh, khách mời, số vé phát hành/đã bán/giữ chỗ/còn lại; sửa hoặc yêu cầu hủy khi được phép. |
+| `/organizer/events/:eventId/edit/:step` | Dùng lại form tạo với `details`, `category`, `tickets`; tải hồ sơ hiện tại, sửa và gửi duyệt lại. |
+
+### 2.2. Mô hình phân tầng: Feature ➔ Pages ➔ Components ➔ API Services
 
 Dự án tổ chức mã nguồn theo từng **phân hệ người dùng / tính năng lớn (Vertical Slices)** thay vì gom chung tất cả components hay pages vào một chỗ. Mỗi phân hệ tuân theo luồng kiến trúc 4 tầng:
 
@@ -67,7 +83,31 @@ Dự án tổ chức mã nguồn theo từng **phân hệ người dùng / tính
 * **API Service (`api/`)**: Chuyên trách việc gọi HTTP request đến server (dùng `httpClient.get`, `httpClient.post`). **Quy chuẩn chung:** Đặt tên thư mục là `api/` (thay vì `services/`) để ngắn gọn và đồng bộ (`auth-api.ts`, `event-api.ts`).
 * **Types (`types/`)**: Định nghĩa interface TypeScript để đảm bảo tính an toàn dữ liệu (Type-safe).
 
+<<<<<<< HEAD
 ---
+=======
+### Xem, sửa và yêu cầu hủy sự kiện
+
+- Sidebar “Sự kiện của tôi” mở danh sách riêng qua `GET /api/events/mine`. Bộ lọc, tên tìm kiếm và trang nằm trong URL để tải lại hoặc Back/Forward; có trạng thái đang tải, lỗi/thử lại và danh sách rỗng. Các thẻ tổng số/trạng thái dùng dữ liệu API. Bố cục nền sáng, thẻ trắng, điểm nhấn xanh theo mẫu; chỉ hiển thị các phần có dữ liệu backend.
+- Chi tiết lấy `GET /api/events/:id`, hiển thị hồ sơ và loại vé/khách mời thật. Số vé đã bán loại trừ số giữ chỗ. API chỉ trả sự kiện thuộc tài khoản; FE không nhận Organizer ID từ URL để thay đổi quyền sở hữu.
+- Sửa dùng cùng `CreateEventPage` và các hộp chỉnh sửa hiện có. Thời gian UTC được đổi về GMT+7, giữ ID loại vé/khách mời, hiện ảnh đã lưu. Thay ảnh thì chỉ gửi file mới; không thay thì giữ URL ở backend. Có thể xóa sơ đồ và ảnh khách mời, thêm/sửa/xóa khách mời và loại vé; vé đã bán/giữ chỗ không cho xóa hoặc giảm số lượng dưới mức đã phân bổ. Backend kiểm tra cả liên kết booking cũ.
+- `PUT /api/events/:id` gửi hồ sơ multipart và các file theo thứ tự mảng đã chỉnh sửa. Ảnh bắt buộc của loại vé mới phải được chọn; khi nhân bản vé cũ cần chọn ảnh cho vé mới. Sửa chỉ được phép trước giờ bắt đầu với trạng thái Chờ duyệt/Đã duyệt. Thành công trở về chi tiết, trạng thái Chờ duyệt và vé tạm ngừng bán để Admin xét lại. Không lưu bản chỉnh sửa vào bản nháp tạo sự kiện trong sessionStorage.
+- Hủy mở hộp nhập lý do (bắt buộc, tối đa 255 ký tự), gọi `POST /api/events/:id/cancel`. Thành công hiển thị Chờ hủy và lý do, tắt thao tác sửa/hủy tiếp. Đây là yêu cầu gửi Admin theo UC23; thời điểm hủy chính thức chỉ được ghi khi Admin xử lý. Không thêm nghiệp vụ hoàn tiền/duyệt Admin.
+- Các request dùng client cookie/CSRF/refresh hiện có. Chặn gửi lặp, giữ form khi API lỗi. Tạo/sửa multipart có timeout 180 giây để chờ upload ảnh; các API đọc vẫn dùng timeout mặc định.
+
+- Đăng ký kiểm tra họ tên, email, mật khẩu 8–72 ký tự/tối đa 72 byte UTF-8 và xác nhận mật khẩu. Số điện thoại không bắt buộc theo DTO backend, tối đa 20 ký tự. Không trim mật khẩu.
+- API gọi `POST /api/auth/register`, `/login`, `/refresh`, `/logout`, luôn có `X-CSRF-Protection: 1` và `withCredentials: true`.
+- Token do backend đặt trong cookie HttpOnly. Không lưu token hoặc mật khẩu vào localStorage/sessionStorage.
+- Khi tải lại ứng dụng, gọi refresh để khôi phục phiên vì backend chưa có endpoint `/me`.
+- Axios interceptor bắt `401` của API cần xác thực, gọi `POST /api/auth/refresh`, rồi gửi lại request ban đầu một lần với cookie mới. Nhiều request cùng hết hạn dùng chung một lần refresh; response `401` đến muộn từ token cũ cũng dùng phiên đã được làm mới.
+- Refresh trả `401` (hết hạn, bị thu hồi hoặc thiếu refresh token), hoặc request thử lại vẫn trả `401`: xóa trạng thái user và chuyển về `/login`. Backend chịu trách nhiệm xóa cookie HttpOnly khi refresh không hợp lệ.
+- Không tự refresh cho login/register/refresh/logout; không xử lý `403` như token hết hạn. Lỗi mạng hoặc `5xx` khi refresh được trả về cho nơi gọi xử lý, không tự đăng xuất.
+- Logout chờ refresh đang chạy hoàn tất để thu hồi đúng phiên mới. Request cũ không được tự thử lại sau khi người dùng đã đăng xuất hoặc đăng nhập tài khoản khác.
+- Mọi API cần cơ chế này phải dùng `httpClient` từ `src/lib/http-client.ts`, ví dụ `httpClient.get('/events')` hoặc `post('/bookings', body)`. Token vẫn nằm trong cookie HttpOnly; frontend không đọc hay giải mã token.
+- Đăng xuất chỉ chuyển trang khi backend trả thành công. Khi mất kết nối, giữ trang hiện tại và cho phép thử lại.
+- Form có trạng thái đang gửi, chặn gửi lặp, thông báo lỗi bằng tiếng Việt và nút hiện/ẩn mật khẩu.
+- Chưa triển khai quên mật khẩu, OAuth, ghi nhớ đăng nhập tùy chọn hay các trang nghiệp vụ khác vì backend chưa có API tương ứng.
+>>>>>>> origin/develop
 
 ## 3. Cơ Chế Xác Thực & Phân Quyền (Auth & RBAC Flow)
 

@@ -1,5 +1,5 @@
 import { ApiError } from '../../lib/http-client'
-import type { CreateEventRequest, EventDraft, FieldErrors, GuestDraft, TicketDraft } from './types/event'
+import type { CreateEventRequest, EventDetail, EventDraft, FieldErrors, GuestDraft, TicketDraft } from './types/event'
 
 export const emptyDraft: EventDraft = {
   name: '', description: '', city: '', address: '', capacity: '', thumbnailImage: null, bannerImage: null,
@@ -10,6 +10,22 @@ export const emptyTicket = (): TicketDraft => ({ key: crypto.randomUUID(), name:
 
 // The form explicitly uses Vietnam time, independently of the browser's time zone.
 export function toUtc(value: string) { return new Date(`${value}+07:00`).toISOString().slice(0, 19) }
+export function fromUtc(value: string) {
+  return new Date(new Date(`${value}Z`).getTime() + 7 * 60 * 60 * 1000).toISOString().slice(0, 19)
+}
+export function fromEvent(event: EventDetail): EventDraft {
+  return {
+    ...emptyDraft, name: event.name, description: event.description ?? '', city: event.venue.city,
+    address: event.venue.address, capacity: String(event.venue.capacity), categoryId: String(event.categoryId),
+    startTime: fromUtc(event.startTime), endTime: fromUtc(event.endTime), thumbnailImageUrl: event.thumbnailImageUrl,
+    bannerImageUrl: event.bannerImageUrl, imageZoneUrl: event.imageZoneUrl,
+    guests: event.guests.map(guest => ({ ...guest, key: crypto.randomUUID(), description: guest.description ?? '', imageFile: null })),
+    ticketTypes: event.ticketTypes.map(ticket => ({ ...ticket, key: crypto.randomUUID(), imageFile: null,
+      description: ticket.description ?? '', price: String(ticket.price), quantity: String(ticket.quantity),
+      allocatedQuantity: ticket.quantity - ticket.remainingQuantity,
+      saleStartTime: fromUtc(ticket.saleStartTime), saleEndTime: fromUtc(ticket.saleEndTime) })),
+  }
+}
 export function formatDate(value: string) {
   return value ? new Intl.DateTimeFormat('vi-VN', { dateStyle: 'short', timeStyle: 'short', timeZone: 'Asia/Ho_Chi_Minh' }).format(new Date(`${value}+07:00`)) : 'Chưa thiết lập'
 }
@@ -29,7 +45,7 @@ export function validateDetails(draft: EventDraft): FieldErrors {
   text(errors, 'name', draft.name, 255, true); text(errors, 'description', draft.description, 255)
   text(errors, 'city', draft.city, 255, true); text(errors, 'address', draft.address, 255, true)
   if (!positiveInteger(draft.capacity)) errors.capacity = 'Nhập sức chứa là số nguyên dương.'
-  image(errors, 'thumbnailImage', draft.thumbnailImage, true); image(errors, 'bannerImage', draft.bannerImage, true)
+  image(errors, 'thumbnailImage', draft.thumbnailImage, !draft.thumbnailImageUrl); image(errors, 'bannerImage', draft.bannerImage, !draft.bannerImageUrl)
   image(errors, 'imageZone', draft.imageZone)
   const start = new Date(`${draft.startTime}+07:00`).getTime(), end = new Date(`${draft.endTime}+07:00`).getTime()
   if (!Number.isFinite(start) || start <= Date.now()) errors.startTime = 'Thời gian bắt đầu phải ở tương lai.'
@@ -45,9 +61,10 @@ export function validateGuest(guest: GuestDraft): FieldErrors {
 export function validateTicket(ticket: TicketDraft, draft: EventDraft): FieldErrors {
   const errors: FieldErrors = {}
   text(errors, 'name', ticket.name, 255, true); text(errors, 'description', ticket.description, 255)
-  image(errors, 'imageFile', ticket.imageFile, true)
+  image(errors, 'imageFile', ticket.imageFile, !ticket.imageUrl)
   if (!/^\d{1,17}(\.\d{1,2})?$/.test(ticket.price)) errors.price = 'Giá vé không âm, tối đa 17 chữ số nguyên và 2 chữ số thập phân.'
   if (!positiveInteger(ticket.quantity)) errors.quantity = 'Số lượng vé phải là số nguyên dương.'
+  else if (Number(ticket.quantity) < (ticket.allocatedQuantity ?? 0)) errors.quantity = 'Số lượng không được nhỏ hơn số vé đã bán và đang giữ chỗ.'
   const start = new Date(`${ticket.saleStartTime}+07:00`).getTime(), end = new Date(`${ticket.saleEndTime}+07:00`).getTime()
   const eventStart = new Date(`${draft.startTime}+07:00`).getTime()
   if (!Number.isFinite(start) || start >= eventStart) errors.saleStartTime = 'Bắt đầu bán phải trước lúc sự kiện diễn ra.'
@@ -70,9 +87,9 @@ export function eventError(error: unknown) {
   switch (error.status) {
     case 400: return 'Thông tin chưa hợp lệ. Hãy kiểm tra thời gian, ảnh và các trường bắt buộc.'
     case 401: return 'Phiên đăng nhập đã hết hạn. Vui lòng đăng nhập lại.'
-    case 403: return 'Tài khoản hiện tại không có quyền tạo sự kiện.'
-    case 404: return 'Danh mục không còn tồn tại. Hãy quay lại bước 2 và chọn lại.'
-    case 409: return 'Dữ liệu chưa thể lưu. Hãy kiểm tra thông tin và thử lại.'
+    case 403: return 'Tài khoản hiện tại không có quyền quản lý sự kiện này.'
+    case 404: return 'Sự kiện hoặc danh mục không tồn tại hoặc bạn không có quyền truy cập.'
+    case 409: return 'Không thể thực hiện với trạng thái hoặc dữ liệu vé hiện tại. Hãy tải lại sự kiện và kiểm tra các loại vé đã bán hoặc giữ chỗ.'
     case 413: return 'Mỗi ảnh tối đa 5 MB; tổng hồ sơ tạo sự kiện tối đa 50 MB.'
     default: return 'Máy chủ chưa thể xử lý yêu cầu. Vui lòng thử lại sau.'
   }

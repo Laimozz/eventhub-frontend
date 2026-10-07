@@ -66,6 +66,62 @@ test('organizer dashboard follows reference and unrelated sections remain placeh
   await page.screenshot({ path: test.info().outputPath('event-details.png'), fullPage: true })
 })
 
+test('organizer avatar opens logout, dismisses with outside click or Escape, and signs out', async ({ page }) => {
+  await session(page)
+  let logouts = 0
+  let completeLogout!: () => void
+  const responseReady = new Promise<void>(resolve => { completeLogout = resolve })
+  await page.route('**/api/auth/logout', async route => {
+    logouts++
+    expect(route.request().method()).toBe('POST')
+    expect(route.request().headers()['x-csrf-protection']).toBe('1')
+    expect(route.request().headers().cookie).toContain('access_token=event-test-session')
+    await responseReady
+    await route.fulfill({ status: 204 })
+  })
+  await page.goto('/organizer')
+  const avatar = page.getByRole('button', { name: 'Menu tài khoản', exact: true })
+  const dropdown = page.locator('#organizer-account-menu')
+  await expect(avatar).toHaveAttribute('aria-expanded', 'false')
+  await avatar.click()
+  await expect(dropdown.getByRole('button', { name: 'Đăng xuất', exact: true })).toBeVisible()
+  await expect(avatar).toHaveAttribute('aria-expanded', 'true')
+  expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true)
+  await page.screenshot({ path: test.info().outputPath('organizer-avatar-logout.png') })
+  await page.getByRole('heading', { name: 'Tổng quan ban tổ chức' }).click()
+  await expect(dropdown).toHaveCount(0)
+  await avatar.focus()
+  await page.keyboard.press('Enter')
+  await page.keyboard.press('Tab')
+  await expect(dropdown.getByRole('button', { name: 'Đăng xuất', exact: true })).toBeFocused()
+  await page.keyboard.press('Escape')
+  await expect(dropdown).toHaveCount(0)
+  await expect(avatar).toBeFocused()
+  await avatar.click()
+  const request = page.waitForRequest('**/api/auth/logout')
+  await dropdown.getByRole('button', { name: 'Đăng xuất', exact: true }).click()
+  await request
+  await expect(dropdown.getByRole('button', { name: 'Đang đăng xuất…', exact: true })).toBeDisabled()
+  completeLogout()
+  await expect(page).toHaveURL('/login')
+  expect(logouts).toBe(1)
+})
+
+test('organizer avatar logout failure keeps the session and allows retry', async ({ page }) => {
+  await session(page)
+  await page.route('**/api/auth/logout', route => route.abort())
+  await page.goto('/organizer')
+  await page.getByRole('button', { name: 'Menu tài khoản', exact: true }).click()
+  const logout = page.locator('#organizer-account-menu').getByRole('button', { name: 'Đăng xuất', exact: true })
+  await logout.click()
+  await expect(page.getByRole('alert')).toContainText('Không thể kết nối')
+  await expect(page).toHaveURL('/organizer')
+  await expect(logout).toBeEnabled()
+  await page.route('**/api/auth/logout', route => route.fulfill({ status: 204 }))
+  await logout.click()
+  await expect(page).toHaveURL('/login')
+})
+
 test('only organizer can access wizard and incomplete direct links return to step one', async ({ page }) => {
   await session(page, 'CUSTOMER')
   await page.goto('/organizer/events/new/details')
