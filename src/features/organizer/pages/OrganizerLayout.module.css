@@ -17,21 +17,25 @@
 .sidebarBottom button { display: flex; gap: 9px; align-items: center; border: 0; background: none; color: #647069; padding: 8px; font-size: 13px; }
 .main { margin-left: 238px; }
 .header { height: 74px; background: #fff; display: flex; align-items: center; justify-content: space-between; padding: 0 30px; gap: 20px; border-bottom: 1px solid #eff1f4; }
-.search { max-width: 420px; flex: 1; display: flex; align-items: center; gap: 9px; background: #f3f4f6; padding: 11px 13px; border-radius: 9px; color: #52655a; }
-.search input { width: 100%; border: 0; background: transparent; font-size: 12px; min-width: 0; }
-.account { display: flex; align-items: center; gap: 15px; }
+.account { display: flex; align-items: center; gap: 15px; margin-left: auto; }
 .role { color: #087e4b; background: #e2f6ec; border-radius: 20px; font-size: 10px; letter-spacing: .4px; padding: 5px 10px; font-weight: 700; white-space: nowrap; }
 .bell { background: none; border: 0; color: #283e30; padding: 3px; cursor: default !important; }
 .user { text-align: right; display: grid; gap: 3px; font-size: 12px; }
 .user small { font-size: 10px; color: #718079; }
-.avatar { background: #daf3e6; width: 35px; height: 35px; display: grid; place-items: center; border-radius: 50%; color: #087e4b; font-weight: 700; }
+.accountMenu { position: relative; flex-shrink: 0; }
+.avatar { background: #daf3e6; width: 35px; height: 35px; display: grid; place-items: center; border: 0; padding: 0; border-radius: 50%; color: #087e4b; font-weight: 700; }
+.avatar:hover, .avatar[aria-expanded="true"] { background: #c5ecd8; }
+.accountDropdown { position: absolute; top: calc(100% + 10px); right: 0; min-width: 175px; padding: 6px; background: #fff; border: 1px solid #e6ece8; border-radius: 10px; box-shadow: 0 8px 24px #17241d1a; z-index: 30; }
+.accountLogout { display: flex; align-items: center; gap: 9px; width: 100%; padding: 11px 12px; border: 0; border-radius: 6px; background: none; color: #203128; font-size: 13px; text-align: left; white-space: nowrap; }
+.accountLogout:hover { background: #e2f6ec; color: #087e4b; }
+.accountLogout:disabled { opacity: .6; cursor: wait; }
 .content { max-width: 1400px; margin: auto; padding: 30px 32px 40px; }
 .menuToggle, .backdrop { display: none; }
 .error { padding: 15px; background: #fff0ed; color: #b42318; }
-@media (max-width: 1100px) { .header { padding: 0 20px; } .role { display: none; } .content { padding: 25px 20px; } .search { max-width: 290px; } }
+@media (max-width: 1100px) { .header { padding: 0 20px; } .role { display: none; } .content { padding: 25px 20px; } }
 @media (max-width: 760px) {
   .sidebar { transform: translateX(-100%); transition: transform .2s; } .sidebar.open { transform: translateX(0); }
-  .main { margin-left: 0; } .header { height: 65px; padding: 0 15px; gap: 12px; } .search { display: none; }
+  .main { margin-left: 0; } .header { height: 65px; padding: 0 15px; gap: 12px; }
   .menuToggle { display: grid; place-items: center; border: 0; background: none; color: #1d3928; padding: 5px; }
   .backdrop { display: block; position: fixed; inset: 0; border: 0; background: #12231a66; z-index: 39; }
   .content { padding: 23px 16px 30px; } .account { gap: 10px; margin-left: auto; } .user strong { max-width: 180px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }

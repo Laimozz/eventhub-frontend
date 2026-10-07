@@ -6,6 +6,9 @@ import { HomePage } from '../pages/HomePage'
 import { OrganizerLayout } from '../features/organizer/pages/OrganizerLayout'
 import { OrganizerDashboard } from '../features/organizer/pages/OrganizerDashboard'
 import { CreateEventPage } from '../features/events/pages/CreateEventPage'
+import { OrganizerEventsPage } from '../features/events/pages/OrganizerEventsPage'
+import { EventDetailPage } from '../features/events/pages/EventDetailPage'
+import { EditEventPage } from '../features/events/pages/EditEventPage'
 
 function GuestRoute() {
   const { user } = useAuth()
@@ -44,6 +47,10 @@ export function AppRouter() {
             <Route index element={<OrganizerDashboard />} />
             <Route path="events/new" element={<Navigate to="details" replace />} />
             <Route path="events/new/:step" element={<CreateEventPage />} />
+            <Route path="events" element={<OrganizerEventsPage />} />
+            <Route path="events/:eventId" element={<EventDetailPage />} />
+            <Route path="events/:eventId/edit" element={<Navigate to="details" replace />} />
+            <Route path="events/:eventId/edit/:step" element={<EditEventPage />} />
           </Route>
         </Route>
       </Route>

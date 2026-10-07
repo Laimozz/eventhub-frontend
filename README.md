@@ -1,6 +1,6 @@
 # EventHub Frontend
 
-React + Vite + TypeScript, tổ chức theo tính năng. Đã triển khai đăng ký, đăng nhập và giao diện Organizer tạo sự kiện theo ba bước, kết nối API của `eventhub-backend`.
+React + Vite + TypeScript, tổ chức theo tính năng. Đã triển khai đăng ký, đăng nhập; Organizer tạo sự kiện theo ba bước, xem danh sách/chi tiết, sửa và gửi yêu cầu hủy, kết nối API của `eventhub-backend`.
 
 ## Khởi chạy
 
@@ -26,6 +26,9 @@ Không cần tạo file môi trường để chạy mặc định. Khi cần đ�
 | `/organizer/events/new/details` | Bước 1: thông tin, địa điểm, thời gian, ảnh bìa/thumbnail/sơ đồ. |
 | `/organizer/events/new/category` | Bước 2: danh mục từ DB và khách mời (tùy chọn). |
 | `/organizer/events/new/tickets` | Bước 3: thêm/sửa/xóa/nhân bản loại vé, kiểm tra hồ sơ và gửi duyệt. |
+| `/organizer/events` | Danh sách từ API: tìm theo tên, lọc trạng thái và phân trang. |
+| `/organizer/events/:eventId` | Chi tiết, địa điểm, ảnh, khách mời, số vé phát hành/đã bán/giữ chỗ/còn lại; sửa hoặc yêu cầu hủy khi được phép. |
+| `/organizer/events/:eventId/edit/:step` | Dùng lại form tạo với `details`, `category`, `tickets`; tải hồ sơ hiện tại, sửa và gửi duyệt lại. |
 
 Đã đăng nhập thì `/login` và `/register` chuyển về `/`. Đường dẫn không tồn tại chuyển về `/`, rồi kiểm tra phiên. Giao diện dùng nhận diện EventHub với bố cục và màu xanh theo mẫu. Truy cập bước sau khi chưa hoàn tất thông tin trước đó sẽ quay về bước cần điền; Back/Next giữ dữ liệu.
 
@@ -38,6 +41,15 @@ Không cần tạo file môi trường để chạy mặc định. Khi cần đ�
 - Hiển thị/nhập giờ Việt Nam GMT+7, chuyển sang chuỗi UTC không offset khi gửi. Thời gian sự kiện phải ở tương lai, kết thúc sau bắt đầu; thời gian bán vé kết thúc trước sự kiện. Tổng số vé không vượt sức chứa. Giá tiền gửi dưới dạng chuỗi thập phân để giữ độ chính xác BigDecimal.
 - Chỉ `POST /api/events` khi bấm gửi duyệt; hàm API nhận một bản nháp và tự dựng JSON cùng các file ảnh từ bản nháp đó. JSON không có trường URL ảnh; backend chỉ hỗ trợ tạo sự kiện multipart. Dùng HTTP client hiện có với cookie/CSRF/refresh. Chặn gửi lặp và điều hướng trong khi đang gửi; lỗi API giữ hồ sơ để chỉnh sửa/thử lại. Thành công hiển thị ID thật và trạng thái chờ duyệt.
 - Cần chạy phiên bản backend hỗ trợ tạo sự kiện multipart và cấu hình `CLOUDINARY_CLOUD_NAME`, `CLOUDINARY_API_KEY`, `CLOUDINARY_API_SECRET` trên backend theo README backend. Không đặt API secret trong frontend. Không còn endpoint upload ảnh riêng hoặc lưu/đọc ảnh local qua backend.
+
+### Xem, sửa và yêu cầu hủy sự kiện
+
+- Sidebar “Sự kiện của tôi” mở danh sách riêng qua `GET /api/events/mine`. Bộ lọc, tên tìm kiếm và trang nằm trong URL để tải lại hoặc Back/Forward; có trạng thái đang tải, lỗi/thử lại và danh sách rỗng. Các thẻ tổng số/trạng thái dùng dữ liệu API. Bố cục nền sáng, thẻ trắng, điểm nhấn xanh theo mẫu; chỉ hiển thị các phần có dữ liệu backend.
+- Chi tiết lấy `GET /api/events/:id`, hiển thị hồ sơ và loại vé/khách mời thật. Số vé đã bán loại trừ số giữ chỗ. API chỉ trả sự kiện thuộc tài khoản; FE không nhận Organizer ID từ URL để thay đổi quyền sở hữu.
+- Sửa dùng cùng `CreateEventPage` và các hộp chỉnh sửa hiện có. Thời gian UTC được đổi về GMT+7, giữ ID loại vé/khách mời, hiện ảnh đã lưu. Thay ảnh thì chỉ gửi file mới; không thay thì giữ URL ở backend. Có thể xóa sơ đồ và ảnh khách mời, thêm/sửa/xóa khách mời và loại vé; vé đã bán/giữ chỗ không cho xóa hoặc giảm số lượng dưới mức đã phân bổ. Backend kiểm tra cả liên kết booking cũ.
+- `PUT /api/events/:id` gửi hồ sơ multipart và các file theo thứ tự mảng đã chỉnh sửa. Ảnh bắt buộc của loại vé mới phải được chọn; khi nhân bản vé cũ cần chọn ảnh cho vé mới. Sửa chỉ được phép trước giờ bắt đầu với trạng thái Chờ duyệt/Đã duyệt. Thành công trở về chi tiết, trạng thái Chờ duyệt và vé tạm ngừng bán để Admin xét lại. Không lưu bản chỉnh sửa vào bản nháp tạo sự kiện trong sessionStorage.
+- Hủy mở hộp nhập lý do (bắt buộc, tối đa 255 ký tự), gọi `POST /api/events/:id/cancel`. Thành công hiển thị Chờ hủy và lý do, tắt thao tác sửa/hủy tiếp. Đây là yêu cầu gửi Admin theo UC23; thời điểm hủy chính thức chỉ được ghi khi Admin xử lý. Không thêm nghiệp vụ hoàn tiền/duyệt Admin.
+- Các request dùng client cookie/CSRF/refresh hiện có. Chặn gửi lặp, giữ form khi API lỗi. Tạo/sửa multipart có timeout 180 giây để chờ upload ảnh; các API đọc vẫn dùng timeout mặc định.
 
 - Đăng ký kiểm tra họ tên, email, mật khẩu 8–72 ký tự/tối đa 72 byte UTF-8 và xác nhận mật khẩu. Số điện thoại không bắt buộc theo DTO backend, tối đa 20 ký tự. Không trim mật khẩu.
 - API gọi `POST /api/auth/register`, `/login`, `/refresh`, `/logout`, luôn có `X-CSRF-Protection: 1` và `withCredentials: true`.
