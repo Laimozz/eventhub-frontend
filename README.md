@@ -1,6 +1,6 @@
 # EventHub Frontend
 
-React + Vite + TypeScript, tổ chức theo tính năng. Đã triển khai giao diện đăng ký, đăng nhập và trang sau đăng nhập chỉ có nút đăng xuất, kết nối API của `eventhub-backend`.
+React + Vite + TypeScript, tổ chức theo tính năng. Đã triển khai đăng ký, đăng nhập và giao diện Organizer tạo sự kiện theo ba bước, kết nối API của `eventhub-backend`.
 
 ## Khởi chạy
 
@@ -21,9 +21,23 @@ Không cần tạo file môi trường để chạy mặc định. Khi cần đ�
 | --- | --- |
 | `/register` | Đăng ký CUSTOMER hoặc ORGANIZER; thành công chuyển sang đăng nhập, chưa tạo phiên. |
 | `/login` | Chỉ nhập email, mật khẩu và đăng nhập; không có đăng nhập mạng xã hội hoặc mô phỏng kiểm thử. |
-| `/` | Yêu cầu đăng nhập; nền trắng chỉ có nút đăng xuất. |
+| `/` | Yêu cầu đăng nhập; Organizer được chuyển tới `/organizer`; các role còn lại có trang đăng xuất. |
+| `/organizer` | Chỉ ORGANIZER; trang tổng quan theo mẫu, các số liệu minh họa và mục quản lý khác chưa kết nối API. |
+| `/organizer/events/new/details` | Bước 1: thông tin, địa điểm, thời gian, ảnh bìa/thumbnail/sơ đồ. |
+| `/organizer/events/new/category` | Bước 2: danh mục từ DB và khách mời (tùy chọn). |
+| `/organizer/events/new/tickets` | Bước 3: thêm/sửa/xóa/nhân bản loại vé, kiểm tra hồ sơ và gửi duyệt. |
 
-Đã đăng nhập thì `/login` và `/register` chuyển về `/`. Đường dẫn không tồn tại chuyển về `/`, rồi kiểm tra phiên. Giao diện dùng nhận diện EventHub với bố cục và màu xanh theo mẫu.
+Đã đăng nhập thì `/login` và `/register` chuyển về `/`. Đường dẫn không tồn tại chuyển về `/`, rồi kiểm tra phiên. Giao diện dùng nhận diện EventHub với bố cục và màu xanh theo mẫu. Truy cập bước sau khi chưa hoàn tất thông tin trước đó sẽ quay về bước cần điền; Back/Next giữ dữ liệu.
+
+### Tạo sự kiện cho Organizer
+
+- Form là ba trang riêng, có sidebar responsive, hộp thêm/sửa khách mời và loại vé, xem trước và xác nhận khi hủy. Các trường bám `CreateEventRequest` backend; thông tin thanh toán, giấy phép hoặc tính năng chưa có hợp đồng API không được tự tạo thêm.
+- `GET /api/categories` lấy đúng ID/name/description từ DB. Khi tải lỗi có thể thử lại; khi danh mục trống hiển thị hướng dẫn liên hệ Admin.
+- Chọn/kéo thả ảnh JPG/PNG tối đa 5 MB chỉ giữ file trong form và xem trước bằng blob URL trên trình duyệt; không gọi upload và không có ô nhập URL ảnh. Khi gửi duyệt, frontend gọi `POST /api/events` một lần bằng multipart: part `event` là JSON, các file là `bannerImage`, `thumbnailImage`, `imageZone` (tùy chọn), `ticketImage0`, `ticketImage1`... và `guestImage0`... (tùy chọn), theo thứ tự vé/khách mời trong JSON. Tổng request tối đa 50 MB. Backend lưu hồ sơ và upload ảnh trong cùng luồng, trả URL Cloudinary trong response sau khi thành công.
+- Thông tin bản nháp tự lưu trong sessionStorage theo ID tài khoản, tồn tại trong tab hiện tại; file ảnh giữ trong bộ nhớ khi Back/Next, không được lưu vào sessionStorage. Sau khi tải lại trang cần chọn lại ảnh. Không gửi hồ sơ nháp lên DB/Cloudinary. Khi gửi thành công hoặc xác nhận hủy, xóa bản nháp.
+- Hiển thị/nhập giờ Việt Nam GMT+7, chuyển sang chuỗi UTC không offset khi gửi. Thời gian sự kiện phải ở tương lai, kết thúc sau bắt đầu; thời gian bán vé kết thúc trước sự kiện. Tổng số vé không vượt sức chứa. Giá tiền gửi dưới dạng chuỗi thập phân để giữ độ chính xác BigDecimal.
+- Chỉ `POST /api/events` khi bấm gửi duyệt; hàm API nhận một bản nháp và tự dựng JSON cùng các file ảnh từ bản nháp đó. JSON không có trường URL ảnh; backend chỉ hỗ trợ tạo sự kiện multipart. Dùng HTTP client hiện có với cookie/CSRF/refresh. Chặn gửi lặp và điều hướng trong khi đang gửi; lỗi API giữ hồ sơ để chỉnh sửa/thử lại. Thành công hiển thị ID thật và trạng thái chờ duyệt.
+- Cần chạy phiên bản backend hỗ trợ tạo sự kiện multipart và cấu hình `CLOUDINARY_CLOUD_NAME`, `CLOUDINARY_API_KEY`, `CLOUDINARY_API_SECRET` trên backend theo README backend. Không đặt API secret trong frontend. Không còn endpoint upload ảnh riêng hoặc lưu/đọc ảnh local qua backend.
 
 - Đăng ký kiểm tra họ tên, email, mật khẩu 8–72 ký tự/tối đa 72 byte UTF-8 và xác nhận mật khẩu. Số điện thoại không bắt buộc theo DTO backend, tối đa 20 ký tự. Không trim mật khẩu.
 - API gọi `POST /api/auth/register`, `/login`, `/refresh`, `/logout`, luôn có `X-CSRF-Protection: 1` và `withCredentials: true`.
@@ -48,6 +62,8 @@ src/
 │   ├── hooks/              # useAuth, context
 │   ├── pages/              # LoginPage, RegisterPage: tự chứa toàn bộ giao diện
 │   └── types/              # Request, User, role
+├── features/events/        # API, validation, ba bước tạo sự kiện và các hộp chỉnh sửa
+├── features/organizer/     # Layout và dashboard Organizer
 ├── lib/                    # Axios client: cookie, CSRF, timeout, tự refresh
 ├── pages/                  # HomePage với nút đăng xuất
 ├── styles/                 # Reset, font, biến CSS toàn cục
@@ -56,7 +72,7 @@ src/
 tests/                      # Kiểm thử trình duyệt với API giả lập
 ```
 
-Các thư mục trống có sẵn còn lại được giữ cho tính năng sau. `features/example/` chỉ là khung tham khảo. Component và page dùng PascalCase; hook bắt đầu bằng `use`; tiện ích dùng kebab-case. Hiện không tách Button, FormField, Brand, AuthCard hoặc layout riêng: các page auth chứa trực tiếp JSX, header, footer, nút và ô nhập. CSS của hai page nằm trong `AuthPage.module.css`; HomePage tự chứa nút đăng xuất và CSS của nó. Không gom CSS nghiệp vụ vào global.
+Các thư mục trống có sẵn còn lại được giữ cho tính năng sau. `features/example/` chỉ là khung tham khảo. Component và page dùng PascalCase; hook bắt đầu bằng `use`; tiện ích dùng kebab-case. Các page auth chứa trực tiếp JSX, header, footer, nút và ô nhập. CSS của hai page nằm trong `AuthPage.module.css`; HomePage tự chứa nút đăng xuất và CSS của nó. Organizer dùng layout chung; các trường và hộp chỉnh sửa dùng lại trong ba bước nằm trong `features/events/components`. Không gom CSS nghiệp vụ vào global.
 
 Dependency: React Router cho routing ([tài liệu chính thức](https://reactrouter.com/start/declarative/routing)), Lucide React cho icon. HTTP dùng Axios với instance và response interceptor trong `lib/http-client.ts`. Playwright là dev dependency để kiểm thử giao diện.
 
@@ -71,7 +87,7 @@ npm run test:e2e
 
 Nếu không tải được Chromium nhưng đã cài Google Chrome, có thể chạy trong PowerShell: `$env:PLAYWRIGHT_CHANNEL='chrome'; npm run test:e2e`.
 
-Test tự chạy Vite tại `127.0.0.1:4173`, kiểm tra desktop và mobile với API giả lập: quyền truy cập trang, đăng ký hai role, validation, email trùng, cookie HttpOnly, khôi phục phiên, đăng nhập/đăng xuất, lỗi mạng và tự refresh token. Bộ kiểm thử refresh gọi Axios client thật qua Vite và giả lập endpoint được bảo vệ, không thêm nút kiểm thử vào ứng dụng. Không cần backend/database và không tạo tài khoản thật. Kết quả không thay thế kiểm thử tích hợp với backend thật. `test-results/` được Git bỏ qua.
+Test tự chạy Vite tại `127.0.0.1:4173`, kiểm tra desktop và mobile với API giả lập: quyền truy cập trang, đăng ký hai role, validation, email trùng, cookie HttpOnly, khôi phục phiên, đăng nhập/đăng xuất, lỗi mạng và tự refresh token. Test tạo sự kiện kiểm tra ba trang, payload/UTC, modal, vé/khách mời, bản nháp, upload ảnh, phân quyền và phục hồi sau lỗi. Bộ kiểm thử refresh gọi Axios client thật qua Vite và giả lập endpoint được bảo vệ, không thêm nút kiểm thử vào ứng dụng. Không cần backend/database và không tạo tài khoản thật. Kết quả không thay thế kiểm thử tích hợp với backend thật. `test-results/` được Git bỏ qua.
 
 `npm run preview` xem build production tại máy local. Proxy `/api` chỉ có trong dev server: để preview hoặc triển khai thực tế, cấu hình `VITE_API_BASE_URL` trước khi build hoặc dùng reverse proxy `/api` đến backend. Server phục vụ frontend cần fallback các đường dẫn SPA về `index.html`; HTTPS cần cookie Secure và cấu hình SameSite/CORS phù hợp.
 
