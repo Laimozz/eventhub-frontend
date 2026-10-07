@@ -1,16 +1,14 @@
-﻿import { Navigate, Outlet, Route, Routes } from 'react-router'
+import { Navigate, Outlet, Route, Routes } from 'react-router'
 import { useAuth } from '../features/auth/hooks/useAuth'
 import { LoginPage } from '../features/auth/pages/LoginPage'
 import { RegisterPage } from '../features/auth/pages/RegisterPage'
 import { HomePage } from '../pages/HomePage'
 
-// Features
-import { AdminPage } from '../features/admin/pages/AdminPage'
-import { CustomerPage } from '../features/customer/pages/CustomerPage'
-import { StaffPage } from '../features/staff/pages/StaffPage'
-import { OrganizerLayout } from '../features/organizer/pages/OrganizerLayout'
-import { OrganizerDashboard } from '../features/organizer/pages/OrganizerDashboard'
-import { CreateEventPage } from '../features/events/pages/CreateEventPage'
+// Feature Sub-Routers
+import { AdminRoutes } from '../features/admin/routes/AdminRoutes'
+import { OrganizerRoutes } from '../features/organizer/routes/OrganizerRoutes'
+import { StaffRoutes } from '../features/staff/routes/StaffRoutes'
+import { CustomerRoutes } from '../features/customer/routes/CustomerRoutes'
 
 function GuestRoute() {
   const { user } = useAuth()
@@ -51,37 +49,34 @@ export function AppRouter() {
 
   return (
     <Routes>
+      {/* Auth Portal */}
       <Route element={<GuestRoute />}>
         <Route path="/login" element={<LoginPage />} />
         <Route path="/register" element={<RegisterPage />} />
       </Route>
 
+      {/* Protected Area */}
       <Route element={<ProtectedRoute />}>
         <Route index element={<LandingPage />} />
 
-        {/* Customer Portal */}
-        <Route path="/customer" element={<CustomerPage />} />
-
-        {/* Admin Portal */}
+        {/* Feature Sub-Routers: AppRouter ủy quyền hoàn toàn cho từng Feature */}
         <Route element={<AdminRoute />}>
-          <Route path="/admin" element={<AdminPage />} />
+          <Route path="/admin/*" element={<AdminRoutes />} />
         </Route>
 
-        {/* Organizer Portal */}
         <Route element={<OrganizerRoute />}>
-          <Route path="/organizer" element={<OrganizerLayout />}>
-            <Route index element={<OrganizerDashboard />} />
-            <Route path="events/new" element={<Navigate to="details" replace />} />
-            <Route path="events/new/:step" element={<CreateEventPage />} />
-          </Route>
+          <Route path="/organizer/*" element={<OrganizerRoutes />} />
         </Route>
 
-        {/* Staff Portal */}
         <Route element={<StaffRoute />}>
-          <Route path="/staff" element={<StaffPage />} />
+          <Route path="/staff/*" element={<StaffRoutes />} />
         </Route>
+
+        {/* Customer Portal */}
+        <Route path="/customer/*" element={<CustomerRoutes />} />
       </Route>
 
+      {/* Fallback */}
       <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>
   )
