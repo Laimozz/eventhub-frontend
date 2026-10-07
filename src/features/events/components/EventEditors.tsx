@@ -15,7 +15,7 @@ export function GuestEditor({ initial, onClose, onSave }: { initial: GuestDraft;
         <Field id="guest-name" label="Tên khách mời / Nghệ sĩ" required error={errors.name}><input id="guest-name" value={guest.name} maxLength={50} autoFocus onChange={event => change('name', event.target.value)} placeholder="Ví dụ: Nguyễn Văn A" /></Field>
         <Field id="guest-role" label="Vai trò / Danh hiệu" required error={errors.role}><input id="guest-role" list="guest-roles" value={guest.role} maxLength={50} onChange={event => change('role', event.target.value)} placeholder="Ví dụ: Ca sĩ chính, Diễn giả, MC…" /><datalist id="guest-roles">{['Ca sĩ chính', 'Diễn giả', 'MC', 'DJ', 'Khách mời'].map(role => <option key={role} value={role} />)}</datalist></Field>
         <Field id="guest-description" label="Mô tả / Giới thiệu ngắn" error={errors.description}><textarea id="guest-description" value={guest.description} maxLength={255} onChange={event => change('description', event.target.value)} rows={3} placeholder="Giới thiệu về khách mời…" /></Field>
-        <ImageField id="guest-image" label="Ảnh khách mời" value={guest.imageFile} onChange={url => change('imageFile', url)} compact error={errors.imageFile} />
+        <ImageField id="guest-image" label="Ảnh khách mời" value={guest.imageFile} existingUrl={guest.imageUrl} onChange={file => { change('imageFile', file); setGuest(previous => ({ ...previous, imageUrl: file ? previous.imageUrl : null, removeImage: !file })) }} compact error={errors.imageFile} />
       </div><div className={styles.dialogFooter}><button type="button" className={styles.secondary} onClick={onClose}>Hủy bỏ</button><button className={styles.primary}><Check size={17} /> Lưu khách mời</button></div>
     </form>
   </EditorDialog>
@@ -33,7 +33,7 @@ export function TicketEditor({ initial, draft, onClose, onSave }: { initial: Tic
         <div className={styles.twoColumns}><Field id="ticket-sale-start" label="Bắt đầu bán vé" required error={errors.saleStartTime}><input id="ticket-sale-start" type="datetime-local" value={ticket.saleStartTime} onChange={event => change('saleStartTime', event.target.value)} /></Field><Field id="ticket-sale-end" label="Kết thúc bán vé" required error={errors.saleEndTime}><input id="ticket-sale-end" type="datetime-local" value={ticket.saleEndTime} onChange={event => change('saleEndTime', event.target.value)} /></Field></div>
         <p className={styles.infoNote}>Giờ Việt Nam (GMT+7). Thời gian bán vé phải kết thúc trước khi sự kiện bắt đầu.</p>
         <Field id="ticket-description" label="Mô tả / Quyền lợi" error={errors.description}><textarea id="ticket-description" value={ticket.description} maxLength={255} onChange={event => change('description', event.target.value)} rows={3} placeholder="Quyền lợi, khu vực, lưu ý của loại vé…" /></Field>
-        <ImageField id="ticket-image" label="Ảnh loại vé" value={ticket.imageFile} onChange={url => change('imageFile', url)} required compact error={errors.imageFile} />
+        <ImageField id="ticket-image" label="Ảnh loại vé" value={ticket.imageFile} existingUrl={ticket.imageUrl} onChange={file => { change('imageFile', file); if (!file) setTicket(previous => ({ ...previous, imageUrl: null })) }} required compact error={errors.imageFile} />
       </div><div className={styles.dialogFooter}><button type="button" className={styles.secondary} onClick={onClose}>Hủy bỏ</button><button className={styles.primary}><Check size={17} /> Lưu loại vé</button></div>
     </form>
   </EditorDialog>

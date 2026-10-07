@@ -7,7 +7,7 @@ export function Field({ id, label, required, error, hint, children }: { id: stri
   return <div className={styles.field}><label htmlFor={id}>{label}{required && <span className={styles.required}> *</span>}</label>{children}{error ? <p className={styles.fieldError} id={`${id}-error`} role="alert">{error}</p> : hint && <small className={styles.hint}>{hint}</small>}</div>
 }
 
-export function ImagePreview({ file, alt, className }: { file: File | null; alt: string; className?: string }) {
+export function ImagePreview({ file, url, alt, className }: { file: File | null; url?: string | null; alt: string; className?: string }) {
   const image = useRef<HTMLImageElement>(null)
   useEffect(() => {
     if (!file) return
@@ -15,11 +15,11 @@ export function ImagePreview({ file, alt, className }: { file: File | null; alt:
     if (image.current) image.current.src = url
     return () => URL.revokeObjectURL(url)
   }, [file])
-  return file ? <img ref={image} alt={alt} className={className} /> : <span className={className}><ImagePlus size={22} /></span>
+  return file || url ? <img ref={image} src={file ? undefined : url ?? undefined} alt={alt} className={className} /> : <span className={className}><ImagePlus size={22} /></span>
 }
 
-export function ImageField({ id, label, value, onChange, required, error, compact }: {
-  id: string; label: string; value: File | null; onChange: (file: File | null) => void; required?: boolean; error?: string; compact?: boolean
+export function ImageField({ id, label, value, existingUrl, onChange, required, error, compact }: {
+  id: string; label: string; value: File | null; existingUrl?: string | null; onChange: (file: File | null) => void; required?: boolean; error?: string; compact?: boolean
 }) {
   const [fileError, setFileError] = useState('')
   function choose(file?: File) {
@@ -31,8 +31,8 @@ export function ImageField({ id, label, value, onChange, required, error, compac
   return <div className={`${styles.imageField} ${compact ? styles.compactImage : ''}`}>
     <span className={styles.imageLabel}>{label}{required && <span className={styles.required}> *</span>}</span>
     <div className={styles.dropzone} onDragOver={event => event.preventDefault()} onDrop={event => { event.preventDefault(); choose(event.dataTransfer.files[0]) }}>
-      {value && <div className={styles.imagePreview}><ImagePreview file={value} alt={`Xem trước ${label.toLowerCase()}`} /><button type="button" aria-label={`Xóa ${label.toLowerCase()}`} onClick={() => { onChange(null); setFileError('') }}><Trash2 size={15} /></button></div>}
-      <label className={styles.uploadLabel} htmlFor={`${id}-file`}>{value ? <Upload size={21} /> : <ImagePlus size={29} />}<strong>{value ? 'Thay ảnh' : 'Chọn ảnh hoặc kéo thả vào đây'}</strong><span>JPG, PNG · Tối đa 5 MB</span></label>
+      {(value || existingUrl) && <div className={styles.imagePreview}><ImagePreview file={value} url={existingUrl} alt={`Xem trước ${label.toLowerCase()}`} /><button type="button" aria-label={`Xóa ${label.toLowerCase()}`} onClick={() => { onChange(null); setFileError('') }}><Trash2 size={15} /></button></div>}
+      <label className={styles.uploadLabel} htmlFor={`${id}-file`}>{value || existingUrl ? <Upload size={21} /> : <ImagePlus size={29} />}<strong>{value || existingUrl ? 'Thay ảnh' : 'Chọn ảnh hoặc kéo thả vào đây'}</strong><span>JPG, PNG · Tối đa 5 MB</span></label>
       <input type="file" id={`${id}-file`} accept="image/jpeg,image/png" className={styles.fileInput} onChange={event => { choose(event.currentTarget.files?.[0]); event.currentTarget.value = '' }} />
     </div>
     {(error || fileError) && <p className={styles.fieldError} role="alert">{fileError || error}</p>}
