@@ -1,78 +1,232 @@
-# EventHub Frontend
+﻿# EventHub Frontend — Tài Liệu Kiến Trúc & Hướng Dẫn Phát Triển
 
-React + Vite + TypeScript, tổ chức theo tính năng. Đã triển khai giao diện đăng ký, đăng nhập và trang sau đăng nhập chỉ có nút đăng xuất, kết nối API của `eventhub-backend`.
+Dự án Frontend được xây dựng bằng **React 19 + Vite + TypeScript**, áp dụng kiến trúc **Feature-driven (hướng phân hệ và tính năng)** kết hợp với phân quyền người dùng **RBAC (Role-Based Access Control)** và cơ chế bảo mật xác thực qua **HttpOnly Cookie**.
 
-## Khởi chạy
+Tài liệu này được biên soạn chi tiết nhằm phục vụ việc review kiến trúc và hướng dẫn toàn bộ thành viên trong nhóm phát triển tính năng một cách thống nhất, tránh xung đột code.
 
-Môi trường: Node.js 24, npm 11.
+---
 
-```bash
-npm ci
-npm run dev
+## 1. Kiến Trúc Cốt Lõi (Architecture Overview)
+
+### 1.1. Mô hình phân tầng: Feature ➔ Pages ➔ Components ➔ API Services
+
+Dự án tổ chức mã nguồn theo từng **phân hệ người dùng / tính năng lớn (Vertical Slices)** thay vì gom chung tất cả components hay pages vào một chỗ. Mỗi phân hệ tuân theo luồng kiến trúc 4 tầng:
+
+```text
+┌────────────────────────────────────────────────────────────────────────┐
+│                      PHÂN HỆ NGƯỜI DÙNG (FEATURE)                      │
+│             (Ví dụ: features/admin, features/customer, ...)            │
+└───────────────────────────────────┬────────────────────────────────────┘
+                                    │
+         ┌──────────────────────────┴──────────────────────────┐
+         ▼                                                     ▼
+┌───────────────────────────────┐             ┌───────────────────────────────┐
+│         TRANG (PAGES)         │             │    KIỂU DỮ LIỆU (TYPES)       │
+│  - Màn hình chính của user    │             │  - Request / Response DTOs    │
+│  - Chứa Layout & Outlet       │             │  - Khớp với Entity Backend    │
+└───────────────┬───────────────┘             └───────────────┬───────────────┘
+                │                                             │
+                ▼                                             │
+┌───────────────────────────────┐                             │
+│     THÀNH PHẦN (COMPONENTS)   │                             │
+│  - Các khối UI con tái sử dụng│                             │
+│  - Nhận props và render view  │                             │
+└───────────────┬───────────────┘                             │
+                │                                             │
+                ▼                                             │
+┌─────────────────────────────────────────────────────────────┴────────┐
+│                        DỊCH VỤ GỌI API (API SERVICES)                │
+│  - File: `<feature>-api.ts` (nằm trong thư mục `api/`)               │
+│  - Sử dụng `httpClient` (Axios instance có sẵn)                      │
+│  - Tự động gắn HttpOnly Cookie, header `X-CSRF-Protection: 1`        │
+│  - Tự động bắt lỗi 401 và kích hoạt xoay vòng token (Token Rotation) │
+└───────────────────────────────────┬──────────────────────────────────┘
+                                    │
+                                    ▼
+                         [ Backend Spring Boot ]
 ```
 
-Mở `http://localhost:5173`. Chạy backend ở `http://localhost:8080`, cấu hình PostgreSQL và khóa JWT Base64 hợp lệ theo README backend. Vite chuyển tiếp `/api` đến backend; cổng 5173 được cố định để khớp CORS. Local HTTP dùng `AUTH_COOKIE_SECURE=false`.
+* **Feature Module (`src/features/<tên-feature>/`)**: Đại diện cho 1 nhóm đối tượng người dùng (`admin`, `customer`, `organizer`, `staff`) hoặc 1 luồng lớn (`auth`).
+* **Pages (`pages/`)**: Các màn hình hoàn chỉnh mà router trỏ tới (ví dụ: `AdminPage.tsx`, `CustomerPage.tsx`).
+* **Components (`components/`)**: Các thành phần giao diện nhỏ hơn cấu thành nên Page (ví dụ: `EventCard.tsx`, `UserTable.tsx`, `FilterBar.tsx`).
+* **API Service (`api/`)**: Chuyên trách việc gọi HTTP request đến server (dùng `httpClient.get`, `httpClient.post`). **Khuyến nghị:** Đặt tên thư mục là `api/` (thay vì `services/`) để ngắn gọn và đồng bộ với các file sẵn có như `auth-api.ts`.
+* **Types (`types/`)**: Định nghĩa interface TypeScript để đảm bảo tính an toàn dữ liệu (Type-safe).
 
-Không cần tạo file môi trường để chạy mặc định. Khi cần đổi URL API, copy `.env.example` thành `.env.local` và đặt `VITE_API_BASE_URL`, ví dụ `http://localhost:8080/api`. Khởi động lại Vite sau khi đổi. Đây là cấu hình công khai, không đặt JWT secret hoặc mật khẩu database vào frontend. Nếu gọi khác origin, backend phải cho phép origin frontend và credentials; dùng cùng hostname (`localhost` hoặc `127.0.0.1`) nhất quán.
+---
 
-## Luồng đã triển khai
+## 2. Cơ Chế Xác Thực & Phân Quyền (Auth & RBAC Flow)
 
-| Đường dẫn | Hành vi |
-| --- | --- |
-| `/register` | Đăng ký CUSTOMER hoặc ORGANIZER; thành công chuyển sang đăng nhập, chưa tạo phiên. |
-| `/login` | Chỉ nhập email, mật khẩu và đăng nhập; không có đăng nhập mạng xã hội hoặc mô phỏng kiểm thử. |
-| `/` | Yêu cầu đăng nhập; nền trắng chỉ có nút đăng xuất. |
+### 2.1. Quản lý phiên bằng HttpOnly Cookie (Tại sao KHÔNG dùng localStorage?)
+1. **Lưu Token:** Sau khi đăng nhập thành công (`POST /api/auth/login`), Backend tự động thiết lập 2 cookie:
+   * `access_token` (Path: `/api`, sống 15 phút).
+   * `refresh_token` (Path: `/api/auth`, sống 7 ngày).
+2. **Bảo mật tuyệt đối:** Cả 2 cookie đều có cờ `HttpOnly`, JavaScript ở Frontend **không thể đọc được** -> Ngăn chặn 100% rủi ro bị đánh cắp token qua lỗ hổng XSS.
+3. **Tuyệt đối KHÔNG lưu token vào `localStorage` hay `sessionStorage`**. Trình duyệt sẽ tự động gửi kèm cookie trong mọi request nhờ `withCredentials: true` cấu hình sẵn trong `httpClient`.
 
-Đã đăng nhập thì `/login` và `/register` chuyển về `/`. Đường dẫn không tồn tại chuyển về `/`, rồi kiểm tra phiên. Giao diện dùng nhận diện EventHub với bố cục và màu xanh theo mẫu.
+### 2.2. Nơi lưu thông tin User ở Frontend & Cơ chế Silent Refresh khi F5
+* **Vị trí lưu:** Thông tin người dùng (`id`, `email`, `fullName`, `role`) được lưu trong **React State** thông qua `AuthContext` tại [`src/app/AuthProvider.tsx`](src/app/AuthProvider.tsx).
+* **Khi người dùng F5 hoặc mở lại trình duyệt:**
+  1. React State bị reset về `null`, nhưng biến `loading = true`.
+  2. `useEffect` trong `AuthProvider` tự động gọi ngay: `POST /api/auth/refresh`.
+  3. Trình duyệt tự gửi cookie `refresh_token` lên Backend.
+  4. Backend xác thực hợp lệ và trả về thông tin user mới nhất -> Frontend gọi `setUser(currentUser)` và chuyển `loading = false`.
+  5. Người dùng tiếp tục sử dụng ứng dụng mà **không bao giờ bị văng ra màn hình đăng nhập**.
 
-- Đăng ký kiểm tra họ tên, email, mật khẩu 8–72 ký tự/tối đa 72 byte UTF-8 và xác nhận mật khẩu. Số điện thoại không bắt buộc theo DTO backend, tối đa 20 ký tự. Không trim mật khẩu.
-- API gọi `POST /api/auth/register`, `/login`, `/refresh`, `/logout`, luôn có `X-CSRF-Protection: 1` và `withCredentials: true`.
-- Token do backend đặt trong cookie HttpOnly. Không lưu token hoặc mật khẩu vào localStorage/sessionStorage.
-- Khi tải lại ứng dụng, gọi refresh để khôi phục phiên vì backend chưa có endpoint `/me`.
-- Axios interceptor bắt `401` của API cần xác thực, gọi `POST /api/auth/refresh`, rồi gửi lại request ban đầu một lần với cookie mới. Nhiều request cùng hết hạn dùng chung một lần refresh; response `401` đến muộn từ token cũ cũng dùng phiên đã được làm mới.
-- Refresh trả `401` (hết hạn, bị thu hồi hoặc thiếu refresh token), hoặc request thử lại vẫn trả `401`: xóa trạng thái user và chuyển về `/login`. Backend chịu trách nhiệm xóa cookie HttpOnly khi refresh không hợp lệ.
-- Không tự refresh cho login/register/refresh/logout; không xử lý `403` như token hết hạn. Lỗi mạng hoặc `5xx` khi refresh được trả về cho nơi gọi xử lý, không tự đăng xuất.
-- Logout chờ refresh đang chạy hoàn tất để thu hồi đúng phiên mới. Request cũ không được tự thử lại sau khi người dùng đã đăng xuất hoặc đăng nhập tài khoản khác.
-- Mọi API cần cơ chế này phải dùng `httpClient` từ `src/lib/http-client.ts`, ví dụ `httpClient.get('/events')` hoặc `post('/bookings', body)`. Token vẫn nằm trong cookie HttpOnly; frontend không đọc hay giải mã token.
-- Đăng xuất chỉ chuyển trang khi backend trả thành công. Khi mất kết nối, giữ trang hiện tại và cho phép thử lại.
-- Form có trạng thái đang gửi, chặn gửi lặp, thông báo lỗi bằng tiếng Việt và nút hiện/ẩn mật khẩu.
-- Chưa triển khai quên mật khẩu, OAuth, ghi nhớ đăng nhập tùy chọn hay các trang nghiệp vụ khác vì backend chưa có API tương ứng.
+### 2.3. Logic kiểm tra quyền và định tuyến trong `AppRouter.tsx`
+Trong [`src/app/AppRouter.tsx`](src/app/AppRouter.tsx), Router sử dụng hook `useAuth()` để lấy dữ liệu từ `AuthProvider` và bảo vệ các tuyến đường bằng các Route Guard:
 
-## Cấu trúc code
+* **`GuestRoute`**: Nếu đã đăng nhập (`user != null`), không cho phép vào `/login` hay `/register` (tự động điều hướng về `/`).
+* **`ProtectedRoute`**: Yêu cầu người dùng phải đăng nhập (`user != null`), nếu chưa sẽ chuyển hướng về `/login`.
+* **`AdminRoute`**: Kiểm tra `user?.role === 'ADMIN'`. Nếu không phải Admin, tự động chuyển về trang chủ `/`.
+* **`OrganizerRoute`**: Kiểm tra `user?.role === 'ORGANIZER'`.
+* **`StaffRoute`**: Kiểm tra `user?.role === 'STAFF'`.
+* **`LandingPage`**: Khi truy cập trang chủ `/`, hệ thống dựa trên `user.role` để chuyển hướng người dùng về đúng trang mặc định của vai trò đó:
+  * Role `ADMIN` ➔ Chuyển hướng sang `/admin`.
+  * Role `ORGANIZER` ➔ Chuyển hướng sang `/organizer`.
+  * Role `STAFF` ➔ Chuyển hướng sang `/staff`.
+  * Role `CUSTOMER` / Khách ➔ Ở lại trang chủ khách hàng `/customer`.
+
+---
+
+## 3. Cấu Trúc Thư Mục Dự Án (Project Structure)
 
 ```text
 src/
-├── app/                    # AppRouter, AuthProvider
-├── features/auth/
-│   ├── api/                # Các endpoint và thông báo lỗi auth
-│   ├── hooks/              # useAuth, context
-│   ├── pages/              # LoginPage, RegisterPage: tự chứa toàn bộ giao diện
-│   └── types/              # Request, User, role
-├── lib/                    # Axios client: cookie, CSRF, timeout, tự refresh
-├── pages/                  # HomePage với nút đăng xuất
-├── styles/                 # Reset, font, biến CSS toàn cục
+├── app/
+│   ├── AppRouter.tsx          # Định tuyến trung tâm & phân quyền Route Guards
+│   └── AuthProvider.tsx       # Quản lý React Context lưu trữ User state & Silent Refresh
+├── components/
+│   ├── common/                # Các component dùng chung toàn bộ dự án (Header, Footer chung)
+│   └── ui/                    # Các phần tử giao diện cơ bản (Button, Input, Modal, Dialog...)
+├── features/                  # CÁC PHÂN HỆ NGƯỜI DÙNG & CHỨC NĂNG CHÍNH
+│   ├── admin/                 # Phân hệ Quản trị viên (Role: ADMIN)
+│   │   ├── api/admin-api.ts   # Service gọi API quản trị
+│   │   ├── pages/AdminPage.tsx# Trang giao diện mặc định của Admin (/admin)
+│   │   └── types/admin.ts     # Kiểu dữ liệu cho Admin
+│   ├── customer/              # Phân hệ Khách hàng (Role: CUSTOMER)
+│   │   ├── api/customer-api.ts# Service gọi API sự kiện, đặt vé, lịch sử vé
+│   │   ├── pages/CustomerPage.tsx # Trang giao diện của Khách hàng (/customer)
+│   │   └── types/customer.ts  # Kiểu dữ liệu sự kiện, vé
+│   ├── organizer/             # Phân hệ Ban tổ chức (Role: ORGANIZER)
+│   │   ├── pages/OrganizerPage.tsx # Trang giao diện của Ban tổ chức (/organizer)
+│   │   └── (tích hợp tính năng tạo sự kiện từ nhánh feature/create-event)
+│   ├── staff/                 # Phân hệ Nhân viên soát vé (Role: STAFF)
+│   │   ├── api/staff-api.ts   # Service gọi API check-in, soát vé
+│   │   ├── pages/StaffPage.tsx# Trang giao diện soát vé (/staff)
+│   │   └── types/staff.ts     # Kiểu dữ liệu soát vé
+│   └── auth/                  # Phân hệ Xác thực
+│       ├── api/auth-api.ts    # Service gọi API đăng ký, đăng nhập, refresh, logout
+│       ├── api/auth-errors.ts # Xử lý và chuẩn hóa thông báo lỗi tiếng Việt
+│       ├── hooks/useAuth.ts   # Custom hook useAuth() dùng để lấy thông tin user ở mọi nơi
+│       ├── pages/LoginPage.tsx
+│       ├── pages/RegisterPage.tsx
+│       └── types/auth.ts      # User, LoginRequest, RegisterRequest
+├── lib/
+│   └── http-client.ts         # Axios instance: tự động gắn CSRF header, bắt 401 & tự xoay vòng token
+├── pages/
+│   └── HomePage.tsx           # Trang điều hướng mặc định sau đăng nhập
+├── styles/                    # Global CSS, css variables
 ├── App.tsx
 └── main.tsx
-tests/                      # Kiểm thử trình duyệt với API giả lập
 ```
 
-Các thư mục trống có sẵn còn lại được giữ cho tính năng sau. `features/example/` chỉ là khung tham khảo. Component và page dùng PascalCase; hook bắt đầu bằng `use`; tiện ích dùng kebab-case. Hiện không tách Button, FormField, Brand, AuthCard hoặc layout riêng: các page auth chứa trực tiếp JSX, header, footer, nút và ô nhập. CSS của hai page nằm trong `AuthPage.module.css`; HomePage tự chứa nút đăng xuất và CSS của nó. Không gom CSS nghiệp vụ vào global.
+---
 
-Dependency: React Router cho routing ([tài liệu chính thức](https://reactrouter.com/start/declarative/routing)), Lucide React cho icon. HTTP dùng Axios với instance và response interceptor trong `lib/http-client.ts`. Playwright là dev dependency để kiểm thử giao diện.
+## 4. Bảng Tra Cứu Đường Dẫn (Route Map)
 
-## Kiểm tra và build
+| Đường dẫn (URL) | Route Guard | Quyền truy cập (Role) | Mô tả giao diện |
+| :--- | :--- | :--- | :--- |
+| `/login` | `GuestRoute` | Khách vãng lai (Chưa đăng nhập) | Trang đăng nhập tài khoản |
+| `/register` | `GuestRoute` | Khách vãng lai (Chưa đăng nhập) | Trang đăng ký tài khoản (Customer / Organizer) |
+| `/` | `ProtectedRoute` | Đã đăng nhập | Tự động chuyển hướng đến trang tương ứng theo Role |
+| `/customer` | `ProtectedRoute` | `CUSTOMER` | Giao diện xem và đặt vé của Khách hàng |
+| `/admin` | `AdminRoute` | `ADMIN` | Giao diện quản trị hệ thống |
+| `/organizer` | `OrganizerRoute` | `ORGANIZER` | Giao diện kênh Ban tổ chức sự kiện |
+| `/staff` | `StaffRoute` | `STAFF` | Giao diện quét mã soát vé cho nhân viên |
+
+---
+
+## 5. Hướng Dẫn Quy Chuẩn Code Cho Thành Viên Nhóm (Coding Guide)
+
+Khi một thành viên nhận nhiệm vụ phát triển một tính năng mới trong phân hệ của mình, hãy tuân theo quy trình chuẩn 5 bước sau:
+
+### Bước 1: Khai báo kiểu dữ liệu trong `types/<feature>.ts`
+Luôn định nghĩa interface rõ ràng trước khi viết code:
+```ts
+// src/features/admin/types/admin.ts
+export interface UserManagementItem {
+  id: number
+  email: string
+  fullName: string
+  role: 'CUSTOMER' | 'ORGANIZER' | 'STAFF' | 'ADMIN'
+  status: 'ACTIVE' | 'BANNED'
+}
+```
+
+### Bước 2: Viết hàm gọi API trong `api/<feature>-api.ts`
+Sử dụng trực tiếp `httpClient` từ `src/lib/http-client`:
+```ts
+// src/features/admin/api/admin-api.ts
+import { httpClient } from '../../../lib/http-client'
+import type { UserManagementItem } from '../types/admin'
+
+export async function getUsers(): Promise<UserManagementItem[]> {
+  const response = await httpClient.get<UserManagementItem[]>('/admin/users')
+  return response.data
+}
+```
+*(Không cần tự gắn header Authorization hay lo lắng về cookie, `httpClient` đã tự động xử lý toàn bộ).*
+
+### Bước 3: Tạo Component con trong `components/` (nếu cần tái sử dụng)
+Sử dụng CSS Modules đi kèm để tránh xung đột CSS toàn cục:
+* File giao diện: `UserTable.tsx`
+* File CSS: `UserTable.module.css`
+
+### Bước 4: Tạo hoặc hoàn thiện Trang trong `pages/`
+Gọi hàm API trong `useEffect` và truyền dữ liệu xuống component con để hiển thị:
+```tsx
+// src/features/admin/pages/UserManagementPage.tsx
+import { useEffect, useState } from 'react'
+import { getUsers } from '../api/admin-api'
+import type { UserManagementItem } from '../types/admin'
+
+export function UserManagementPage() {
+  const [users, setUsers] = useState<UserManagementItem[]>([])
+
+  useEffect(() => {
+    getUsers().then(setUsers)
+  }, [])
+
+  return (
+    <div>
+      <h2>Quản lý người dùng</h2>
+      {/* Render danh sách user */}
+    </div>
+  )
+}
+```
+
+### Bước 5: Đăng ký Route vào `src/app/AppRouter.tsx`
+Thêm route mới vào đúng nhóm quyền được bảo vệ tương ứng.
+
+---
+
+## 6. Lệnh Khởi Chạy & Kiểm Thử
 
 ```bash
+# 1. Cài đặt thư viện
+npm install
+
+# 2. Khởi chạy môi trường phát triển (Dev server)
+npm run dev
+
+# 3. Kiểm tra lỗi cú pháp và chuẩn mã nguồn (Linter)
 npm run lint
+
+# 4. Kiểm tra biên dịch TypeScript & Đóng gói sản phẩm (Build)
 npm run build
-npx playwright install chromium  # Chỉ cần làm lần đầu
-npm run test:e2e
+
+# 5. Chạy bộ kiểm thử tự động E2E (Playwright)
+# Nếu dùng Google Chrome có sẵn trên máy:
+$env:PLAYWRIGHT_CHANNEL='chrome'; npm run test:e2e
 ```
-
-Nếu không tải được Chromium nhưng đã cài Google Chrome, có thể chạy trong PowerShell: `$env:PLAYWRIGHT_CHANNEL='chrome'; npm run test:e2e`.
-
-Test tự chạy Vite tại `127.0.0.1:4173`, kiểm tra desktop và mobile với API giả lập: quyền truy cập trang, đăng ký hai role, validation, email trùng, cookie HttpOnly, khôi phục phiên, đăng nhập/đăng xuất, lỗi mạng và tự refresh token. Bộ kiểm thử refresh gọi Axios client thật qua Vite và giả lập endpoint được bảo vệ, không thêm nút kiểm thử vào ứng dụng. Không cần backend/database và không tạo tài khoản thật. Kết quả không thay thế kiểm thử tích hợp với backend thật. `test-results/` được Git bỏ qua.
-
-`npm run preview` xem build production tại máy local. Proxy `/api` chỉ có trong dev server: để preview hoặc triển khai thực tế, cấu hình `VITE_API_BASE_URL` trước khi build hoặc dùng reverse proxy `/api` đến backend. Server phục vụ frontend cần fallback các đường dẫn SPA về `index.html`; HTTPS cần cookie Secure và cấu hình SameSite/CORS phù hợp.
-
-Chạy lint, build và test liên quan trước khi gửi thay đổi. Dùng npm và commit lockfile cùng thay đổi dependency. Không tự nâng phiên bản hoặc thêm tính năng ngoài phạm vi yêu cầu.
