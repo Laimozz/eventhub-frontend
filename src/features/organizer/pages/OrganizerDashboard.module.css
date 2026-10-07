@@ -1,0 +1,31 @@
+.dashboard h1 { margin: 12px 0 9px; font-size: clamp(24px, 2.5vw, 35px); letter-spacing: -1px; }
+.heading { display: flex; align-items: center; justify-content: space-between; gap: 20px; }
+.heading p, .startCard p { color: #7a857f; font-size: 13px; line-height: 1.7; }
+.eyebrow { font-size: 10px; font-weight: 700; letter-spacing: 1px; color: #627169; }
+.eyebrow i { display: inline-block; width: 7px; height: 7px; border-radius: 50%; background: #24bf76; margin-right: 5px; }
+.primary { padding: 12px 16px; background: #24bf76; color: white; font-size: 13px; font-weight: 600; border-radius: 9px; display: inline-flex; align-items: center; justify-content: center; gap: 7px; text-decoration: none !important; white-space: nowrap; }
+.primary:hover { background: #15995b; }
+.demo { font-size: 11px; color: #78847d; padding-top: 17px; }
+.stats { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 16px; margin: 20px 0; }
+.stat, .card, .startCard { background: #fff; border: 1px solid #eef0f3; border-radius: 14px; padding: 24px; box-shadow: 0 2px 4px #13251c03; }
+.stat > div { display: flex; justify-content: space-between; align-items: center; gap: 12px; margin-bottom: 25px; font-size: 10px; font-weight: 600; min-height: 36px; }
+.stat svg { color: #087e4b; flex-shrink: 0; }
+.stat > strong { display: block; font-size: clamp(18px, 1.9vw, 28px); letter-spacing: -.5px; }
+.stat > p { font-size: 11px; color: #7a857f; margin-top: 7px; }
+.stat small { display: flex; align-items: center; gap: 4px; font-size: 10px; color: #087e4b; margin-top: 20px; }
+.charts { display: grid; grid-template-columns: 1.8fr 1fr; gap: 20px; }
+.card h2, .startCard h2 { font-size: 19px; font-weight: 600; margin: 9px 0 20px; letter-spacing: -.4px; }
+.chartNote { font-size: 11px; padding: 13px; border-radius: 8px; background: #f5f7f6; display: flex; align-items: center; gap: 7px; margin-bottom: 20px; }
+.chartNote > span { width: 7px; height: 7px; border-radius: 50%; background: #24bf76; }
+.chartNote small { margin-left: auto; color: #7a857f; }
+.lineChart { width: 100%; height: auto; min-height: 150px; }
+.months { display: flex; justify-content: space-between; font-size: 10px; margin-top: 15px; }
+.percent { background: #f3f6f4; border-radius: 10px; padding: 17px; margin-bottom: 23px; }
+.percent small { font-size: 11px; }.percent strong { display: block; color: #087e4b; font-size: 29px; margin-top: 5px; }
+.progress { margin-bottom: 18px; }.progress p { display: flex; justify-content: space-between; font-size: 11px; margin-bottom: 7px; gap: 10px; }.progress strong { font-weight: 500; }
+.progress > div { height: 6px; border-radius: 4px; background: #f1f3f6; overflow: hidden; }.progress i { display: block; height: 100%; border-radius: 4px; }
+.startCard { display: flex; align-items: center; gap: 17px; margin-top: 20px; }.startCard h2 { margin: 0 0 5px; }.startCard .primary { margin-left: auto; }
+.startIcon { display: grid; place-items: center; background: #e1f8ec; padding: 15px; border-radius: 11px; color: #087e4b; }
+@media (max-width: 1200px) { .stats { grid-template-columns: repeat(2, minmax(0, 1fr)); } .stat > strong { font-size: 25px; } }
+@media (max-width: 950px) { .charts { grid-template-columns: 1fr; } .heading { align-items: flex-start; flex-direction: column; } .startCard { flex-wrap: wrap; }.startCard .primary { margin-left: 0; } }
+@media (max-width: 450px) { .stats { gap: 10px; }.stat { padding: 17px 12px; }.stat > strong { font-size: 18px; }.card { padding: 18px; }.card h2 { font-size: 18px; }.months { font-size: 8px; } }

@@ -2,13 +2,28 @@
 
 Dự án Frontend được xây dựng bằng **React 19 + Vite + TypeScript**, áp dụng kiến trúc **Feature-driven (hướng phân hệ và tính năng)** kết hợp với phân quyền người dùng **RBAC (Role-Based Access Control)** và cơ chế bảo mật xác thực qua **HttpOnly Cookie**.
 
-Tài liệu này được biên soạn chi tiết nhằm phục vụ việc review kiến trúc và hướng dẫn toàn bộ thành viên trong nhóm phát triển tính năng một cách thống nhất, tránh xung đột code.
+Đã triển khai đầy đủ luồng xác thực (Đăng ký, Đăng nhập, Token Rotation), giao diện Ban tổ chức tạo sự kiện (`features/events` & `features/organizer`) và khung phân quyền cho cả 4 nhóm người dùng (`ADMIN`, `ORGANIZER`, `CUSTOMER`, `STAFF`).
 
 ---
 
-## 1. Kiến Trúc Cốt Lõi (Architecture Overview)
+## 1. Khởi Chạy Dự Án
 
-### 1.1. Mô hình phân tầng: Feature ➔ Pages ➔ Components ➔ API Services
+Yêu cầu môi trường: **Node.js 20+**, **npm**.
+
+```bash
+npm install
+npm run dev
+```
+
+* Mở trình duyệt tại: `http://localhost:5173`.
+* Backend chạy tại: `http://localhost:8080` (tham khảo README của `eventhub-backend` để cấu hình PostgreSQL và JWT).
+* Vite đã cấu hình proxy tự động chuyển tiếp các request `/api` sang `http://localhost:8080`.
+
+---
+
+## 2. Kiến Trúc Cốt Lõi (Architecture Overview)
+
+### 2.1. Mô hình phân tầng: Feature ➔ Pages ➔ Components ➔ API Services
 
 Dự án tổ chức mã nguồn theo từng **phân hệ người dùng / tính năng lớn (Vertical Slices)** thay vì gom chung tất cả components hay pages vào một chỗ. Mỗi phân hệ tuân theo luồng kiến trúc 4 tầng:
 
@@ -46,33 +61,33 @@ Dự án tổ chức mã nguồn theo từng **phân hệ người dùng / tính
                          [ Backend Spring Boot ]
 ```
 
-* **Feature Module (`src/features/<tên-feature>/`)**: Đại diện cho 1 nhóm đối tượng người dùng (`admin`, `customer`, `organizer`, `staff`) hoặc 1 luồng lớn (`auth`).
-* **Pages (`pages/`)**: Các màn hình hoàn chỉnh mà router trỏ tới (ví dụ: `AdminPage.tsx`, `CustomerPage.tsx`).
-* **Components (`components/`)**: Các thành phần giao diện nhỏ hơn cấu thành nên Page (ví dụ: `EventCard.tsx`, `UserTable.tsx`, `FilterBar.tsx`).
-* **API Service (`api/`)**: Chuyên trách việc gọi HTTP request đến server (dùng `httpClient.get`, `httpClient.post`). **Khuyến nghị:** Đặt tên thư mục là `api/` (thay vì `services/`) để ngắn gọn và đồng bộ với các file sẵn có như `auth-api.ts`.
+* **Feature Module (`src/features/<tên-feature>/`)**: Đại diện cho 1 nhóm đối tượng người dùng (`admin`, `customer`, `organizer`, `staff`) hoặc 1 luồng lớn (`auth`, `events`).
+* **Pages (`pages/`)**: Các màn hình hoàn chỉnh mà router trỏ tới (ví dụ: `AdminPage.tsx`, `CreateEventPage.tsx`).
+* **Components (`components/`)**: Các thành phần giao diện nhỏ hơn cấu thành nên Page (ví dụ: `EventEditors.tsx`, `EventFields.tsx`).
+* **API Service (`api/`)**: Chuyên trách việc gọi HTTP request đến server (dùng `httpClient.get`, `httpClient.post`). **Quy chuẩn chung:** Đặt tên thư mục là `api/` (thay vì `services/`) để ngắn gọn và đồng bộ (`auth-api.ts`, `event-api.ts`).
 * **Types (`types/`)**: Định nghĩa interface TypeScript để đảm bảo tính an toàn dữ liệu (Type-safe).
 
 ---
 
-## 2. Cơ Chế Xác Thực & Phân Quyền (Auth & RBAC Flow)
+## 3. Cơ Chế Xác Thực & Phân Quyền (Auth & RBAC Flow)
 
-### 2.1. Quản lý phiên bằng HttpOnly Cookie (Tại sao KHÔNG dùng localStorage?)
+### 3.1. Quản lý phiên bằng HttpOnly Cookie (Tại sao KHÔNG dùng localStorage?)
 1. **Lưu Token:** Sau khi đăng nhập thành công (`POST /api/auth/login`), Backend tự động thiết lập 2 cookie:
    * `access_token` (Path: `/api`, sống 15 phút).
    * `refresh_token` (Path: `/api/auth`, sống 7 ngày).
 2. **Bảo mật tuyệt đối:** Cả 2 cookie đều có cờ `HttpOnly`, JavaScript ở Frontend **không thể đọc được** -> Ngăn chặn 100% rủi ro bị đánh cắp token qua lỗ hổng XSS.
-3. **Tuyệt đối KHÔNG lưu token vào `localStorage` hay `sessionStorage`**. Trình duyệt sẽ tự động gửi kèm cookie trong mọi request nhờ `withCredentials: true` cấu hình sẵn trong `httpClient`.
+3. **Tuyệt đối KHÔNG lưu token vào `localStorage` hay `sessionStorage`**. Trình duyệt tự động gửi kèm cookie trong mọi request nhờ `withCredentials: true` cấu hình sẵn trong `httpClient`.
 
-### 2.2. Nơi lưu thông tin User ở Frontend & Cơ chế Silent Refresh khi F5
+### 3.2. Nơi lưu thông tin User ở Frontend & Cơ chế Silent Refresh khi F5
 * **Vị trí lưu:** Thông tin người dùng (`id`, `email`, `fullName`, `role`) được lưu trong **React State** thông qua `AuthContext` tại [`src/app/AuthProvider.tsx`](src/app/AuthProvider.tsx).
 * **Khi người dùng F5 hoặc mở lại trình duyệt:**
   1. React State bị reset về `null`, nhưng biến `loading = true`.
   2. `useEffect` trong `AuthProvider` tự động gọi ngay: `POST /api/auth/refresh`.
   3. Trình duyệt tự gửi cookie `refresh_token` lên Backend.
   4. Backend xác thực hợp lệ và trả về thông tin user mới nhất -> Frontend gọi `setUser(currentUser)` và chuyển `loading = false`.
-  5. Người dùng tiếp tục sử dụng ứng dụng mà **không bao giờ bị văng ra màn hình đăng nhập**.
+  5. Người dùng tiếp tục sử dụng ứng dụng mà **không bị văng ra màn hình đăng nhập**.
 
-### 2.3. Logic kiểm tra quyền và định tuyến trong `AppRouter.tsx`
+### 3.3. Logic kiểm tra quyền và định tuyến trong `AppRouter.tsx`
 Trong [`src/app/AppRouter.tsx`](src/app/AppRouter.tsx), Router sử dụng hook `useAuth()` để lấy dữ liệu từ `AuthProvider` và bảo vệ các tuyến đường bằng các Route Guard:
 
 * **`GuestRoute`**: Nếu đã đăng nhập (`user != null`), không cho phép vào `/login` hay `/register` (tự động điều hướng về `/`).
@@ -84,11 +99,11 @@ Trong [`src/app/AppRouter.tsx`](src/app/AppRouter.tsx), Router sử dụng hook 
   * Role `ADMIN` ➔ Chuyển hướng sang `/admin`.
   * Role `ORGANIZER` ➔ Chuyển hướng sang `/organizer`.
   * Role `STAFF` ➔ Chuyển hướng sang `/staff`.
-  * Role `CUSTOMER` / Khách ➔ Ở lại trang chủ khách hàng `/customer`.
+  * Role `CUSTOMER` / Khách ➔ Trang mặc định của khách `/customer`.
 
 ---
 
-## 3. Cấu Trúc Thư Mục Dự Án (Project Structure)
+## 4. Cấu Trúc Thư Mục Dự Án (Project Structure)
 
 ```text
 src/
@@ -96,9 +111,9 @@ src/
 │   ├── AppRouter.tsx          # Định tuyến trung tâm & phân quyền Route Guards
 │   └── AuthProvider.tsx       # Quản lý React Context lưu trữ User state & Silent Refresh
 ├── components/
-│   ├── common/                # Các component dùng chung toàn bộ dự án (Header, Footer chung)
-│   └── ui/                    # Các phần tử giao diện cơ bản (Button, Input, Modal, Dialog...)
-├── features/                  # CÁC PHÂN HỆ NGƯỜI DÙNG & CHỨC NĂNG CHÍNH
+│   ├── common/                # Các component dùng chung toàn bộ dự án
+│   └── ui/                    # Các phần tử giao diện cơ bản (Button, Input...)
+├── features/                  # CÁC PHÂN HỆ NGƯỜI DÙNG & TÍNH NĂNG CHÍNH
 │   ├── admin/                 # Phân hệ Quản trị viên (Role: ADMIN)
 │   │   ├── api/admin-api.ts   # Service gọi API quản trị
 │   │   ├── pages/AdminPage.tsx# Trang giao diện mặc định của Admin (/admin)
@@ -108,8 +123,13 @@ src/
 │   │   ├── pages/CustomerPage.tsx # Trang giao diện của Khách hàng (/customer)
 │   │   └── types/customer.ts  # Kiểu dữ liệu sự kiện, vé
 │   ├── organizer/             # Phân hệ Ban tổ chức (Role: ORGANIZER)
-│   │   ├── pages/OrganizerPage.tsx # Trang giao diện của Ban tổ chức (/organizer)
-│   │   └── (tích hợp tính năng tạo sự kiện từ nhánh feature/create-event)
+│   │   ├── pages/OrganizerLayout.tsx    # Layout Sidebar Ban tổ chức
+│   │   └── pages/OrganizerDashboard.tsx # Bảng điều khiển Ban tổ chức (/organizer)
+│   ├── events/                # Tính năng Tạo sự kiện (cho Organizer)
+│   │   ├── api/event-api.ts   # API tạo sự kiện qua multipart
+│   │   ├── components/        # EventEditors.tsx, EventFields.tsx
+│   │   ├── pages/CreateEventPage.tsx # Form tạo sự kiện 3 bước (/organizer/events/new)
+│   │   └── types/event.ts     # Kiểu dữ liệu sự kiện
 │   ├── staff/                 # Phân hệ Nhân viên soát vé (Role: STAFF)
 │   │   ├── api/staff-api.ts   # Service gọi API check-in, soát vé
 │   │   ├── pages/StaffPage.tsx# Trang giao diện soát vé (/staff)
@@ -117,7 +137,7 @@ src/
 │   └── auth/                  # Phân hệ Xác thực
 │       ├── api/auth-api.ts    # Service gọi API đăng ký, đăng nhập, refresh, logout
 │       ├── api/auth-errors.ts # Xử lý và chuẩn hóa thông báo lỗi tiếng Việt
-│       ├── hooks/useAuth.ts   # Custom hook useAuth() dùng để lấy thông tin user ở mọi nơi
+│       ├── hooks/useAuth.ts   # Custom hook useAuth()
 │       ├── pages/LoginPage.tsx
 │       ├── pages/RegisterPage.tsx
 │       └── types/auth.ts      # User, LoginRequest, RegisterRequest
@@ -132,101 +152,42 @@ src/
 
 ---
 
-## 4. Bảng Tra Cứu Đường Dẫn (Route Map)
+## 5. Bảng Tra Cứu Đường Dẫn (Route Map)
 
 | Đường dẫn (URL) | Route Guard | Quyền truy cập (Role) | Mô tả giao diện |
 | :--- | :--- | :--- | :--- |
-| `/login` | `GuestRoute` | Khách vãng lai (Chưa đăng nhập) | Trang đăng nhập tài khoản |
-| `/register` | `GuestRoute` | Khách vãng lai (Chưa đăng nhập) | Trang đăng ký tài khoản (Customer / Organizer) |
+| `/login` | `GuestRoute` | Khách vãng lai | Trang đăng nhập tài khoản |
+| `/register` | `GuestRoute` | Khách vãng lai | Trang đăng ký tài khoản (Customer / Organizer) |
 | `/` | `ProtectedRoute` | Đã đăng nhập | Tự động chuyển hướng đến trang tương ứng theo Role |
 | `/customer` | `ProtectedRoute` | `CUSTOMER` | Giao diện xem và đặt vé của Khách hàng |
 | `/admin` | `AdminRoute` | `ADMIN` | Giao diện quản trị hệ thống |
-| `/organizer` | `OrganizerRoute` | `ORGANIZER` | Giao diện kênh Ban tổ chức sự kiện |
+| `/organizer` | `OrganizerRoute` | `ORGANIZER` | Bảng điều khiển Ban tổ chức sự kiện |
+| `/organizer/events/new` | `OrganizerRoute` | `ORGANIZER` | Tạo sự kiện mới (3 bước: chi tiết, danh mục, vé) |
 | `/staff` | `StaffRoute` | `STAFF` | Giao diện quét mã soát vé cho nhân viên |
 
 ---
 
-## 5. Hướng Dẫn Quy Chuẩn Code Cho Thành Viên Nhóm (Coding Guide)
+## 6. Hướng Dẫn Quy Chuẩn Code Cho Thành Viên Nhóm (Coding Guide)
 
 Khi một thành viên nhận nhiệm vụ phát triển một tính năng mới trong phân hệ của mình, hãy tuân theo quy trình chuẩn 5 bước sau:
 
-### Bước 1: Khai báo kiểu dữ liệu trong `types/<feature>.ts`
-Luôn định nghĩa interface rõ ràng trước khi viết code:
-```ts
-// src/features/admin/types/admin.ts
-export interface UserManagementItem {
-  id: number
-  email: string
-  fullName: string
-  role: 'CUSTOMER' | 'ORGANIZER' | 'STAFF' | 'ADMIN'
-  status: 'ACTIVE' | 'BANNED'
-}
-```
-
-### Bước 2: Viết hàm gọi API trong `api/<feature>-api.ts`
-Sử dụng trực tiếp `httpClient` từ `src/lib/http-client`:
-```ts
-// src/features/admin/api/admin-api.ts
-import { httpClient } from '../../../lib/http-client'
-import type { UserManagementItem } from '../types/admin'
-
-export async function getUsers(): Promise<UserManagementItem[]> {
-  const response = await httpClient.get<UserManagementItem[]>('/admin/users')
-  return response.data
-}
-```
-*(Không cần tự gắn header Authorization hay lo lắng về cookie, `httpClient` đã tự động xử lý toàn bộ).*
-
-### Bước 3: Tạo Component con trong `components/` (nếu cần tái sử dụng)
-Sử dụng CSS Modules đi kèm để tránh xung đột CSS toàn cục:
-* File giao diện: `UserTable.tsx`
-* File CSS: `UserTable.module.css`
-
-### Bước 4: Tạo hoặc hoàn thiện Trang trong `pages/`
-Gọi hàm API trong `useEffect` và truyền dữ liệu xuống component con để hiển thị:
-```tsx
-// src/features/admin/pages/UserManagementPage.tsx
-import { useEffect, useState } from 'react'
-import { getUsers } from '../api/admin-api'
-import type { UserManagementItem } from '../types/admin'
-
-export function UserManagementPage() {
-  const [users, setUsers] = useState<UserManagementItem[]>([])
-
-  useEffect(() => {
-    getUsers().then(setUsers)
-  }, [])
-
-  return (
-    <div>
-      <h2>Quản lý người dùng</h2>
-      {/* Render danh sách user */}
-    </div>
-  )
-}
-```
-
-### Bước 5: Đăng ký Route vào `src/app/AppRouter.tsx`
-Thêm route mới vào đúng nhóm quyền được bảo vệ tương ứng.
+1. **Bước 1: Khai báo kiểu dữ liệu trong `types/<feature>.ts`**: Định nghĩa rõ request/response interface.
+2. **Bước 2: Viết hàm gọi API trong `api/<feature>-api.ts`**: Dùng trực tiếp `httpClient` từ `src/lib/http-client` (đã có cookie, CSRF và refresh tự động).
+3. **Bước 3: Tạo Component con trong `components/`**: Dùng CSS Modules đi kèm để tránh xung đột class name.
+4. **Bước 4: Tạo hoặc hoàn thiện Trang trong `pages/`**: Gọi hàm API và render dữ liệu.
+5. **Bước 5: Đăng ký Route vào `src/app/AppRouter.tsx`**: Đặt vào đúng nhóm quyền bảo vệ.
 
 ---
 
-## 6. Lệnh Khởi Chạy & Kiểm Thử
+## 7. Kiểm Tra & Đóng Gói
 
 ```bash
-# 1. Cài đặt thư viện
-npm install
-
-# 2. Khởi chạy môi trường phát triển (Dev server)
-npm run dev
-
-# 3. Kiểm tra lỗi cú pháp và chuẩn mã nguồn (Linter)
+# Kiểm tra linter
 npm run lint
 
-# 4. Kiểm tra biên dịch TypeScript & Đóng gói sản phẩm (Build)
+# Biên dịch TypeScript & Build Vite
 npm run build
 
-# 5. Chạy bộ kiểm thử tự động E2E (Playwright)
-# Nếu dùng Google Chrome có sẵn trên máy:
+# Chạy test E2E Playwright
 $env:PLAYWRIGHT_CHANNEL='chrome'; npm run test:e2e
 ```
