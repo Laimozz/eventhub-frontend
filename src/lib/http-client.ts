@@ -3,10 +3,12 @@ import type { InternalAxiosRequestConfig } from 'axios'
 
 export class ApiError extends Error {
   readonly status: number
-  constructor(status: number) {
+  readonly data: { code?: string; message?: string; errors?: Record<string, string> } | undefined
+  constructor(status: number, data?: { code?: string; message?: string; errors?: Record<string, string> }) {
     super(`Request failed (${status})`)
     this.name = 'ApiError'
     this.status = status
+    this.data = data
   }
 }
 
@@ -74,7 +76,7 @@ httpClient.interceptors.response.use(
     const config = error.config as SessionRequest | undefined
     const status = error.response?.status
     if (status !== 401 || !config || authEndpoint(config)) {
-      throw status ? new ApiError(status) : error
+      throw status ? new ApiError(status, error.response?.data) : error
     }
     // Ignore old requests after logout or a different login.
     if (sessionExpired || config.sessionEpoch !== sessionEpoch) throw new ApiError(401)

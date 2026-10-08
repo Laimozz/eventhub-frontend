@@ -2,6 +2,22 @@
 
 React + Vite + TypeScript, tổ chức theo tính năng. Đã triển khai đăng ký, đăng nhập; Organizer tạo sự kiện theo ba bước, xem danh sách/chi tiết, sửa và gửi yêu cầu hủy, kết nối API của `eventhub-backend`.
 
+## Quản trị UC31–36
+
+Admin đăng nhập được chuyển tới /admin/events/pending. Feature `src/features/admin` dùng router/AuthProvider và Axios client chung; CSS Modules, Lucide, bố cục theo mẫu platform.
+
+| Route | Chức năng |
+| --- | --- |
+| /admin/users | Tìm tên/email, lọc role, phân trang, tạo CUSTOMER/ORGANIZER, khóa/mở; chặn tự khóa |
+| /admin/event-categories | Thêm/sửa/xóa danh mục; xử lý trùng tên và danh mục đang dùng |
+| /admin/events/pending | Danh sách chỉ sự kiện chờ duyệt |
+| /admin/events/pending/:eventId | Hồ sơ, ảnh, địa điểm, khách mời, vé; duyệt có xác nhận, từ chối có lý do tối đa 255 ký tự |
+| /organizer/notifications | Thông báo kết quả xét duyệt từ DB, mở từ biểu tượng chuông |
+
+UI có loading/lỗi/thử lại/rỗng, dialog giữ dữ liệu khi lỗi, chặn gửi lặp. Quyết định gửi version nhận từ chi tiết; 404/409 chặn quyết định tiếp đến khi đọc lại hồ sơ. Trang Organizer bổ sung trạng thái REJECTED và rejectReason; chưa mở sửa/gửi lại REJECTED.
+
+ApiError giữ thêm code/message/errors từ backend để hiện lỗi nghiệp vụ; cơ chế cookie/refresh vẫn giữ nguyên. Test `tests/admin.spec.ts` chạy desktop/mobile với API giả lập; backend kiểm thử API và DB thật riêng. Trên máy có Edge có thể dùng `$env:PLAYWRIGHT_CHANNEL='msedge'; npm.cmd run test:e2e`. PowerShell chặn npm.ps1 thì dùng npm.cmd.
+
 ## Khởi chạy
 
 Môi trường: Node.js 24, npm 11.
