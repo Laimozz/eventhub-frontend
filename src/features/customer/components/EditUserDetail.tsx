@@ -1,8 +1,8 @@
-import { useState } from 'react';
-import type { FormEvent } from 'react';
+import { useRef, useState } from 'react';
+import type { ChangeEvent, FormEvent } from 'react';
 import { useNavigate } from 'react-router';
 import type { UserDetailDto } from '../types/user';
-import { updateUserDetail } from '../api/user-api';
+import { updateUserDetail, uploadAvatar } from '../api/user-api';
 import { userErrorMessage, userFieldErrors } from '../api/user-errors';
 import styles from '../pages/UserDetailPage.module.css';
 
@@ -17,6 +17,7 @@ interface EditUserDetailProps {
   onError: (message: string) => void;
   onShowNotice?: (message: string) => void;
   onChangePassword?: () => void;
+  onAvatarUpdated?: (newAvatarUrl: string) => void;
 }
 
 export function EditUserDetail({
@@ -26,8 +27,12 @@ export function EditUserDetail({
   onError,
   onShowNotice,
   onChangePassword,
+  onAvatarUpdated,
 }: EditUserDetailProps) {
   const navigate = useNavigate();
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const [avatarUrl, setAvatarUrl] = useState(user.avatarUrl || '');
+  const [uploadingAvatar, setUploadingAvatar] = useState(false);
   const [fullName, setFullName] = useState(user.fullName || '');
   const [email, setEmail] = useState(user.email || '');
   const [phone, setPhone] = useState(user.phone || '');
@@ -91,7 +96,7 @@ export function EditUserDetail({
         phone: cleanPhone,
         dateOfBirth: birthDate || null,
       });
-      onSuccess(updated);
+      onSuccess({ ...updated, avatarUrl: avatarUrl || updated.avatarUrl });
     } catch (err: unknown) {
       const serverFieldErrors = userFieldErrors(err);
       if (serverFieldErrors) {
@@ -107,14 +112,64 @@ export function EditUserDetail({
     }
   }
 
-  function handleAvatarAction() {
+  async function handleFileSelect(event: ChangeEvent<HTMLInputElement>) {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    if (!['image/jpeg', 'image/png'].includes(file.type)) {
+      onError('Định dạng ảnh không hợp lệ. Vui lòng chọn tệp định dạng JPG hoặc PNG.');
+      if (fileInputRef.current) fileInputRef.current.value = '';
+      return;
+    }
+
+    if (file.size > 5 * 1024 * 1024) {
+      onError('Kích thước ảnh vượt quá 5MB. Vui lòng chọn tệp nhỏ hơn.');
+      if (fileInputRef.current) fileInputRef.current.value = '';
+      return;
+    }
+
+    setUploadingAvatar(true);
+    try {
+      const res = await uploadAvatar(file, user.id);
+      setAvatarUrl(res.avatarUrl);
+      if (onAvatarUpdated) {
+        onAvatarUpdated(res.avatarUrl);
+      }
+      if (onShowNotice) {
+        onShowNotice('Cập nhật ảnh đại diện thành công!');
+      }
+    } catch (err: unknown) {
+      const msg = userErrorMessage(err);
+      onError(msg || 'Tải lên ảnh đại diện thất bại. Vui lòng thử lại.');
+    } finally {
+      setUploadingAvatar(false);
+      if (fileInputRef.current) {
+        fileInputRef.current.value = '';
+      }
+    }
+  }
+
+  function handleTriggerFileInput() {
+    fileInputRef.current?.click();
+  }
+
+  function handleDeleteAvatar() {
     if (onShowNotice) {
-      onShowNotice('Tính năng cập nhật ảnh đại diện sẽ được hỗ trợ trong phiên bản tiếp theo.');
+      onShowNotice('Tính năng gỡ ảnh đại diện sẽ được hỗ trợ trong phiên bản tiếp theo.');
     }
   }
 
   return (
     <div className={styles.profileCard}>
+      {/* Hidden File Input for Avatar Upload */}
+      <input
+        type="file"
+        ref={fileInputRef}
+        accept="image/png,image/jpeg"
+        style={{ display: 'none' }}
+        onChange={handleFileSelect}
+      />
+
       <form onSubmit={handleSubmit} noValidate>
         {/* Form Title Header */}
         <div className={styles.formHeader}>
@@ -128,9 +183,9 @@ export function EditUserDetail({
         {/* Avatar Upload Segment */}
         <div className={styles.avatarSegment}>
           <div className={styles.avatarUploadPreviewWrapper}>
-            {user.avatarUrl ? (
+            {avatarUrl ? (
               <img
-                src={user.avatarUrl}
+                src={avatarUrl}
                 alt={user.fullName}
                 className={styles.avatarUploadPreview}
               />
@@ -149,15 +204,19 @@ export function EditUserDetail({
               <button
                 type="button"
                 className={styles.btnUploadPhoto}
-                onClick={handleAvatarAction}
+                onClick={handleTriggerFileInput}
+                disabled={uploadingAvatar || pending}
               >
-                <span className="material-symbols-outlined text-[18px]">cloud_upload</span>
-                <span>Đổi ảnh đại diện</span>
+                <span className="material-symbols-outlined text-[18px]">
+                  {uploadingAvatar ? 'hourglass_top' : 'cloud_upload'}
+                </span>
+                <span>{uploadingAvatar ? 'Đang tải lên...' : 'Đổi ảnh đại diện'}</span>
               </button>
               <button
                 type="button"
                 className={styles.btnDeletePhoto}
-                onClick={handleAvatarAction}
+                onClick={handleDeleteAvatar}
+                disabled={uploadingAvatar || pending}
               >
                 <span className="material-symbols-outlined text-[18px]">delete</span>
                 <span>Xóa ảnh</span>

@@ -123,6 +123,9 @@ export function UserDetailPage() {
               user={currentUser}
               onCancel={() => setMode('VIEW')}
               onChangePassword={() => setMode('CHANGE_PASSWORD')}
+              onAvatarUpdated={(newAvatarUrl) => {
+                setUser((prev) => (prev ? { ...prev, avatarUrl: newAvatarUrl } : null));
+              }}
               onSuccess={(updatedUser) => {
                 setUser(updatedUser);
                 setMode('VIEW');
