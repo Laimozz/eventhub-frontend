@@ -9,6 +9,12 @@ import { CreateEventPage } from '../features/events/pages/CreateEventPage'
 import { OrganizerEventsPage } from '../features/events/pages/OrganizerEventsPage'
 import { EventDetailPage } from '../features/events/pages/EventDetailPage'
 import { EditEventPage } from '../features/events/pages/EditEventPage'
+import { AdminLayout } from '../features/admin/pages/AdminLayout'
+import { UsersPage } from '../features/admin/pages/UsersPage'
+import { EventCategoriesPage } from '../features/admin/pages/EventCategoriesPage'
+import { PendingEventsPage } from '../features/admin/pages/PendingEventsPage'
+import { EventReviewDetailPage } from '../features/admin/pages/EventReviewDetailPage'
+import { NotificationsPage } from '../features/notifications/pages/NotificationsPage'
 
 function GuestRoute() {
   const { user } = useAuth()
@@ -27,7 +33,13 @@ function OrganizerRoute() {
 
 function LandingPage() {
   const { user } = useAuth()
+  if (user?.role === 'ADMIN') return <Navigate to="/admin/events/pending" replace />
   return user?.role === 'ORGANIZER' ? <Navigate to="/organizer" replace /> : <HomePage />
+}
+
+function AdminRoute() {
+  const { user } = useAuth()
+  return user?.role === 'ADMIN' ? <Outlet /> : <Navigate to="/" replace />
 }
 
 export function AppRouter() {
@@ -42,8 +54,18 @@ export function AppRouter() {
       </Route>
       <Route element={<ProtectedRoute />}>
         <Route index element={<LandingPage />} />
+        <Route element={<AdminRoute />}>
+          <Route path="/admin" element={<AdminLayout />}>
+            <Route index element={<Navigate to="events/pending" replace />} />
+            <Route path="users" element={<UsersPage />} />
+            <Route path="event-categories" element={<EventCategoriesPage />} />
+            <Route path="events/pending" element={<PendingEventsPage />} />
+            <Route path="events/pending/:eventId" element={<EventReviewDetailPage />} />
+          </Route>
+        </Route>
         <Route element={<OrganizerRoute />}>
           <Route path="/organizer" element={<OrganizerLayout />}>
+            <Route path="notifications" element={<NotificationsPage />} />
             <Route index element={<OrganizerDashboard />} />
             <Route path="events/new" element={<Navigate to="details" replace />} />
             <Route path="events/new/:step" element={<CreateEventPage />} />

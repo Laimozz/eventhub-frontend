@@ -20,7 +20,7 @@ export interface CreateEventRequest {
   }[]
 }
 export interface CreatedEvent { id: number; name: string; status: 'PENDING_APPROVAL' }
-export type EventStatus = 'PENDING_APPROVAL' | 'APPROVED' | 'ONGOING' | 'COMPLETED' | 'PENDING_CANCELLATION' | 'CANCELED'
+export type EventStatus = 'PENDING_APPROVAL' | 'APPROVED' | 'REJECTED' | 'ONGOING' | 'COMPLETED' | 'PENDING_CANCELLATION' | 'CANCELED'
 export interface EventSummary {
   id: number; name: string; description: string | null; thumbnailImageUrl: string
   categoryName: string; city: string; address: string; startTime: string; endTime: string
@@ -31,6 +31,7 @@ export interface EventDetail {
   thumbnailImageUrl: string; bannerImageUrl: string; imageZoneUrl: string | null
   startTime: string; endTime: string; createdAt: string; status: EventStatus; canEdit: boolean; canCancel: boolean
   cancelReason: string | null; canceledAt: string | null
+  rejectReason: string | null
   venue: { id: number; city: string; address: string; capacity: number }
   ticketTypes: { id: number; name: string; description: string | null; imageUrl: string; price: number | string
     quantity: number; reservedQuantity: number; remainingQuantity: number; saleStartTime: string; saleEndTime: string; status: string }[]
