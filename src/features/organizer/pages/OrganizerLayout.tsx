@@ -46,7 +46,7 @@ export function OrganizerLayout() {
         <button className={styles.menuToggle} onClick={() => setMenuOpen(!menuOpen)} aria-label={menuOpen ? 'Đóng menu điều hướng' : 'Mở menu điều hướng'} aria-expanded={menuOpen}>{menuOpen ? <X /> : <Menu />}</button>
         <div className={styles.account}>
           <span className={styles.role}>BAN TỔ CHỨC</span>
-          <button className={styles.bell} disabled aria-label="Thông báo (chưa triển khai)"><Bell size={21} /></button>
+          <Link className={styles.bell} to="/organizer/notifications" aria-label="Thông báo"><Bell size={21} /></Link>
           <div className={styles.user}><strong>{user?.fullName || 'Nhà tổ chức'}</strong><small>{user?.email}</small></div>
           <div className={styles.accountMenu} ref={accountMenuRef}
             onBlur={event => { if (event.relatedTarget && !event.currentTarget.contains(event.relatedTarget)) setAccountMenuOpen(false) }}

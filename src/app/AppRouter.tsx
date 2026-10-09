@@ -2,10 +2,27 @@ import { Navigate, Outlet, Route, Routes } from 'react-router'
 import { useAuth } from '../features/auth/hooks/useAuth'
 import { LoginPage } from '../features/auth/pages/LoginPage'
 import { RegisterPage } from '../features/auth/pages/RegisterPage'
+import { HomePage } from '../pages/HomePage'
+
+// Organizer Pages & Layout
+import { OrganizerLayout } from '../features/organizer/pages/OrganizerLayout'
+import { OrganizerDashboard } from '../features/organizer/pages/OrganizerDashboard'
+import { CreateEventPage } from '../features/events/pages/CreateEventPage'
+import { OrganizerEventsPage } from '../features/events/pages/OrganizerEventsPage'
+import { EventDetailPage } from '../features/events/pages/EventDetailPage'
+import { EditEventPage } from '../features/events/pages/EditEventPage'
+
+// Admin Pages & Layout
+import { AdminLayout } from '../features/admin/pages/AdminLayout'
+import { UsersPage } from '../features/admin/pages/UsersPage'
+import { EventCategoriesPage } from '../features/admin/pages/EventCategoriesPage'
+import { PendingEventsPage } from '../features/admin/pages/PendingEventsPage'
+import { EventReviewDetailPage } from '../features/admin/pages/EventReviewDetailPage'
+
+// Notifications
+import { NotificationsPage } from '../features/notifications/pages/NotificationsPage'
 
 // Feature Sub-Routers
-import { AdminRoutes } from '../features/admin/routes/AdminRoutes'
-import { OrganizerRoutes } from '../features/organizer/routes/OrganizerRoutes'
 import { StaffRoutes } from '../features/staff/routes/StaffRoutes'
 import { CustomerRoutes } from '../features/customer/routes/CustomerRoutes'
 
@@ -36,11 +53,10 @@ function StaffRoute() {
 
 function LandingPage() {
   const { user } = useAuth()
-  if (user?.role === 'ADMIN') return <Navigate to="/admin" replace />
+  if (user?.role === 'ADMIN') return <Navigate to="/admin/events/pending" replace />
   if (user?.role === 'ORGANIZER') return <Navigate to="/organizer" replace />
   if (user?.role === 'STAFF') return <Navigate to="/staff" replace />
-  // Role CUSTOMER hoặc người dùng chưa rõ role thì về cổng customer
-  return <Navigate to="/customer" replace />
+  return <HomePage />
 }
 
 export function AppRouter() {
@@ -55,26 +71,43 @@ export function AppRouter() {
         <Route path="/register" element={<RegisterPage />} />
       </Route>
 
-      {/* Public / Generic Entry */}
-      <Route path="/" element={<LandingPage />} />
-
-      {/* Feature Sub-Routers (Protected) */}
+      {/* Protected Area */}
       <Route element={<ProtectedRoute />}>
+        <Route index element={<LandingPage />} />
+
+        {/* Admin Portal */}
         <Route element={<AdminRoute />}>
-          <Route path="/admin/*" element={<AdminRoutes />} />
+          <Route path="/admin" element={<AdminLayout />}>
+            <Route index element={<Navigate to="events/pending" replace />} />
+            <Route path="users" element={<UsersPage />} />
+            <Route path="event-categories" element={<EventCategoriesPage />} />
+            <Route path="events/pending" element={<PendingEventsPage />} />
+            <Route path="events/pending/:eventId" element={<EventReviewDetailPage />} />
+          </Route>
         </Route>
 
+        {/* Organizer Portal */}
         <Route element={<OrganizerRoute />}>
-          <Route path="/organizer/*" element={<OrganizerRoutes />} />
+          <Route path="/organizer" element={<OrganizerLayout />}>
+            <Route path="notifications" element={<NotificationsPage />} />
+            <Route index element={<OrganizerDashboard />} />
+            <Route path="events/new" element={<Navigate to="details" replace />} />
+            <Route path="events/new/:step" element={<CreateEventPage />} />
+            <Route path="events" element={<OrganizerEventsPage />} />
+            <Route path="events/:eventId" element={<EventDetailPage />} />
+            <Route path="events/:eventId/edit" element={<Navigate to="details" replace />} />
+            <Route path="events/:eventId/edit/:step" element={<EditEventPage />} />
+          </Route>
         </Route>
 
+        {/* Staff Portal */}
         <Route element={<StaffRoute />}>
           <Route path="/staff/*" element={<StaffRoutes />} />
         </Route>
-      </Route>
 
-      {/* Customer Portal (Public access allowed) */}
-      <Route path="/customer/*" element={<CustomerRoutes />} />
+        {/* Customer Portal */}
+        <Route path="/customer/*" element={<CustomerRoutes />} />
+      </Route>
 
       {/* Fallback */}
       <Route path="*" element={<Navigate to="/" replace />} />

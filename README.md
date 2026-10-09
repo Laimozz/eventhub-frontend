@@ -2,7 +2,23 @@
 
 Dự án Frontend được xây dựng bằng **React 19 + Vite + TypeScript**, áp dụng kiến trúc **Feature-driven (hướng phân hệ và tính năng)** kết hợp với phân quyền người dùng **RBAC (Role-Based Access Control)** và cơ chế bảo mật xác thực qua **HttpOnly Cookie**. Đã triển khai đăng ký, đăng nhập; thông tin cá nhân và đổi mật khẩu; Organizer tạo sự kiện theo ba bước, xem danh sách/chi tiết, sửa và gửi yêu cầu hủy, kết nối API của `eventhub-backend`.
 
-Đã triển khai đầy đủ luồng xác thực (Đăng ký, Đăng nhập, Token Rotation), giao diện Ban tổ chức tạo sự kiện (`features/events` & `features/organizer`) và khung phân quyền cho cả 4 nhóm người dùng (`ADMIN`, `ORGANIZER`, `CUSTOMER`, `STAFF`).
+## Quản trị UC31–36
+
+Admin đăng nhập được chuyển tới /admin/events/pending. Feature `src/features/admin` dùng router/AuthProvider và Axios client chung; CSS Modules, Lucide, bố cục theo mẫu platform.
+
+| Route | Chức năng |
+| --- | --- |
+| /admin/users | Tìm tên/email, lọc role, phân trang, tạo CUSTOMER/ORGANIZER, khóa/mở; chặn tự khóa |
+| /admin/event-categories | Thêm/sửa/xóa danh mục; xử lý trùng tên và danh mục đang dùng |
+| /admin/events/pending | Danh sách chỉ sự kiện chờ duyệt |
+| /admin/events/pending/:eventId | Hồ sơ, ảnh, địa điểm, khách mời, vé; duyệt có xác nhận, từ chối có lý do tối đa 255 ký tự |
+| /organizer/notifications | Thông báo kết quả xét duyệt từ DB, mở từ biểu tượng chuông |
+
+UI có loading/lỗi/thử lại/rỗng, dialog giữ dữ liệu khi lỗi, chặn gửi lặp. Quyết định gửi version nhận từ chi tiết; 404/409 chặn quyết định tiếp đến khi đọc lại hồ sơ. Trang Organizer bổ sung trạng thái REJECTED và rejectReason; chưa mở sửa/gửi lại REJECTED.
+
+ApiError giữ thêm code/message/errors từ backend để hiện lỗi nghiệp vụ; cơ chế cookie/refresh vẫn giữ nguyên. Test `tests/admin.spec.ts` chạy desktop/mobile với API giả lập; backend kiểm thử API và DB thật riêng. Trên máy có Edge có thể dùng `$env:PLAYWRIGHT_CHANNEL='msedge'; npm.cmd run test:e2e`. PowerShell chặn npm.ps1 thì dùng npm.cmd.
+
+Đã triển khai đầy đủ luồng xác thực (Đăng ký, Đăng nhập, Token Rotation), thông tin cá nhân & đổi mật khẩu của Khách hàng (`features/customer`), giao diện Ban tổ chức tạo sự kiện (`features/events` & `features/organizer`) và khung phân quyền cho cả 4 nhóm người dùng (`ADMIN`, `ORGANIZER`, `CUSTOMER`, `STAFF`).
 
 ---
 
@@ -83,9 +99,8 @@ Dự án tổ chức mã nguồn theo từng **phân hệ người dùng / tính
 * **API Service (`api/`)**: Chuyên trách việc gọi HTTP request đến server (dùng `httpClient.get`, `httpClient.post`). **Quy chuẩn chung:** Đặt tên thư mục là `api/` (thay vì `services/`) để ngắn gọn và đồng bộ (`auth-api.ts`, `event-api.ts`).
 * **Types (`types/`)**: Định nghĩa interface TypeScript để đảm bảo tính an toàn dữ liệu (Type-safe).
 
-<<<<<<< HEAD
 ---
-=======
+
 ### Xem, sửa và yêu cầu hủy sự kiện
 
 - Sidebar “Sự kiện của tôi” mở danh sách riêng qua `GET /api/events/mine`. Bộ lọc, tên tìm kiếm và trang nằm trong URL để tải lại hoặc Back/Forward; có trạng thái đang tải, lỗi/thử lại và danh sách rỗng. Các thẻ tổng số/trạng thái dùng dữ liệu API. Bố cục nền sáng, thẻ trắng, điểm nhấn xanh theo mẫu; chỉ hiển thị các phần có dữ liệu backend.
@@ -107,7 +122,6 @@ Dự án tổ chức mã nguồn theo từng **phân hệ người dùng / tính
 - Đăng xuất chỉ chuyển trang khi backend trả thành công. Khi mất kết nối, giữ trang hiện tại và cho phép thử lại.
 - Form có trạng thái đang gửi, chặn gửi lặp, thông báo lỗi bằng tiếng Việt và nút hiện/ẩn mật khẩu.
 - Chưa triển khai quên mật khẩu, OAuth, ghi nhớ đăng nhập tùy chọn hay các trang nghiệp vụ khác vì backend chưa có API tương ứng.
->>>>>>> origin/develop
 
 ## 3. Cơ Chế Xác Thực & Phân Quyền (Auth & RBAC Flow)
 

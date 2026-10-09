@@ -3,8 +3,8 @@ import type { InternalAxiosRequestConfig } from 'axios'
 
 export class ApiError extends Error {
   readonly status: number
-  readonly data?: unknown
-  constructor(status: number, data?: unknown) {
+  readonly data: { code?: string; message?: string; errors?: Record<string, string> } | any
+  constructor(status: number, data?: any) {
     super(`Request failed (${status})`)
     this.name = 'ApiError'
     this.status = status

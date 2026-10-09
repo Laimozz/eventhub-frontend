@@ -1,22 +1,46 @@
-﻿import type { User } from '../../auth/types/auth'
+import type { EventDetail } from '../../events/types/event'
 
-export interface AdminStats {
-  totalUsers: number
-  totalEvents: number
-  pendingEvents: number
-  totalRevenue: number
+export interface PageResult<T> {
+  items: T[]
+  page: number
+  pageSize: number
+  totalElements: number
+  totalPages: number
 }
 
-export interface AdminUserItem extends User {
-  status: 'ACTIVE' | 'BANNED' | 'INACTIVE'
-  createdAt?: string
-}
-
-export interface AdminEventApprovalItem {
+export interface AdminUser {
   id: number
-  title: string
-  organizerName: string
+  fullName: string
+  email: string
+  phone: string | null
+  role: string
+  status: string
+}
+
+export interface Category {
+  id: number
+  name: string
+  description: string
+}
+
+export interface Organizer {
+  id: number
+  fullName: string
+  email: string
+}
+
+export interface PendingEvent {
+  id: number
+  name: string
+  thumbnailImageUrl: string
   categoryName: string
-  status: 'PENDING' | 'APPROVED' | 'REJECTED'
+  organizer: Organizer
   createdAt: string
+  status: string
+}
+
+export interface ReviewDetail {
+  event: EventDetail
+  organizer: Organizer
+  version: number
 }
