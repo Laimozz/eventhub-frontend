@@ -1,6 +1,6 @@
-# EventHub Frontend
+# EventHub Frontend — Tài Liệu Kiến Trúc & Hướng Dẫn Phát Triển
 
-React + Vite + TypeScript, tổ chức theo tính năng. Đã triển khai đăng ký, đăng nhập; Organizer tạo sự kiện theo ba bước, xem danh sách/chi tiết, sửa và gửi yêu cầu hủy, kết nối API của `eventhub-backend`.
+Dự án Frontend được xây dựng bằng **React 19 + Vite + TypeScript**, áp dụng kiến trúc **Feature-driven (hướng phân hệ và tính năng)** kết hợp với phân quyền người dùng **RBAC (Role-Based Access Control)** và cơ chế bảo mật xác thực qua **HttpOnly Cookie**. Đã triển khai đăng ký, đăng nhập; thông tin cá nhân và đổi mật khẩu; Organizer tạo sự kiện theo ba bước, xem danh sách/chi tiết, sửa và gửi yêu cầu hủy, kết nối API của `eventhub-backend`.
 
 ## Quản trị UC31–36
 
@@ -18,26 +18,35 @@ UI có loading/lỗi/thử lại/rỗng, dialog giữ dữ liệu khi lỗi, ch�
 
 ApiError giữ thêm code/message/errors từ backend để hiện lỗi nghiệp vụ; cơ chế cookie/refresh vẫn giữ nguyên. Test `tests/admin.spec.ts` chạy desktop/mobile với API giả lập; backend kiểm thử API và DB thật riêng. Trên máy có Edge có thể dùng `$env:PLAYWRIGHT_CHANNEL='msedge'; npm.cmd run test:e2e`. PowerShell chặn npm.ps1 thì dùng npm.cmd.
 
-## Khởi chạy
+Đã triển khai đầy đủ luồng xác thực (Đăng ký, Đăng nhập, Token Rotation), thông tin cá nhân & đổi mật khẩu của Khách hàng (`features/customer`), giao diện Ban tổ chức tạo sự kiện (`features/events` & `features/organizer`) và khung phân quyền cho cả 4 nhóm người dùng (`ADMIN`, `ORGANIZER`, `CUSTOMER`, `STAFF`).
 
-Môi trường: Node.js 24, npm 11.
+---
+
+## 1. Khởi Chạy Dự Án
+
+Yêu cầu môi trường: **Node.js 20+**, **npm**.
 
 ```bash
-npm ci
+npm install
 npm run dev
 ```
 
-Mở `http://localhost:5173`. Chạy backend ở `http://localhost:8080`, cấu hình PostgreSQL và khóa JWT Base64 hợp lệ theo README backend. Vite chuyển tiếp `/api` đến backend; cổng 5173 được cố định để khớp CORS. Local HTTP dùng `AUTH_COOKIE_SECURE=false`.
+* Mở trình duyệt tại: `http://localhost:5173`.
+* Backend chạy tại: `http://localhost:8080` (tham khảo README của `eventhub-backend` để cấu hình PostgreSQL và JWT).
+* Vite đã cấu hình proxy tự động chuyển tiếp các request `/api` sang `http://localhost:8080`.
 
-Không cần tạo file môi trường để chạy mặc định. Khi cần đổi URL API, copy `.env.example` thành `.env.local` và đặt `VITE_API_BASE_URL`, ví dụ `http://localhost:8080/api`. Khởi động lại Vite sau khi đổi. Đây là cấu hình công khai, không đặt JWT secret hoặc mật khẩu database vào frontend. Nếu gọi khác origin, backend phải cho phép origin frontend và credentials; dùng cùng hostname (`localhost` hoặc `127.0.0.1`) nhất quán.
+---
 
-## Luồng đã triển khai
+## 2. Kiến Trúc Cốt Lõi (Architecture Overview)
+
+### 2.1. Danh mục đường dẫn chính
 
 | Đường dẫn | Hành vi |
 | --- | --- |
 | `/register` | Đăng ký CUSTOMER hoặc ORGANIZER; thành công chuyển sang đăng nhập, chưa tạo phiên. |
 | `/login` | Chỉ nhập email, mật khẩu và đăng nhập; không có đăng nhập mạng xã hội hoặc mô phỏng kiểm thử. |
 | `/` | Yêu cầu đăng nhập; Organizer được chuyển tới `/organizer`; các role còn lại có trang đăng xuất. |
+| `/customer` | Cổng thông tin khách hàng, xem chi tiết và cập nhật thông tin cá nhân, đổi mật khẩu. |
 | `/organizer` | Chỉ ORGANIZER; trang tổng quan theo mẫu, các số liệu minh họa và mục quản lý khác chưa kết nối API. |
 | `/organizer/events/new/details` | Bước 1: thông tin, địa điểm, thời gian, ảnh bìa/thumbnail/sơ đồ. |
 | `/organizer/events/new/category` | Bước 2: danh mục từ DB và khách mời (tùy chọn). |
@@ -46,17 +55,51 @@ Không cần tạo file môi trường để chạy mặc định. Khi cần đ�
 | `/organizer/events/:eventId` | Chi tiết, địa điểm, ảnh, khách mời, số vé phát hành/đã bán/giữ chỗ/còn lại; sửa hoặc yêu cầu hủy khi được phép. |
 | `/organizer/events/:eventId/edit/:step` | Dùng lại form tạo với `details`, `category`, `tickets`; tải hồ sơ hiện tại, sửa và gửi duyệt lại. |
 
-Đã đăng nhập thì `/login` và `/register` chuyển về `/`. Đường dẫn không tồn tại chuyển về `/`, rồi kiểm tra phiên. Giao diện dùng nhận diện EventHub với bố cục và màu xanh theo mẫu. Truy cập bước sau khi chưa hoàn tất thông tin trước đó sẽ quay về bước cần điền; Back/Next giữ dữ liệu.
+### 2.2. Mô hình phân tầng: Feature ➔ Pages ➔ Components ➔ API Services
 
-### Tạo sự kiện cho Organizer
+Dự án tổ chức mã nguồn theo từng **phân hệ người dùng / tính năng lớn (Vertical Slices)** thay vì gom chung tất cả components hay pages vào một chỗ. Mỗi phân hệ tuân theo luồng kiến trúc 4 tầng:
 
-- Form là ba trang riêng, có sidebar responsive, hộp thêm/sửa khách mời và loại vé, xem trước và xác nhận khi hủy. Các trường bám `CreateEventRequest` backend; thông tin thanh toán, giấy phép hoặc tính năng chưa có hợp đồng API không được tự tạo thêm.
-- `GET /api/categories` lấy đúng ID/name/description từ DB. Khi tải lỗi có thể thử lại; khi danh mục trống hiển thị hướng dẫn liên hệ Admin.
-- Chọn/kéo thả ảnh JPG/PNG tối đa 5 MB chỉ giữ file trong form và xem trước bằng blob URL trên trình duyệt; không gọi upload và không có ô nhập URL ảnh. Khi gửi duyệt, frontend gọi `POST /api/events` một lần bằng multipart: part `event` là JSON, các file là `bannerImage`, `thumbnailImage`, `imageZone` (tùy chọn), `ticketImage0`, `ticketImage1`... và `guestImage0`... (tùy chọn), theo thứ tự vé/khách mời trong JSON. Tổng request tối đa 50 MB. Backend lưu hồ sơ và upload ảnh trong cùng luồng, trả URL Cloudinary trong response sau khi thành công.
-- Thông tin bản nháp tự lưu trong sessionStorage theo ID tài khoản, tồn tại trong tab hiện tại; file ảnh giữ trong bộ nhớ khi Back/Next, không được lưu vào sessionStorage. Sau khi tải lại trang cần chọn lại ảnh. Không gửi hồ sơ nháp lên DB/Cloudinary. Khi gửi thành công hoặc xác nhận hủy, xóa bản nháp.
-- Hiển thị/nhập giờ Việt Nam GMT+7, chuyển sang chuỗi UTC không offset khi gửi. Thời gian sự kiện phải ở tương lai, kết thúc sau bắt đầu; thời gian bán vé kết thúc trước sự kiện. Tổng số vé không vượt sức chứa. Giá tiền gửi dưới dạng chuỗi thập phân để giữ độ chính xác BigDecimal.
-- Chỉ `POST /api/events` khi bấm gửi duyệt; hàm API nhận một bản nháp và tự dựng JSON cùng các file ảnh từ bản nháp đó. JSON không có trường URL ảnh; backend chỉ hỗ trợ tạo sự kiện multipart. Dùng HTTP client hiện có với cookie/CSRF/refresh. Chặn gửi lặp và điều hướng trong khi đang gửi; lỗi API giữ hồ sơ để chỉnh sửa/thử lại. Thành công hiển thị ID thật và trạng thái chờ duyệt.
-- Cần chạy phiên bản backend hỗ trợ tạo sự kiện multipart và cấu hình `CLOUDINARY_CLOUD_NAME`, `CLOUDINARY_API_KEY`, `CLOUDINARY_API_SECRET` trên backend theo README backend. Không đặt API secret trong frontend. Không còn endpoint upload ảnh riêng hoặc lưu/đọc ảnh local qua backend.
+```text
+┌────────────────────────────────────────────────────────────────────────┐
+│                      PHÂN HỆ NGƯỜI DÙNG (FEATURE)                      │
+│             (Ví dụ: features/admin, features/customer, ...)            │
+└───────────────────────────────────┬────────────────────────────────────┘
+                                    │
+         ┌──────────────────────────┴──────────────────────────┐
+         ▼                                                     ▼
+┌───────────────────────────────┐             ┌───────────────────────────────┐
+│         TRANG (PAGES)         │             │    KIỂU DỮ LIỆU (TYPES)       │
+│  - Màn hình chính của user    │             │  - Request / Response DTOs    │
+│  - Chứa Layout & Outlet       │             │  - Khớp với Entity Backend    │
+└───────────────┬───────────────┘             └───────────────┬───────────────┘
+                │                                             │
+                ▼                                             │
+┌───────────────────────────────┐                             │
+│     THÀNH PHẦN (COMPONENTS)   │                             │
+│  - Các khối UI con tái sử dụng│                             │
+│  - Nhận props và render view  │                             │
+└───────────────┬───────────────┘                             │
+                │                                             │
+                ▼                                             │
+┌─────────────────────────────────────────────────────────────┴────────┐
+│                        DỊCH VỤ GỌI API (API SERVICES)                │
+│  - File: `<feature>-api.ts` (nằm trong thư mục `api/`)               │
+│  - Sử dụng `httpClient` (Axios instance có sẵn)                      │
+│  - Tự động gắn HttpOnly Cookie, header `X-CSRF-Protection: 1`        │
+│  - Tự động bắt lỗi 401 và kích hoạt xoay vòng token (Token Rotation) │
+└───────────────────────────────────┬──────────────────────────────────┘
+                                    │
+                                    ▼
+                         [ Backend Spring Boot ]
+```
+
+* **Feature Module (`src/features/<tên-feature>/`)**: Đại diện cho 1 nhóm đối tượng người dùng (`admin`, `customer`, `organizer`, `staff`) hoặc 1 luồng lớn (`auth`, `events`).
+* **Pages (`pages/`)**: Các màn hình hoàn chỉnh mà router trỏ tới (ví dụ: `AdminPage.tsx`, `CreateEventPage.tsx`).
+* **Components (`components/`)**: Các thành phần giao diện nhỏ hơn cấu thành nên Page (ví dụ: `EventEditors.tsx`, `EventFields.tsx`).
+* **API Service (`api/`)**: Chuyên trách việc gọi HTTP request đến server (dùng `httpClient.get`, `httpClient.post`). **Quy chuẩn chung:** Đặt tên thư mục là `api/` (thay vì `services/`) để ngắn gọn và đồng bộ (`auth-api.ts`, `event-api.ts`).
+* **Types (`types/`)**: Định nghĩa interface TypeScript để đảm bảo tính an toàn dữ liệu (Type-safe).
+
+---
 
 ### Xem, sửa và yêu cầu hủy sự kiện
 
@@ -80,43 +123,125 @@ Không cần tạo file môi trường để chạy mặc định. Khi cần đ�
 - Form có trạng thái đang gửi, chặn gửi lặp, thông báo lỗi bằng tiếng Việt và nút hiện/ẩn mật khẩu.
 - Chưa triển khai quên mật khẩu, OAuth, ghi nhớ đăng nhập tùy chọn hay các trang nghiệp vụ khác vì backend chưa có API tương ứng.
 
-## Cấu trúc code
+## 3. Cơ Chế Xác Thực & Phân Quyền (Auth & RBAC Flow)
+
+### 3.1. Quản lý phiên bằng HttpOnly Cookie (Tại sao KHÔNG dùng localStorage?)
+1. **Lưu Token:** Sau khi đăng nhập thành công (`POST /api/auth/login`), Backend tự động thiết lập 2 cookie:
+   * `access_token` (Path: `/api`, sống 15 phút).
+   * `refresh_token` (Path: `/api/auth`, sống 7 ngày).
+2. **Bảo mật tuyệt đối:** Cả 2 cookie đều có cờ `HttpOnly`, JavaScript ở Frontend **không thể đọc được** -> Ngăn chặn 100% rủi ro bị đánh cắp token qua lỗ hổng XSS.
+3. **Tuyệt đối KHÔNG lưu token vào `localStorage` hay `sessionStorage`**. Trình duyệt tự động gửi kèm cookie trong mọi request nhờ `withCredentials: true` cấu hình sẵn trong `httpClient`.
+
+### 3.2. Nơi lưu thông tin User ở Frontend & Cơ chế Silent Refresh khi F5
+* **Vị trí lưu:** Thông tin người dùng (`id`, `email`, `fullName`, `role`) được lưu trong **React State** thông qua `AuthContext` tại [`src/app/AuthProvider.tsx`](src/app/AuthProvider.tsx).
+* **Khi người dùng F5 hoặc mở lại trình duyệt:**
+  1. React State bị reset về `null`, nhưng biến `loading = true`.
+  2. `useEffect` trong `AuthProvider` tự động gọi ngay: `POST /api/auth/refresh`.
+  3. Trình duyệt tự gửi cookie `refresh_token` lên Backend.
+  4. Backend xác thực hợp lệ và trả về thông tin user mới nhất -> Frontend gọi `setUser(currentUser)` và chuyển `loading = false`.
+  5. Người dùng tiếp tục sử dụng ứng dụng mà **không bị văng ra màn hình đăng nhập**.
+
+### 3.3. Logic kiểm tra quyền và định tuyến trong `AppRouter.tsx`
+Trong [`src/app/AppRouter.tsx`](src/app/AppRouter.tsx), Router sử dụng hook `useAuth()` để lấy dữ liệu từ `AuthProvider` và bảo vệ các tuyến đường bằng các Route Guard:
+
+* **`GuestRoute`**: Nếu đã đăng nhập (`user != null`), không cho phép vào `/login` hay `/register` (tự động điều hướng về `/`).
+* **`ProtectedRoute`**: Yêu cầu người dùng phải đăng nhập (`user != null`), nếu chưa sẽ chuyển hướng về `/login`.
+* **`AdminRoute`**: Kiểm tra `user?.role === 'ADMIN'`. Nếu không phải Admin, tự động chuyển về trang chủ `/`.
+* **`OrganizerRoute`**: Kiểm tra `user?.role === 'ORGANIZER'`.
+* **`StaffRoute`**: Kiểm tra `user?.role === 'STAFF'`.
+* **`LandingPage`**: Khi truy cập trang chủ `/`, hệ thống dựa trên `user.role` để chuyển hướng người dùng về đúng trang mặc định của vai trò đó:
+  * Role `ADMIN` ➔ Chuyển hướng sang `/admin`.
+  * Role `ORGANIZER` ➔ Chuyển hướng sang `/organizer`.
+  * Role `STAFF` ➔ Chuyển hướng sang `/staff`.
+  * Role `CUSTOMER` / Khách ➔ Trang mặc định của khách `/customer`.
+
+---
+
+## 4. Cấu Trúc Thư Mục Dự Án (Project Structure)
 
 ```text
 src/
-├── app/                    # AppRouter, AuthProvider
-├── features/auth/
-│   ├── api/                # Các endpoint và thông báo lỗi auth
-│   ├── hooks/              # useAuth, context
-│   ├── pages/              # LoginPage, RegisterPage: tự chứa toàn bộ giao diện
-│   └── types/              # Request, User, role
-├── features/events/        # API, validation, ba bước tạo sự kiện và các hộp chỉnh sửa
-├── features/organizer/     # Layout và dashboard Organizer
-├── lib/                    # Axios client: cookie, CSRF, timeout, tự refresh
-├── pages/                  # HomePage với nút đăng xuất
-├── styles/                 # Reset, font, biến CSS toàn cục
+├── app/
+│   ├── AppRouter.tsx          # Định tuyến trung tâm & phân quyền Route Guards
+│   └── AuthProvider.tsx       # Quản lý React Context lưu trữ User state & Silent Refresh
+├── components/
+│   ├── common/                # Các component dùng chung toàn bộ dự án
+│   └── ui/                    # Các phần tử giao diện cơ bản (Button, Input...)
+├── features/                  # CÁC PHÂN HỆ NGƯỜI DÙNG & TÍNH NĂNG CHÍNH
+│   ├── admin/                 # Phân hệ Quản trị viên (Role: ADMIN)
+│   │   ├── api/admin-api.ts   # Service gọi API quản trị
+│   │   ├── pages/AdminPage.tsx# Trang giao diện mặc định của Admin (/admin)
+│   │   └── types/admin.ts     # Kiểu dữ liệu cho Admin
+│   ├── customer/              # Phân hệ Khách hàng (Role: CUSTOMER)
+│   │   ├── api/customer-api.ts# Service gọi API sự kiện, đặt vé, lịch sử vé
+│   │   ├── pages/CustomerPage.tsx # Trang giao diện của Khách hàng (/customer)
+│   │   └── types/customer.ts  # Kiểu dữ liệu sự kiện, vé
+│   ├── organizer/             # Phân hệ Ban tổ chức (Role: ORGANIZER)
+│   │   ├── pages/OrganizerLayout.tsx    # Layout Sidebar Ban tổ chức
+│   │   └── pages/OrganizerDashboard.tsx # Bảng điều khiển Ban tổ chức (/organizer)
+│   ├── events/                # Tính năng Tạo sự kiện (cho Organizer)
+│   │   ├── api/event-api.ts   # API tạo sự kiện qua multipart
+│   │   ├── components/        # EventEditors.tsx, EventFields.tsx
+│   │   ├── pages/CreateEventPage.tsx # Form tạo sự kiện 3 bước (/organizer/events/new)
+│   │   └── types/event.ts     # Kiểu dữ liệu sự kiện
+│   ├── staff/                 # Phân hệ Nhân viên soát vé (Role: STAFF)
+│   │   ├── api/staff-api.ts   # Service gọi API check-in, soát vé
+│   │   ├── pages/StaffPage.tsx# Trang giao diện soát vé (/staff)
+│   │   └── types/staff.ts     # Kiểu dữ liệu soát vé
+│   └── auth/                  # Phân hệ Xác thực
+│       ├── api/auth-api.ts    # Service gọi API đăng ký, đăng nhập, refresh, logout
+│       ├── api/auth-errors.ts # Xử lý và chuẩn hóa thông báo lỗi tiếng Việt
+│       ├── hooks/useAuth.ts   # Custom hook useAuth()
+│       ├── pages/LoginPage.tsx
+│       ├── pages/RegisterPage.tsx
+│       └── types/auth.ts      # User, LoginRequest, RegisterRequest
+├── lib/
+│   └── http-client.ts         # Axios instance: tự động gắn CSRF header, bắt 401 & tự xoay vòng token
+├── pages/
+│   └── HomePage.tsx           # Trang điều hướng mặc định sau đăng nhập
+├── styles/                    # Global CSS, css variables
 ├── App.tsx
 └── main.tsx
-tests/                      # Kiểm thử trình duyệt với API giả lập
 ```
 
-Các thư mục trống có sẵn còn lại được giữ cho tính năng sau. `features/example/` chỉ là khung tham khảo. Component và page dùng PascalCase; hook bắt đầu bằng `use`; tiện ích dùng kebab-case. Các page auth chứa trực tiếp JSX, header, footer, nút và ô nhập. CSS của hai page nằm trong `AuthPage.module.css`; HomePage tự chứa nút đăng xuất và CSS của nó. Organizer dùng layout chung; các trường và hộp chỉnh sửa dùng lại trong ba bước nằm trong `features/events/components`. Không gom CSS nghiệp vụ vào global.
+---
 
-Dependency: React Router cho routing ([tài liệu chính thức](https://reactrouter.com/start/declarative/routing)), Lucide React cho icon. HTTP dùng Axios với instance và response interceptor trong `lib/http-client.ts`. Playwright là dev dependency để kiểm thử giao diện.
+## 5. Bảng Tra Cứu Đường Dẫn (Route Map)
 
-## Kiểm tra và build
+| Đường dẫn (URL) | Route Guard | Quyền truy cập (Role) | Mô tả giao diện |
+| :--- | :--- | :--- | :--- |
+| `/login` | `GuestRoute` | Khách vãng lai | Trang đăng nhập tài khoản |
+| `/register` | `GuestRoute` | Khách vãng lai | Trang đăng ký tài khoản (Customer / Organizer) |
+| `/` | `ProtectedRoute` | Đã đăng nhập | Tự động chuyển hướng đến trang tương ứng theo Role |
+| `/customer` | `ProtectedRoute` | `CUSTOMER` | Giao diện xem và đặt vé của Khách hàng |
+| `/admin` | `AdminRoute` | `ADMIN` | Giao diện quản trị hệ thống |
+| `/organizer` | `OrganizerRoute` | `ORGANIZER` | Bảng điều khiển Ban tổ chức sự kiện |
+| `/organizer/events/new` | `OrganizerRoute` | `ORGANIZER` | Tạo sự kiện mới (3 bước: chi tiết, danh mục, vé) |
+| `/staff` | `StaffRoute` | `STAFF` | Giao diện quét mã soát vé cho nhân viên |
+
+---
+
+## 6. Hướng Dẫn Quy Chuẩn Code Cho Thành Viên Nhóm (Coding Guide)
+
+Khi một thành viên nhận nhiệm vụ phát triển một tính năng mới trong phân hệ của mình, hãy tuân theo quy trình chuẩn 5 bước sau:
+
+1. **Bước 1: Khai báo kiểu dữ liệu trong `types/<feature>.ts`**: Định nghĩa rõ request/response interface.
+2. **Bước 2: Viết hàm gọi API trong `api/<feature>-api.ts`**: Dùng trực tiếp `httpClient` từ `src/lib/http-client` (đã có cookie, CSRF và refresh tự động).
+3. **Bước 3: Tạo Component con trong `components/`**: Dùng CSS Modules đi kèm để tránh xung đột class name.
+4. **Bước 4: Tạo hoặc hoàn thiện Trang trong `pages/`**: Gọi hàm API và render dữ liệu.
+5. **Bước 5: Đăng ký Route vào `src/app/AppRouter.tsx`**: Đặt vào đúng nhóm quyền bảo vệ.
+
+---
+
+## 7. Kiểm Tra & Đóng Gói
 
 ```bash
+# Kiểm tra linter
 npm run lint
+
+# Biên dịch TypeScript & Build Vite
 npm run build
-npx playwright install chromium  # Chỉ cần làm lần đầu
-npm run test:e2e
+
+# Chạy test E2E Playwright
+$env:PLAYWRIGHT_CHANNEL='chrome'; npm run test:e2e
 ```
-
-Nếu không tải được Chromium nhưng đã cài Google Chrome, có thể chạy trong PowerShell: `$env:PLAYWRIGHT_CHANNEL='chrome'; npm run test:e2e`.
-
-Test tự chạy Vite tại `127.0.0.1:4173`, kiểm tra desktop và mobile với API giả lập: quyền truy cập trang, đăng ký hai role, validation, email trùng, cookie HttpOnly, khôi phục phiên, đăng nhập/đăng xuất, lỗi mạng và tự refresh token. Test tạo sự kiện kiểm tra ba trang, payload/UTC, modal, vé/khách mời, bản nháp, upload ảnh, phân quyền và phục hồi sau lỗi. Bộ kiểm thử refresh gọi Axios client thật qua Vite và giả lập endpoint được bảo vệ, không thêm nút kiểm thử vào ứng dụng. Không cần backend/database và không tạo tài khoản thật. Kết quả không thay thế kiểm thử tích hợp với backend thật. `test-results/` được Git bỏ qua.
-
-`npm run preview` xem build production tại máy local. Proxy `/api` chỉ có trong dev server: để preview hoặc triển khai thực tế, cấu hình `VITE_API_BASE_URL` trước khi build hoặc dùng reverse proxy `/api` đến backend. Server phục vụ frontend cần fallback các đường dẫn SPA về `index.html`; HTTPS cần cookie Secure và cấu hình SameSite/CORS phù hợp.
-
-Chạy lint, build và test liên quan trước khi gửi thay đổi. Dùng npm và commit lockfile cùng thay đổi dependency. Không tự nâng phiên bản hoặc thêm tính năng ngoài phạm vi yêu cầu.

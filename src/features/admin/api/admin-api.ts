@@ -15,6 +15,7 @@ export const adminApi = {
   approve: (id: number, version: number) => httpClient.post('/admin/events/' + id + '/approve', { version }),
   reject: (id: number, version: number, reason: string) => httpClient.post('/admin/events/' + id + '/reject', { version, reason }),
 }
+
 export function errorMessage(error: unknown): string {
   if (!(error instanceof ApiError) && !axios.isAxiosError(error)) return 'Có lỗi xảy ra. Vui lòng thử lại.'
   const status = error instanceof ApiError ? error.status : error.response?.status
@@ -32,6 +33,7 @@ export function errorMessage(error: unknown): string {
   if (status === 409) return 'Dữ liệu bị trùng hoặc đã thay đổi. Vui lòng tải lại.'
   return 'Không thể kết nối máy chủ. Vui lòng thử lại.'
 }
+
 export function fieldErrors(error: unknown): Record<string, string> {
   if (!(error instanceof ApiError) && !axios.isAxiosError(error)) return {}
   const errors = (error instanceof ApiError ? error.data?.errors : error.response?.data?.errors) as Record<string, string> | undefined

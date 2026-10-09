@@ -3,18 +3,28 @@ import { useAuth } from '../features/auth/hooks/useAuth'
 import { LoginPage } from '../features/auth/pages/LoginPage'
 import { RegisterPage } from '../features/auth/pages/RegisterPage'
 import { HomePage } from '../pages/HomePage'
+
+// Organizer Pages & Layout
 import { OrganizerLayout } from '../features/organizer/pages/OrganizerLayout'
 import { OrganizerDashboard } from '../features/organizer/pages/OrganizerDashboard'
 import { CreateEventPage } from '../features/events/pages/CreateEventPage'
 import { OrganizerEventsPage } from '../features/events/pages/OrganizerEventsPage'
 import { EventDetailPage } from '../features/events/pages/EventDetailPage'
 import { EditEventPage } from '../features/events/pages/EditEventPage'
+
+// Admin Pages & Layout
 import { AdminLayout } from '../features/admin/pages/AdminLayout'
 import { UsersPage } from '../features/admin/pages/UsersPage'
 import { EventCategoriesPage } from '../features/admin/pages/EventCategoriesPage'
 import { PendingEventsPage } from '../features/admin/pages/PendingEventsPage'
 import { EventReviewDetailPage } from '../features/admin/pages/EventReviewDetailPage'
+
+// Notifications
 import { NotificationsPage } from '../features/notifications/pages/NotificationsPage'
+
+// Feature Sub-Routers
+import { StaffRoutes } from '../features/staff/routes/StaffRoutes'
+import { CustomerRoutes } from '../features/customer/routes/CustomerRoutes'
 
 function GuestRoute() {
   const { user } = useAuth()
@@ -26,20 +36,27 @@ function ProtectedRoute() {
   return user ? <Outlet /> : <Navigate to="/login" replace />
 }
 
+function AdminRoute() {
+  const { user } = useAuth()
+  return user?.role === 'ADMIN' ? <Outlet /> : <Navigate to="/" replace />
+}
+
 function OrganizerRoute() {
   const { user } = useAuth()
   return user?.role === 'ORGANIZER' ? <Outlet /> : <Navigate to="/" replace />
 }
 
+function StaffRoute() {
+  const { user } = useAuth()
+  return user?.role === 'STAFF' ? <Outlet /> : <Navigate to="/" replace />
+}
+
 function LandingPage() {
   const { user } = useAuth()
   if (user?.role === 'ADMIN') return <Navigate to="/admin/events/pending" replace />
-  return user?.role === 'ORGANIZER' ? <Navigate to="/organizer" replace /> : <HomePage />
-}
-
-function AdminRoute() {
-  const { user } = useAuth()
-  return user?.role === 'ADMIN' ? <Outlet /> : <Navigate to="/" replace />
+  if (user?.role === 'ORGANIZER') return <Navigate to="/organizer" replace />
+  if (user?.role === 'STAFF') return <Navigate to="/staff" replace />
+  return <HomePage />
 }
 
 export function AppRouter() {
@@ -48,12 +65,17 @@ export function AppRouter() {
 
   return (
     <Routes>
+      {/* Auth Portal */}
       <Route element={<GuestRoute />}>
         <Route path="/login" element={<LoginPage />} />
         <Route path="/register" element={<RegisterPage />} />
       </Route>
+
+      {/* Protected Area */}
       <Route element={<ProtectedRoute />}>
         <Route index element={<LandingPage />} />
+
+        {/* Admin Portal */}
         <Route element={<AdminRoute />}>
           <Route path="/admin" element={<AdminLayout />}>
             <Route index element={<Navigate to="events/pending" replace />} />
@@ -63,6 +85,8 @@ export function AppRouter() {
             <Route path="events/pending/:eventId" element={<EventReviewDetailPage />} />
           </Route>
         </Route>
+
+        {/* Organizer Portal */}
         <Route element={<OrganizerRoute />}>
           <Route path="/organizer" element={<OrganizerLayout />}>
             <Route path="notifications" element={<NotificationsPage />} />
@@ -75,7 +99,17 @@ export function AppRouter() {
             <Route path="events/:eventId/edit/:step" element={<EditEventPage />} />
           </Route>
         </Route>
+
+        {/* Staff Portal */}
+        <Route element={<StaffRoute />}>
+          <Route path="/staff/*" element={<StaffRoutes />} />
+        </Route>
+
+        {/* Customer Portal */}
+        <Route path="/customer/*" element={<CustomerRoutes />} />
       </Route>
+
+      {/* Fallback */}
       <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>
   )

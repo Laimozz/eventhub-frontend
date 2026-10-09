@@ -3,8 +3,8 @@ import type { InternalAxiosRequestConfig } from 'axios'
 
 export class ApiError extends Error {
   readonly status: number
-  readonly data: { code?: string; message?: string; errors?: Record<string, string> } | undefined
-  constructor(status: number, data?: { code?: string; message?: string; errors?: Record<string, string> }) {
+  readonly data: { code?: string; message?: string; errors?: Record<string, string> } | any
+  constructor(status: number, data?: any) {
     super(`Request failed (${status})`)
     this.name = 'ApiError'
     this.status = status
@@ -118,7 +118,17 @@ export function refreshSession<T = unknown>(): Promise<T> {
   return pendingRefresh as Promise<T>
 }
 
+export async function get<T>(path: string): Promise<T> {
+  const response = await httpClient.get<T>(path)
+  return response.data
+}
+
 export async function post<T>(path: string, body?: unknown): Promise<T> {
   const response = await httpClient.post<T>(path, body)
+  return response.data
+}
+
+export async function put<T>(path: string, body?: unknown): Promise<T> {
+  const response = await httpClient.put<T>(path, body)
   return response.data
 }
