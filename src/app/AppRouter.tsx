@@ -2,7 +2,6 @@ import { Navigate, Outlet, Route, Routes } from 'react-router'
 import { useAuth } from '../features/auth/hooks/useAuth'
 import { LoginPage } from '../features/auth/pages/LoginPage'
 import { RegisterPage } from '../features/auth/pages/RegisterPage'
-import { HomePage } from '../pages/HomePage'
 
 // Feature Sub-Routers
 import { AdminRoutes } from '../features/admin/routes/AdminRoutes'
@@ -40,7 +39,8 @@ function LandingPage() {
   if (user?.role === 'ADMIN') return <Navigate to="/admin" replace />
   if (user?.role === 'ORGANIZER') return <Navigate to="/organizer" replace />
   if (user?.role === 'STAFF') return <Navigate to="/staff" replace />
-  return <HomePage />
+  // Role CUSTOMER hoặc người dùng chưa rõ role thì về cổng customer
+  return <Navigate to="/customer" replace />
 }
 
 export function AppRouter() {
@@ -55,11 +55,11 @@ export function AppRouter() {
         <Route path="/register" element={<RegisterPage />} />
       </Route>
 
-      {/* Protected Area */}
-      <Route element={<ProtectedRoute />}>
-        <Route index element={<LandingPage />} />
+      {/* Public / Generic Entry */}
+      <Route path="/" element={<LandingPage />} />
 
-        {/* Feature Sub-Routers: AppRouter ủy quyền hoàn toàn cho từng Feature */}
+      {/* Feature Sub-Routers (Protected) */}
+      <Route element={<ProtectedRoute />}>
         <Route element={<AdminRoute />}>
           <Route path="/admin/*" element={<AdminRoutes />} />
         </Route>
@@ -71,10 +71,10 @@ export function AppRouter() {
         <Route element={<StaffRoute />}>
           <Route path="/staff/*" element={<StaffRoutes />} />
         </Route>
-
-        {/* Customer Portal */}
-        <Route path="/customer/*" element={<CustomerRoutes />} />
       </Route>
+
+      {/* Customer Portal (Public access allowed) */}
+      <Route path="/customer/*" element={<CustomerRoutes />} />
 
       {/* Fallback */}
       <Route path="*" element={<Navigate to="/" replace />} />

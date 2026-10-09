@@ -325,3 +325,50 @@
   from { opacity: 0; transform: translateY(-4px); }
   to { opacity: 1; transform: translateY(0); }
 }
+
+/* Guest Actions */
+.guestActions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.btnLogin {
+  height: 40px;
+  padding: 0 16px;
+  border-radius: 50px;
+  font-size: 14px;
+  font-weight: 600;
+  color: #191c1e;
+  background: transparent;
+  text-decoration: none;
+  display: flex;
+  align-items: center;
+  transition: all 0.2s;
+}
+
+.btnLogin:hover {
+  background: #f2f4f6;
+  text-decoration: none;
+}
+
+.btnRegister {
+  height: 40px;
+  padding: 0 20px;
+  border-radius: 50px;
+  font-size: 14px;
+  font-weight: 700;
+  color: #ffffff;
+  background: #2dc275;
+  text-decoration: none;
+  display: flex;
+  align-items: center;
+  transition: all 0.2s;
+  box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+}
+
+.btnRegister:hover {
+  background: #25ab66;
+  text-decoration: none;
+  transform: scale(1.02);
+}
