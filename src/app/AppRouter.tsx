@@ -56,7 +56,8 @@ function LandingPage() {
   if (user?.role === 'ADMIN') return <Navigate to="/admin/events/pending" replace />
   if (user?.role === 'ORGANIZER') return <Navigate to="/organizer" replace />
   if (user?.role === 'STAFF') return <Navigate to="/staff" replace />
-  return <HomePage />
+  // Role CUSTOMER hoặc người dùng chưa rõ role thì về cổng customer
+  return <Navigate to="/customer" replace />
 }
 
 export function AppRouter() {
@@ -71,10 +72,11 @@ export function AppRouter() {
         <Route path="/register" element={<RegisterPage />} />
       </Route>
 
+      {/* Public / Generic Entry */}
+      <Route path="/" element={<LandingPage />} />
+
       {/* Protected Area */}
       <Route element={<ProtectedRoute />}>
-        <Route index element={<LandingPage />} />
-
         {/* Admin Portal */}
         <Route element={<AdminRoute />}>
           <Route path="/admin" element={<AdminLayout />}>
@@ -104,10 +106,10 @@ export function AppRouter() {
         <Route element={<StaffRoute />}>
           <Route path="/staff/*" element={<StaffRoutes />} />
         </Route>
-
-        {/* Customer Portal */}
-        <Route path="/customer/*" element={<CustomerRoutes />} />
       </Route>
+
+      {/* Customer Portal (Public access allowed) */}
+      <Route path="/customer/*" element={<CustomerRoutes />} />
 
       {/* Fallback */}
       <Route path="*" element={<Navigate to="/" replace />} />
