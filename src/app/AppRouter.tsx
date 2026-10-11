@@ -2,7 +2,6 @@ import { Navigate, Outlet, Route, Routes } from 'react-router'
 import { useAuth } from '../features/auth/hooks/useAuth'
 import { LoginPage } from '../features/auth/pages/LoginPage'
 import { RegisterPage } from '../features/auth/pages/RegisterPage'
-import { HomePage } from '../pages/HomePage'
 
 // Organizer Pages & Layout
 import { OrganizerLayout } from '../features/organizer/pages/OrganizerLayout'
@@ -11,6 +10,7 @@ import { CreateEventPage } from '../features/events/pages/CreateEventPage'
 import { OrganizerEventsPage } from '../features/events/pages/OrganizerEventsPage'
 import { EventDetailPage } from '../features/events/pages/EventDetailPage'
 import { EditEventPage } from '../features/events/pages/EditEventPage'
+import { UserDetailPage as OrganizerUserDetailPage } from '../features/organizer/pages/UserDetailPage'
 
 // Admin Pages & Layout
 import { AdminLayout } from '../features/admin/pages/AdminLayout'
@@ -18,6 +18,7 @@ import { UsersPage } from '../features/admin/pages/UsersPage'
 import { EventCategoriesPage } from '../features/admin/pages/EventCategoriesPage'
 import { PendingEventsPage } from '../features/admin/pages/PendingEventsPage'
 import { EventReviewDetailPage } from '../features/admin/pages/EventReviewDetailPage'
+import { UserDetailPage as AdminUserDetailPage } from '../features/admin/pages/UserDetailPage'
 
 // Notifications
 import { NotificationsPage } from '../features/notifications/pages/NotificationsPage'
@@ -85,6 +86,7 @@ export function AppRouter() {
             <Route path="event-categories" element={<EventCategoriesPage />} />
             <Route path="events/pending" element={<PendingEventsPage />} />
             <Route path="events/pending/:eventId" element={<EventReviewDetailPage />} />
+            <Route path="profile" element={<AdminUserDetailPage />} />
           </Route>
         </Route>
 
@@ -99,6 +101,7 @@ export function AppRouter() {
             <Route path="events/:eventId" element={<EventDetailPage />} />
             <Route path="events/:eventId/edit" element={<Navigate to="details" replace />} />
             <Route path="events/:eventId/edit/:step" element={<EditEventPage />} />
+            <Route path="profile" element={<OrganizerUserDetailPage />} />
           </Route>
         </Route>
 

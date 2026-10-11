@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { useLocation } from 'react-router';
 import { useAuth } from '../../auth/hooks/useAuth';
 import type { UserDetailDto } from '../types/user';
 import { getUserDetail } from '../api/user-api';
@@ -12,8 +13,16 @@ import { Toast, type ToastData } from '../components/Toast';
 import { UserPageHeader, type PageMode } from '../components/UserPageHeader';
 import styles from './UserDetailPage.module.css';
 
-export function UserDetailPage() {
+interface UserDetailPageProps {
+  hideNav?: boolean;
+}
+
+export function UserDetailPage({ hideNav = false }: UserDetailPageProps = {}) {
   const { user: authUser } = useAuth();
+  const location = useLocation();
+
+  const isInsidePortal = location.pathname.startsWith('/admin') || location.pathname.startsWith('/organizer');
+  const shouldHideNav = hideNav || isInsidePortal;
 
   const [mode, setMode] = useState<PageMode>('VIEW');
   const [user, setUser] = useState<UserDetailDto | null>(null);
@@ -81,18 +90,20 @@ export function UserDetailPage() {
   } : null);
 
   return (
-    <div className={styles.pageWrapper}>
+    <div className={`${styles.pageWrapper} ${shouldHideNav ? styles.portalWrapper : ''}`}>
       {/* Toast Notification Alert */}
       <Toast toast={toast} onClose={() => setToast(null)} />
 
       {/* Header & Account Menu */}
-      <CustomerHeader
-        user={currentUser}
-        onSelectMode={(targetMode) => setMode(targetMode)}
-      />
+      {!shouldHideNav && (
+        <CustomerHeader
+          user={currentUser}
+          onSelectMode={(targetMode) => setMode(targetMode)}
+        />
+      )}
 
       {/* Main Body */}
-      <main className={styles.mainContent}>
+      <main className={`${styles.mainContent} ${shouldHideNav ? styles.portalMainContent : ''}`}>
         <UserPageHeader mode={mode} onSetMode={setMode} />
 
         {/* State Display: Loading / Error / Active View Component */}
@@ -166,7 +177,7 @@ export function UserDetailPage() {
       </main>
 
       {/* Footer */}
-      <CustomerFooter />
+      {!shouldHideNav && <CustomerFooter />}
     </div>
   );
 }

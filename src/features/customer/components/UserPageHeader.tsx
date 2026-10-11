@@ -1,4 +1,4 @@
-import { Link } from 'react-router';
+import { Link, useLocation } from 'react-router';
 import styles from './UserPageHeader.module.css';
 
 export type PageMode = 'VIEW' | 'EDIT' | 'CHANGE_PASSWORD';
@@ -9,13 +9,19 @@ interface UserPageHeaderProps {
 }
 
 export function UserPageHeader({ mode, onSetMode }: UserPageHeaderProps) {
+  const location = useLocation();
+  const isInsideAdmin = location.pathname.startsWith('/admin');
+  const isInsideOrganizer = location.pathname.startsWith('/organizer');
+  const homePath = isInsideAdmin ? '/admin/events/pending' : isInsideOrganizer ? '/organizer' : '/';
+  const homeText = isInsideAdmin ? 'Quản trị' : isInsideOrganizer ? 'Ban tổ chức' : 'Trang chủ';
+
   return (
     <>
       {/* Breadcrumb Navigation */}
       <nav className={styles.breadcrumb} aria-label="Breadcrumb">
-        <Link to="/">
+        <Link to={homePath}>
           <span className="material-symbols-outlined text-[16px]">home</span>
-          Trang chủ
+          {homeText}
         </Link>
         <span className="material-symbols-outlined text-[14px]">chevron_right</span>
 

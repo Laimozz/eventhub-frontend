@@ -26,6 +26,8 @@
 .avatar { background: #daf3e6; width: 35px; height: 35px; display: grid; place-items: center; border: 0; padding: 0; border-radius: 50%; color: #087e4b; font-weight: 700; }
 .avatar:hover, .avatar[aria-expanded="true"] { background: #c5ecd8; }
 .accountDropdown { position: absolute; top: calc(100% + 10px); right: 0; min-width: 175px; padding: 6px; background: #fff; border: 1px solid #e6ece8; border-radius: 10px; box-shadow: 0 8px 24px #17241d1a; z-index: 30; }
+.accountProfile { display: flex; align-items: center; gap: 9px; width: 100%; padding: 11px 12px; border: 0; border-radius: 6px; background: none; color: #203128; font-size: 13px; text-align: left; white-space: nowrap; text-decoration: none; }
+.accountProfile:hover { background: #e2f6ec; color: #087e4b; }
 .accountLogout { display: flex; align-items: center; gap: 9px; width: 100%; padding: 11px 12px; border: 0; border-radius: 6px; background: none; color: #203128; font-size: 13px; text-align: left; white-space: nowrap; }
 .accountLogout:hover { background: #e2f6ec; color: #087e4b; }
 .accountLogout:disabled { opacity: .6; cursor: wait; }

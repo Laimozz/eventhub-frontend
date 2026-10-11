@@ -42,7 +42,27 @@ export function EditUserDetail({
   const [otpModalOpen, setOtpModalOpen] = useState(false);
   const [otpCode, setOtpCode] = useState(['5', '8', '2', '', '', '']);
 
-  const roleDisplay = user.role === 'CUSTOMER' ? 'Khách mua vé / Customer' : user.role;
+  const roleDisplay = user.role === 'ADMIN'
+    ? 'Quản trị viên / Admin'
+    : user.role === 'ORGANIZER'
+    ? 'Ban tổ chức / Organizer'
+    : user.role === 'STAFF'
+    ? 'Nhân viên / Staff'
+    : 'Khách mua vé / Customer';
+
+  const nameSubNote = user.role === 'CUSTOMER' ? 'Tên in trên vé' : 'Tên hiển thị';
+  const nameHelperText = user.role === 'CUSTOMER'
+    ? 'Sử dụng họ tên khớp với CCCD để đối soát tại cổng soát vé.'
+    : 'Họ và tên hiển thị trong hệ thống và các tài liệu liên quan.';
+
+  const roleHelper = user.role === 'ADMIN'
+    ? 'Vai trò quản trị viên cấp cao nhất trên hệ thống EventHub.'
+    : user.role === 'ORGANIZER'
+    ? 'Vai trò ban tổ chức, được quyền tạo và quản lý các sự kiện.'
+    : user.role === 'STAFF'
+    ? 'Vai trò nhân viên hỗ trợ kiểm soát vé và sự kiện.'
+    : 'Vai trò do hệ thống quản lý mặc định cho tài khoản người dùng mua vé.';
+
   const initial = user.fullName?.trim() ? user.fullName.trim().charAt(0).toUpperCase() : 'U';
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
@@ -233,7 +253,7 @@ export function EditUserDetail({
               <label htmlFor="fullName">
                 Họ và tên <span className={styles.requiredStar}>*</span>
               </label>
-              <span className={styles.fieldSubNote}>Tên in trên vé</span>
+              <span className={styles.fieldSubNote}>{nameSubNote}</span>
             </div>
             <div className={styles.inputControlWrapper}>
               <span className={`material-symbols-outlined ${styles.fieldIcon}`}>badge</span>
@@ -259,7 +279,7 @@ export function EditUserDetail({
               <p className={styles.fieldErrorText}>{fieldErrors.fullName}</p>
             ) : (
               <p className={styles.fieldHelperText}>
-                Sử dụng họ tên khớp với CCCD để đối soát tại cổng soát vé.
+                {nameHelperText}
               </p>
             )}
           </div>
@@ -456,7 +476,7 @@ export function EditUserDetail({
               <span className={`material-symbols-outlined ${styles.inputRightIcon}`}>lock</span>
             </div>
             <p className={styles.fieldHelperText}>
-              Vai trò do hệ thống quản lý mặc định cho tài khoản người dùng mua vé.
+              {roleHelper}
             </p>
           </div>
         </div>

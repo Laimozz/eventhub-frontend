@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 import { Link, NavLink, Outlet, useNavigate } from 'react-router'
-import { Bell, ChartColumn, CirclePlus, LayoutDashboard, LogOut, Menu, Ticket, Users, Wallet, X } from 'lucide-react'
+import { Bell, ChartColumn, CirclePlus, LayoutDashboard, LogOut, Menu, Ticket, User, Users, Wallet, X } from 'lucide-react'
 import { useAuth } from '../../auth/hooks/useAuth'
 import { authErrorMessage } from '../../auth/api/auth-errors'
 import styles from './OrganizerLayout.module.css'
@@ -37,6 +37,7 @@ export function OrganizerLayout() {
       <nav aria-label="Menu Organizer" className={styles.navigation}>
         <NavLink to="/organizer" end className={({ isActive }) => isActive ? styles.active : ''} onClick={() => setMenuOpen(false)}><LayoutDashboard size={19} /> Tổng quan</NavLink>
         <NavLink to="/organizer/events" className={({ isActive }) => isActive ? styles.active : ''} onClick={() => setMenuOpen(false)}><Ticket size={19} />Sự kiện của tôi</NavLink>
+        <NavLink to="/organizer/profile" className={({ isActive }) => isActive ? styles.active : ''} onClick={() => setMenuOpen(false)}><User size={19} />Thông tin cá nhân</NavLink>
         {[{ icon: Ticket, text: 'Quản lý Booking' }, { icon: Users, text: 'Nhân viên soát vé' }, { icon: ChartColumn, text: 'Báo cáo thống kê' }, { icon: Wallet, text: 'Doanh thu & Rút tiền' }].map(({ icon: Icon, text }) => <button key={text} disabled title="Chức năng sẽ được triển khai sau"><Icon size={19} />{text}</button>)}
       </nav>
       <div className={styles.sidebarBottom}><div className={styles.portalStatus}><span /> CỔNG BAN TỔ CHỨC<small>Không gian quản lý sự kiện</small></div><button onClick={logout} disabled={pending}><LogOut size={17} />{pending ? 'Đang đăng xuất…' : 'Đăng xuất'}</button></div>
@@ -62,6 +63,9 @@ export function OrganizerLayout() {
               {(user?.fullName || user?.email || 'O').slice(0, 1).toUpperCase()}
             </button>
             {accountMenuOpen && <div id="organizer-account-menu" className={styles.accountDropdown}>
+              <Link to="/organizer/profile" className={styles.accountProfile} onClick={() => setAccountMenuOpen(false)}>
+                <User size={17} />Thông tin cá nhân
+              </Link>
               <button type="button" className={styles.accountLogout} onClick={logout} disabled={pending}>
                 <LogOut size={17} />{pending ? 'Đang đăng xuất…' : 'Đăng xuất'}
               </button>
