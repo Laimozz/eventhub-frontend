@@ -1,0 +1,598 @@
+<!DOCTYPE html><html lang="vi"><head><meta charset="utf-8"><meta content="width=device-width, initial-scale=1.0" name="viewport"><meta content="web_dashboard" name="shell-type"><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&amp;family=Plus+Jakarta+Sans:wght@600;700;800&amp;display=swap" rel="stylesheet"><link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"><style>@layer base{html,body{margin:0;padding:0;}body{overscroll-behavior:none;}main>:first-child{margin-top:0!important;}main>:last-child{margin-bottom:0!important;}}::-webkit-scrollbar{display:none;}</style><script src="https://cdn.tailwindcss.com"></script><script id="tailwind-config">tailwind.config = { darkMode: "class", theme: { extend: { "colors": { "on-secondary-fixed-variant": "#004c6e", "surface-tint": "#006d3d", "primary": "#006d3d", "surface-container-low": "#f2f4f6", "surface-container": "#eceef0", "surface-variant": "#e1e2e5", "surface-dim": "#d8dadd", "tertiary-fixed": "#6ffbbe", "slate-surface": "#1E2329", "primary-fixed": "#72fca9", "error": "#ba1a1a", "surface": "#f8f9fc", "on-error": "#ffffff", "on-secondary-fixed": "#001e2f", "surface-light": "#F8FAFC", "background": "#f8f9fc", "error-container": "#ffdad6", "secondary": "#006591", "outline": "#6d7b6f", "on-surface": "#191c1e", "surface-bright": "#f8f9fc", "surface-container-highest": "#e1e2e5", "on-tertiary": "#ffffff", "inverse-primary": "#53df8f", "on-primary-fixed": "#00210f", "secondary-fixed-dim": "#89ceff", "inverse-surface": "#2e3133", "outline-variant": "#bccabc", "on-tertiary-fixed-variant": "#005236", "surface-container-high": "#e7e8eb", "on-surface-variant": "#3d4a3f", "primary-container": "#2dc275", "on-primary-fixed-variant": "#00522c", "on-background": "#191c1e", "on-error-container": "#93000a", "on-secondary-container": "#004666", "on-tertiary-fixed": "#002113", "on-primary": "#ffffff", "tertiary": "#006c49", "on-tertiary-container": "#004930", "inverse-on-surface": "#eff1f3", "urgency-coral": "#FF4D4D", "mint-bright": "#A7F3D0", "sold-out-gray": "#94A3B8", "secondary-fixed": "#c9e6ff", "primary-fixed-dim": "#53df8f", "on-primary-container": "#004927", "secondary-container": "#39b8fd", "surface-container-lowest": "#ffffff", "tertiary-container": "#24c188", "on-secondary": "#ffffff", "tertiary-fixed-dim": "#4edea3", "slate-subtle": "#333C48" }, "borderRadius": { "DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px" }, "spacing": { "space-xs": "0.25rem", "margin": "2rem", "margin-sm": "1rem", "gutter-sm": "1rem", "space-xl": "2.5rem", "space-sm": "0.5rem", "gutter": "1.5rem", "space-md": "1rem", "space-lg": "1.5rem" }, "fontFamily": { "headline-sm": ["Plus Jakarta Sans"], "headline-xl-mobile": ["Plus Jakarta Sans"], "label-lg": ["Inter"], "body-sm": ["Inter"], "body-md": ["Inter"], "label-sm": ["Inter"], "headline-lg": ["Plus Jakarta Sans"], "headline-lg-mobile": ["Plus Jakarta Sans"], "headline-xl": ["Plus Jakarta Sans"], "body-lg": ["Inter"], "label-md": ["Inter"], "headline-md": ["Plus Jakarta Sans"] }, "fontSize": { "headline-sm": ["20px", { "lineHeight": "28px", "letterSpacing": "-0.005em", "fontWeight": "600" }], "headline-xl-mobile": ["32px", { "lineHeight": "40px", "letterSpacing": "-0.02em", "fontWeight": "800" }], "label-lg": ["14px", { "lineHeight": "20px", "letterSpacing": "0.01em", "fontWeight": "600" }], "body-sm": ["13px", { "lineHeight": "20px", "fontWeight": "400" }], "body-md": ["15px", { "lineHeight": "24px", "fontWeight": "400" }], "label-sm": ["11px", { "lineHeight": "14px", "letterSpacing": "0.04em", "fontWeight": "700" }], "headline-lg": ["36px", { "lineHeight": "44px", "letterSpacing": "-0.015em", "fontWeight": "700" }], "headline-lg-mobile": ["26px", { "lineHeight": "34px", "letterSpacing": "-0.015em", "fontWeight": "700" }], "headline-xl": ["48px", { "lineHeight": "56px", "letterSpacing": "-0.02em", "fontWeight": "800" }], "body-lg": ["18px", { "lineHeight": "28px", "fontWeight": "400" }], "label-md": ["12px", { "lineHeight": "16px", "letterSpacing": "0.02em", "fontWeight": "600" }], "headline-md": ["24px", { "lineHeight": "32px", "letterSpacing": "-0.01em", "fontWeight": "700" }] } } } };</script></head><body class="bg-surface font-body-md text-on-surface antialiased selection:bg-mint-bright selection:text-on-primary-container"><aside class="fixed left-0 top-0 h-full w-72 bg-surface-container-lowest z-50 flex flex-col justify-between shadow-[0_1px_8px_rgba(0,0,0,0.04)]"><div class="flex flex-col"><div class="h-16 px-space-lg flex items-center gap-space-sm bg-surface-container-lowest"><img alt="Brand logo. - Primary color: #2dc275 - Font: plusJakartaSans - Mode: light - Roundness: rounded-md" class="h-8 w-auto object-contain" src="https://lh3.googleusercontent.com/aida/AEtjO1UicYsGuTunsUa8-glxQnyzmQ5_7Iu0CUcZvq3FYALCGXNS08m5U4UT30IM4FyOKL3Qy1G9O0yduTrUHQty-YBylEZiib5K7Aqez-u1JBP_Fy5WV69CXagWa4bi_Jtq9szvGI1_8KgeszRydaFlMetD_7XLgbRPQuxd1sAA9S8t2XIAlTzHuvvMfR2--pKlA-_sbxu1pQqsgpvdZ-2LfmHF7QqaMvyXlFXWybVmEK3gNJiNQo8f6mue0qU"><div class="flex flex-col"><span class="font-headline-sm text-headline-sm font-bold text-on-surface tracking-tight leading-none">TicketBox</span><span class="font-label-sm text-label-sm text-on-surface-variant font-semibold tracking-wider uppercase mt-0.5">Admin Console</span></div></div><div class="px-space-md py-space-sm"><div class="px-space-sm py-space-xs font-label-sm text-label-sm text-on-surface-variant font-bold uppercase tracking-wider">Điều hướng chính</div></div><nav class="flex flex-col gap-1 px-space-md" data-active-classes="bg-primary-container text-on-primary-container font-semibold shadow-sm"><a class="flex items-center gap-space-sm px-space-md py-2.5 rounded-lg text-on-surface-variant hover:bg-surface-container hover:text-on-surface transition-colors font-label-lg text-label-lg" data-path="dashboard" href="#"><span class="material-symbols-outlined text-[20px]">grid_view</span><span>Dashboard</span></a><a class="flex items-center gap-space-sm px-space-md py-2.5 rounded-lg text-on-surface-variant hover:bg-surface-container hover:text-on-surface transition-colors font-label-lg text-label-lg" data-path="quan-ly-nguoi-dung" href="#"><span class="material-symbols-outlined text-[20px]">group</span><span>Quản lý người dùng</span></a><a class="flex items-center gap-space-sm px-space-md py-2.5 rounded-lg text-on-surface-variant hover:bg-surface-container hover:text-on-surface transition-colors font-label-lg text-label-lg" data-path="quan-ly-danh-muc" href="#"><span class="material-symbols-outlined text-[20px]">category</span><span>Quản lý danh mục</span></a><a class="flex items-center gap-space-sm px-space-md py-2.5 rounded-lg text-on-surface-variant hover:bg-surface-container hover:text-on-surface transition-colors font-label-lg text-label-lg" data-path="su-kien-cho-duyet" href="#"><span class="material-symbols-outlined text-[20px]">verified</span><span>Sự kiện chờ duyệt</span></a><a class="flex items-center gap-space-sm px-space-md py-2.5 rounded-lg text-on-surface-variant hover:bg-surface-container hover:text-on-surface transition-colors font-label-lg text-label-lg" data-path="hoan-tien" href="#"><span class="material-symbols-outlined text-[20px]">currency_exchange</span><span>Hoàn tiền</span></a><a class="flex items-center gap-space-sm px-space-md py-2.5 rounded-lg text-on-surface-variant hover:bg-surface-container hover:text-on-surface transition-colors font-label-lg text-label-lg" data-path="yeu-cau-rut-tien" href="#"><span class="material-symbols-outlined text-[20px]">payments</span><span>Yêu cầu rút tiền</span></a></nav></div><div class="p-space-md"><div class="bg-surface-container-low rounded-xl p-space-md flex flex-col gap-2"><div class="flex items-center justify-between"><span class="font-label-sm text-label-sm text-on-surface-variant font-bold uppercase tracking-wider">Cổng quản trị</span><span class="h-2 w-2 rounded-full bg-primary-container animate-pulse"></span></div><p class="font-body-sm text-body-sm text-on-surface-variant">Hệ thống TicketBox SaaS v2.4 vận hành ổn định</p></div></div></aside><div class="pl-72 flex flex-col min-h-screen"><header class="fixed top-0 left-72 right-0 h-16 bg-surface/85 backdrop-blur-xl z-40 px-space-lg flex items-center justify-between shadow-[0_1px_8px_rgba(0,0,0,0.04)]"><div class="flex items-center gap-space-md w-full max-w-lg"><div class="relative w-full flex items-center"><span class="material-symbols-outlined absolute left-3 text-on-surface-variant text-[20px]">search</span><input class="w-full h-10 pl-10 pr-4 bg-surface-container-lowest text-on-surface placeholder:text-on-surface-variant font-body-sm text-body-sm rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-container transition-all" placeholder="Tìm kiếm giao dịch, sự kiện, người dùng (Ctrl + K)..." type="text"></div></div><div class="flex items-center gap-space-md"><div class="hidden sm:flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-primary/10 text-primary font-label-sm text-label-sm font-bold uppercase tracking-wide"><span class="material-symbols-outlined text-[16px]">shield_person</span><span>Admin</span></div><button aria-label="Thông báo hệ thống" class="relative p-2 rounded-lg text-on-surface-variant hover:bg-surface-container hover:text-on-surface transition-colors" type="button"><span class="material-symbols-outlined text-[22px]">notifications</span><span class="absolute top-1.5 right-1.5 w-2 h-2 rounded-full bg-urgency-coral"></span></button><div class="flex items-center gap-space-sm pl-space-sm"><img alt="Profile" class="w-8 h-8 rounded-full object-cover shadow-sm" src="https://lh3.googleusercontent.com/aida/AEtjO1UzoiGo2usCM7z-EAav6yMCw7Zu9mINgw5jGEIXa5nRxGkxmptYV_com2zT4zPFu-tOiNdlKmX0nsOsbhneUVkZoV6_KJZdfqqHUCfIrdePSx2DrUiFhOskBqXY6eDFuRstPN3D7zUD9JwZ1Bi27hTfqSDbE9oBo_CLSdfr_QYkdRzQ5CkVNG_p4BHhaNJgu8hruuzAFY_rppRFZ6Q6iD-MkBvMxRtRmJGVta7ug_Je2ekdfJytTx--yuw"><div class="hidden md:flex flex-col"><span class="font-label-md text-label-md text-on-surface font-semibold leading-tight">Quản Trị Viên</span><span class="font-label-sm text-label-sm text-on-surface-variant leading-tight">admin@ticketbox.vn</span></div></div></div></header><main class="w-full pt-16 flex-1 bg-surface px-space-lg py-space-lg"><div class="flex flex-col w-full">
+<!-- Interactive Error Toast/Notification System -->
+<div class="fixed top-20 right-8 z-50 transform translate-y-[-120%] opacity-0 transition-all duration-300 pointer-events-none flex items-start gap-space-md p-space-md rounded-xl bg-error-container text-on-error-container shadow-xl max-w-md" id="toastNotification">
+<div class="p-2 rounded-lg bg-error text-on-error shrink-0">
+<span class="material-symbols-outlined text-[20px]">block</span>
+</div>
+<div class="flex flex-col flex-1">
+<div class="flex items-center justify-between">
+<span class="font-headline-sm text-label-lg font-bold text-on-error-container">Thao tác bị từ chối</span>
+<button class="text-on-error-container/70 hover:text-on-error-container" onclick="hideToast()">
+<span class="material-symbols-outlined text-[18px]">close</span>
+</button>
+</div>
+<p class="font-body-sm text-body-sm mt-1 text-on-error-container leading-relaxed" id="toastMessage">
+        Không thể xóa danh mục đang được sử dụng (Âm nhạc &amp; Concert đang có 18 sự kiện hoạt động).
+      </p>
+</div>
+</div>
+<!-- Persistent Warning / Demo Simulation Banner -->
+<div class="w-full bg-error/10 rounded-xl p-space-md flex items-center justify-between gap-space-md mb-space-lg" id="demoWarningBanner">
+<div class="flex items-center gap-space-md">
+<div class="w-10 h-10 rounded-lg bg-error text-on-error flex items-center justify-center shrink-0 shadow-sm">
+<span class="material-symbols-outlined text-[22px]">warning</span>
+</div>
+<div class="flex flex-col">
+<span class="font-label-lg text-label-lg font-bold text-error">Quy chuẩn dữ liệu danh mục</span>
+<p class="font-body-sm text-body-sm text-on-surface-variant">
+          Hệ thống bảo vệ toàn vẹn: Các danh mục đang liên kết với sự kiện (&gt;0 sự kiện) không thể xóa trực tiếp. Hãy chuyển sự kiện sang phân loại khác trước.
+        </p>
+</div>
+</div>
+<button class="text-on-surface-variant hover:text-on-surface p-1 rounded-lg" onclick="document.getElementById('demoWarningBanner').classList.add('hidden')">
+<span class="material-symbols-outlined text-[20px]">close</span>
+</button>
+</div>
+<!-- Page Header & Action Hub -->
+<div class="flex flex-col md:flex-row md:items-center justify-between gap-space-md mb-space-xl">
+<div class="flex flex-col">
+<div class="flex items-center gap-space-sm mb-1">
+<span class="px-2.5 py-0.5 rounded-full bg-primary/10 text-primary font-label-sm text-label-sm font-bold uppercase tracking-wider">Cấu hình hệ thống</span>
+<span class="text-on-surface-variant text-label-sm">•</span>
+<span class="font-label-sm text-label-sm text-on-surface-variant">5 danh mục hoạt động</span>
+</div>
+<h1 class="font-headline-lg text-headline-lg font-bold text-on-surface tracking-tight">
+        Quản lý danh mục sự kiện
+      </h1>
+<p class="font-body-md text-body-md text-on-surface-variant mt-1">
+        Tổ chức phân cấp phân loại sự kiện biểu diễn, văn hóa &amp; giải trí trên toàn bộ sàn giao dịch TicketBox.
+      </p>
+</div>
+<div class="flex items-center gap-space-sm self-start md:self-auto">
+<button class="h-11 px-space-lg rounded-xl bg-primary-container text-on-primary-container font-label-lg text-label-lg font-semibold flex items-center gap-space-sm shadow-md hover:brightness-105 active:scale-95 transition-all" onclick="openModal('add')">
+<span class="material-symbols-outlined text-[20px]">add</span>
+<span>+ Thêm danh mục mới</span>
+</button>
+</div>
+</div>
+<!-- Metric Insight Bento Cards -->
+<div class="grid grid-cols-1 md:grid-cols-3 gap-space-md mb-space-lg">
+<div class="bg-surface-container-lowest p-space-md rounded-xl flex items-center justify-between shadow-sm">
+<div class="flex flex-col">
+<span class="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider font-bold">Tổng phân loại</span>
+<span class="font-headline-md text-headline-md font-bold text-on-surface mt-1">05</span>
+<span class="font-body-sm text-body-sm text-primary font-medium mt-0.5">100% khả dụng trên ứng dụng</span>
+</div>
+<div class="w-12 h-12 rounded-xl bg-surface-container flex items-center justify-center text-primary">
+<span class="material-symbols-outlined text-[24px]">category</span>
+</div>
+</div>
+<div class="bg-surface-container-lowest p-space-md rounded-xl flex items-center justify-between shadow-sm">
+<div class="flex flex-col">
+<span class="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider font-bold">Sự kiện đang gắn tag</span>
+<span class="font-headline-md text-headline-md font-bold text-on-surface mt-1">36</span>
+<span class="font-body-sm text-body-sm text-on-surface-variant mt-0.5">Top: Âm nhạc &amp; Concert</span>
+</div>
+<div class="w-12 h-12 rounded-xl bg-surface-container flex items-center justify-center text-secondary">
+<span class="material-symbols-outlined text-[24px]">confirmation_number</span>
+</div>
+</div>
+<div class="bg-surface-container-lowest p-space-md rounded-xl flex items-center justify-between shadow-sm">
+<div class="flex flex-col">
+<span class="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider font-bold">Danh mục rỗng (Có thể xóa)</span>
+<span class="font-headline-md text-headline-md font-bold text-urgency-coral mt-1">01</span>
+<span class="font-body-sm text-body-sm text-on-surface-variant mt-0.5">Ẩm thực &amp; Lễ hội</span>
+</div>
+<div class="w-12 h-12 rounded-xl bg-surface-container flex items-center justify-center text-urgency-coral">
+<span class="material-symbols-outlined text-[24px]">auto_delete</span>
+</div>
+</div>
+</div>
+<!-- Main Category Management Table Section -->
+<div class="bg-surface-container-lowest rounded-xl shadow-sm overflow-hidden flex flex-col">
+<!-- Filter & Search Toolbar within Table card -->
+<div class="p-space-md flex flex-col sm:flex-row items-center justify-between gap-space-md bg-surface-container-lowest">
+<div class="flex items-center gap-space-sm w-full sm:w-80 bg-surface rounded-lg px-3 py-2">
+<span class="material-symbols-outlined text-on-surface-variant text-[20px]">search</span>
+<input class="w-full bg-transparent text-on-surface font-body-sm text-body-sm placeholder:text-on-surface-variant focus:outline-none" id="categorySearch" oninput="filterCategories()" placeholder="Lọc theo tên danh mục..." type="text">
+</div>
+<div class="flex items-center gap-2 self-end sm:self-auto">
+<span class="font-label-sm text-label-sm text-on-surface-variant uppercase font-bold">Sắp xếp:</span>
+<span class="font-label-md text-label-md text-on-surface font-semibold bg-surface px-3 py-1.5 rounded-lg flex items-center gap-1">
+          Số lượng sự kiện
+          <span class="material-symbols-outlined text-[16px]">arrow_downward</span>
+</span>
+</div>
+</div>
+<!-- Table container -->
+<div class="w-full overflow-x-auto">
+<table class="w-full text-left">
+<thead>
+<tr class="bg-surface text-on-surface-variant font-label-sm text-label-sm uppercase tracking-wider">
+<th class="py-3 px-space-lg font-bold">Danh mục &amp; Biểu tượng</th>
+<th class="py-3 px-space-lg font-bold">Mô tả chi tiết</th>
+<th class="py-3 px-space-lg font-bold text-center">Sự kiện áp dụng</th>
+<th class="py-3 px-space-lg font-bold text-right">Thao tác</th>
+</tr>
+</thead>
+<tbody id="categoryTableBody">
+<!-- Row 1: Music (18 events - Deletion locked) -->
+<tr class="hover:bg-surface-container-low transition-colors group">
+<td class="py-space-md px-space-lg align-top">
+<div class="flex items-center gap-space-md">
+<div class="w-12 h-12 rounded-xl bg-primary/10 text-primary flex items-center justify-center shrink-0">
+<span class="material-symbols-outlined text-[26px]">music_note</span>
+</div>
+<div class="flex flex-col">
+<span class="font-label-lg text-label-lg font-bold text-on-surface group-hover:text-primary transition-colors">Âm nhạc &amp; Concert</span>
+<span class="font-label-sm text-label-sm text-on-surface-variant font-mono">SLUG: am-nhac-concert</span>
+</div>
+</div>
+</td>
+<td class="py-space-md px-space-lg align-top max-w-md">
+<p class="font-body-sm text-body-sm text-on-surface-variant leading-relaxed">
+                Các đêm nhạc trực tiếp, concert quy mô lớn, livehouse, festival âm nhạc đa thể loại từ pop, rock tới indie &amp; EDM.
+              </p>
+</td>
+<td class="py-space-md px-space-lg align-top text-center">
+<span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-primary/15 text-primary font-label-md text-label-md font-bold">
+<span class="w-2 h-2 rounded-full bg-primary"></span>
+                18 sự kiện
+              </span>
+</td>
+<td class="py-space-md px-space-lg align-top text-right">
+<div class="flex items-center justify-end gap-1">
+<button class="p-2 rounded-lg text-on-surface-variant hover:text-primary hover:bg-surface transition-colors" onclick="openModal('edit', 'Âm nhạc &amp; Concert', 'Các đêm nhạc trực tiếp, concert quy mô lớn, livehouse, festival âm nhạc đa thể loại từ pop, rock tới indie &amp; EDM.', 'music_note')" title="Chỉnh sửa">
+<span class="material-symbols-outlined text-[20px]">edit_note</span>
+</button>
+<button class="p-2 rounded-lg text-on-surface-variant hover:text-error hover:bg-surface transition-colors" onclick="handleDeleteCategory('Âm nhạc &amp; Concert', 18)" title="Xóa danh mục">
+<span class="material-symbols-outlined text-[20px]">delete</span>
+</button>
+</div>
+</td>
+</tr>
+<!-- Row 2: Sports (8 events - Deletion locked) -->
+<tr class="hover:bg-surface-container-low transition-colors group">
+<td class="py-space-md px-space-lg align-top">
+<div class="flex items-center gap-space-md">
+<div class="w-12 h-12 rounded-xl bg-secondary/10 text-secondary flex items-center justify-center shrink-0">
+<span class="material-symbols-outlined text-[26px]">directions_run</span>
+</div>
+<div class="flex flex-col">
+<span class="font-label-lg text-label-lg font-bold text-on-surface group-hover:text-secondary transition-colors">Thể thao &amp; Marathon</span>
+<span class="font-label-sm text-label-sm text-on-surface-variant font-mono">SLUG: the-thao-marathon</span>
+</div>
+</div>
+</td>
+<td class="py-space-md px-space-lg align-top max-w-md">
+<p class="font-body-sm text-body-sm text-on-surface-variant leading-relaxed">
+                Giải chạy việt dã, giải đấu thể thao đối kháng, bóng đá, e-sports và các giải vô địch thể chất cộng đồng.
+              </p>
+</td>
+<td class="py-space-md px-space-lg align-top text-center">
+<span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-secondary/15 text-secondary font-label-md text-label-md font-bold">
+<span class="w-2 h-2 rounded-full bg-secondary"></span>
+                8 sự kiện
+              </span>
+</td>
+<td class="py-space-md px-space-lg align-top text-right">
+<div class="flex items-center justify-end gap-1">
+<button class="p-2 rounded-lg text-on-surface-variant hover:text-primary hover:bg-surface transition-colors" onclick="openModal('edit', 'Thể thao &amp; Marathon', 'Giải chạy việt dã, giải đấu thể thao đối kháng, bóng đá, e-sports và các giải vô địch thể chất cộng đồng.', 'directions_run')" title="Chỉnh sửa">
+<span class="material-symbols-outlined text-[20px]">edit_note</span>
+</button>
+<button class="p-2 rounded-lg text-on-surface-variant hover:text-error hover:bg-surface transition-colors" onclick="handleDeleteCategory('Thể thao &amp; Marathon', 8)" title="Xóa danh mục">
+<span class="material-symbols-outlined text-[20px]">delete</span>
+</button>
+</div>
+</td>
+</tr>
+<!-- Row 3: Tech Summit (6 events - Deletion locked) -->
+<tr class="hover:bg-surface-container-low transition-colors group">
+<td class="py-space-md px-space-lg align-top">
+<div class="flex items-center gap-space-md">
+<div class="w-12 h-12 rounded-xl bg-slate-subtle/10 text-on-surface flex items-center justify-center shrink-0">
+<span class="material-symbols-outlined text-[26px]">devices</span>
+</div>
+<div class="flex flex-col">
+<span class="font-label-lg text-label-lg font-bold text-on-surface group-hover:text-primary transition-colors">Hội thảo &amp; Tech Summit</span>
+<span class="font-label-sm text-label-sm text-on-surface-variant font-mono">SLUG: hoi-thao-tech-summit</span>
+</div>
+</div>
+</td>
+<td class="py-space-md px-space-lg align-top max-w-md">
+<p class="font-body-sm text-body-sm text-on-surface-variant leading-relaxed">
+                Diễn đàn kinh doanh, hội nghị chuyên gia, các sự kiện kết nối công nghệ AI, Fintech, và đổi mới sáng tạo.
+              </p>
+</td>
+<td class="py-space-md px-space-lg align-top text-center">
+<span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-surface-container-high text-on-surface font-label-md text-label-md font-bold">
+<span class="w-2 h-2 rounded-full bg-slate-subtle"></span>
+                6 sự kiện
+              </span>
+</td>
+<td class="py-space-md px-space-lg align-top text-right">
+<div class="flex items-center justify-end gap-1">
+<button class="p-2 rounded-lg text-on-surface-variant hover:text-primary hover:bg-surface transition-colors" onclick="openModal('edit', 'Hội thảo &amp; Tech Summit', 'Diễn đàn kinh doanh, hội nghị chuyên gia, các sự kiện kết nối công nghệ AI, Fintech, và đổi mới sáng tạo.', 'devices')" title="Chỉnh sửa">
+<span class="material-symbols-outlined text-[20px]">edit_note</span>
+</button>
+<button class="p-2 rounded-lg text-on-surface-variant hover:text-error hover:bg-surface transition-colors" onclick="handleDeleteCategory('Hội thảo &amp; Tech Summit', 6)" title="Xóa danh mục">
+<span class="material-symbols-outlined text-[20px]">delete</span>
+</button>
+</div>
+</td>
+</tr>
+<!-- Row 4: Art & Expo (4 events - Deletion locked) -->
+<tr class="hover:bg-surface-container-low transition-colors group">
+<td class="py-space-md px-space-lg align-top">
+<div class="flex items-center gap-space-md">
+<div class="w-12 h-12 rounded-xl bg-tertiary/10 text-tertiary flex items-center justify-center shrink-0">
+<span class="material-symbols-outlined text-[26px]">palette</span>
+</div>
+<div class="flex flex-col">
+<span class="font-label-lg text-label-lg font-bold text-on-surface group-hover:text-tertiary transition-colors">Nghệ thuật &amp; Triển lãm</span>
+<span class="font-label-sm text-label-sm text-on-surface-variant font-mono">SLUG: nghe-thuat-trien-lam</span>
+</div>
+</div>
+</td>
+<td class="py-space-md px-space-lg align-top max-w-md">
+<p class="font-body-sm text-body-sm text-on-surface-variant leading-relaxed">
+                Phòng trưng bày nghệ thuật thị giác, triển lãm điêu khắc, hội chợ sách, kịch nói và nhạc kịch kén khán giả.
+              </p>
+</td>
+<td class="py-space-md px-space-lg align-top text-center">
+<span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-surface-container-high text-on-surface font-label-md text-label-md font-bold">
+<span class="w-2 h-2 rounded-full bg-tertiary"></span>
+                4 sự kiện
+              </span>
+</td>
+<td class="py-space-md px-space-lg align-top text-right">
+<div class="flex items-center justify-end gap-1">
+<button class="p-2 rounded-lg text-on-surface-variant hover:text-primary hover:bg-surface transition-colors" onclick="openModal('edit', 'Nghệ thuật &amp; Triển lãm', 'Phòng trưng bày nghệ thuật thị giác, triển lãm điêu khắc, hội chợ sách, kịch nói và nhạc kịch kén khán giả.', 'palette')" title="Chỉnh sửa">
+<span class="material-symbols-outlined text-[20px]">edit_note</span>
+</button>
+<button class="p-2 rounded-lg text-on-surface-variant hover:text-error hover:bg-surface transition-colors" onclick="handleDeleteCategory('Nghệ thuật &amp; Triển lãm', 4)" title="Xóa danh mục">
+<span class="material-symbols-outlined text-[20px]">delete</span>
+</button>
+</div>
+</td>
+</tr>
+<!-- Row 5: Food & Festival (0 events - Deletion allowed) -->
+<tr class="hover:bg-surface-container-low transition-colors group bg-surface-container-lowest" id="row-food">
+<td class="py-space-md px-space-lg align-top">
+<div class="flex items-center gap-space-md">
+<div class="w-12 h-12 rounded-xl bg-urgency-coral/10 text-urgency-coral flex items-center justify-center shrink-0">
+<span class="material-symbols-outlined text-[26px]">restaurant</span>
+</div>
+<div class="flex flex-col">
+<span class="font-label-lg text-label-lg font-bold text-on-surface group-hover:text-urgency-coral transition-colors">Ẩm thực &amp; Lễ hội văn hóa</span>
+<span class="font-label-sm text-label-sm text-on-surface-variant font-mono">SLUG: am-thuc-le-hoi-van-hoa</span>
+</div>
+</div>
+</td>
+<td class="py-space-md px-space-lg align-top max-w-md">
+<p class="font-body-sm text-body-sm text-on-surface-variant leading-relaxed">
+                Hội chợ ẩm thực đường phố quốc tế, ngày hội bia thủ công, lễ hội carnival và các sự kiện trải nghiệm văn hóa đa quốc gia.
+              </p>
+</td>
+<td class="py-space-md px-space-lg align-top text-center">
+<span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-surface-variant text-sold-out-gray font-label-md text-label-md font-bold">
+<span class="w-2 h-2 rounded-full bg-sold-out-gray"></span>
+                0 sự kiện
+              </span>
+</td>
+<td class="py-space-md px-space-lg align-top text-right">
+<div class="flex items-center justify-end gap-1">
+<button class="p-2 rounded-lg text-on-surface-variant hover:text-primary hover:bg-surface transition-colors" onclick="openModal('edit', 'Ẩm thực &amp; Lễ hội văn hóa', 'Hội chợ ẩm thực đường phố quốc tế, ngày hội bia thủ công, lễ hội carnival và các sự kiện trải nghiệm văn hóa đa quốc gia.', 'restaurant')" title="Chỉnh sửa">
+<span class="material-symbols-outlined text-[20px]">edit_note</span>
+</button>
+<button class="p-2 rounded-lg text-error hover:bg-error-container transition-colors" onclick="confirmDirectDelete('Ẩm thực &amp; Lễ hội văn hóa', 'row-food')" title="Xóa danh mục trống">
+<span class="material-symbols-outlined text-[20px]">delete_forever</span>
+</button>
+</div>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+<!-- Table Footer / Pagination metadata -->
+<div class="px-space-lg py-space-md bg-surface-container-low flex items-center justify-between">
+<span class="font-label-sm text-label-sm text-on-surface-variant">Hiển thị 5 / 5 danh mục toàn hệ thống</span>
+<div class="flex items-center gap-space-xs font-label-sm text-label-sm text-on-surface-variant">
+<span>Đồng bộ CDN TicketBox</span>
+<span class="w-2 h-2 rounded-full bg-primary-container"></span>
+</div>
+</div>
+</div>
+<!-- Showcase Preview Cards (Visual Richness Element) -->
+<div class="mt-space-xl flex flex-col gap-space-md">
+<div class="flex items-center justify-between">
+<div class="flex flex-col">
+<span class="font-headline-sm text-headline-sm font-bold text-on-surface">Minh họa giao diện ứng dụng</span>
+<span class="font-body-sm text-body-sm text-on-surface-variant">Hình ảnh banner thực tế của các danh mục chính trên ứng dụng di động TicketBox</span>
+</div>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-space-md">
+<!-- Card 1 -->
+<div class="group relative rounded-xl overflow-hidden shadow-sm bg-surface-container-lowest">
+<div class="h-44 w-full relative overflow-hidden">
+<img class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" data-alt="High energy music concert arena crowd with laser beams in emerald green and neon mint, huge electronic music stage visual effects, high contrast commercial lighting, professional photography" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBbQjX6cffKo0Lf5kUXzlXhByRMTwrptgPkXAuP3j7ZKRZA5PgStHIjgI3VXOBAR4A5QkgDK8FYycWMhQ29jnFIDJdRc3Uc6Gn0BVkq2gWMCcaW2y_yo8srfykZcbp5GJhui6ClfhjBV-tcWAq-21urEVXKoZNSl1Que8zcxLfrFDpxoq1-X6PkdSXkLU4i97QDffduewY0yJDa3wRKDkLoPp_S6YEJ_g3vpV9-njm3cSeGDy3p_H0E">
+<div class="absolute inset-0 bg-gradient-to-t from-slate-surface via-slate-surface/40 to-transparent"></div>
+<div class="absolute bottom-3 left-4 right-4 flex items-center justify-between">
+<span class="font-headline-sm text-label-lg font-bold text-surface-container-lowest">Âm nhạc &amp; Concert</span>
+<span class="px-2 py-0.5 rounded-full bg-primary-container text-on-primary-container font-label-sm text-label-sm font-bold">18 Sự kiện</span>
+</div>
+</div>
+<div class="p-space-md flex items-center justify-between">
+<span class="font-body-sm text-body-sm text-on-surface-variant">Doanh số vé tháng này</span>
+<span class="font-label-lg text-label-lg font-bold text-primary">12.480 vé</span>
+</div>
+</div>
+<!-- Card 2 -->
+<div class="group relative rounded-xl overflow-hidden shadow-sm bg-surface-container-lowest">
+<div class="h-44 w-full relative overflow-hidden">
+<img class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" data-alt="Atmospheric city night marathon running event with thousands of energetic athletes in modern sportswear under bright stadium LED lights with sharp green and white brand highlights" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAgp31Puh9XGoiwZUD5YFlSu9fndBoFwNeSsSiK8dG77xBeoLCriT8CYWCJ2ru_579846VyUazluU5gSD-wj5kRphmPQtkYABQoO804xEIGsroNQ8LN39MwH-x82vMSy0r2_nkr32zeUVzUIUYZsZaZ-lM-4qGt3TDbnCTfOb6X4f8LdtB_b7iin2WX84We7t7tqeyKvxcPc0WyPXYJOxJCDP2LxxJW7FjorRO1TnaatUV8e3wxsG_J">
+<div class="absolute inset-0 bg-gradient-to-t from-slate-surface via-slate-surface/40 to-transparent"></div>
+<div class="absolute bottom-3 left-4 right-4 flex items-center justify-between">
+<span class="font-headline-sm text-label-lg font-bold text-surface-container-lowest">Thể thao &amp; Marathon</span>
+<span class="px-2 py-0.5 rounded-full bg-secondary-container text-on-secondary-container font-label-sm text-label-sm font-bold">8 Sự kiện</span>
+</div>
+</div>
+<div class="p-space-md flex items-center justify-between">
+<span class="font-body-sm text-body-sm text-on-surface-variant">Doanh số vé tháng này</span>
+<span class="font-label-lg text-label-lg font-bold text-secondary">3.850 bib</span>
+</div>
+</div>
+<!-- Card 3 -->
+<div class="group relative rounded-xl overflow-hidden shadow-sm bg-surface-container-lowest">
+<div class="h-44 w-full relative overflow-hidden">
+<img class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" data-alt="Futuristic global tech summit auditorium with visionary keynote speakers, holographic ambient displays, emerald and deep slate lighting aesthetic, sharp business architecture" src="https://lh3.googleusercontent.com/aida-public/AB6AXuA2rD3XOUUUYuK45_D1W7ZUGxGxSdS6S8-raYE2YAAufoNpuiQU28NhjGLIb4HxZPjNcNjMuXldeT0QtIFMWlh16lnErelnjTete3iRDZmXZaoJligO4DxbF7Q482SHQ7uFV8V-yEEYN9i5ZhL1iiYD2XRF5Z5ZqW0aaJ5Rb-qaqekpX_IyW_O5JTAyteOvxDb6oL68rVhxUS21Ixx0BGuMR1pkwkWESvxueDlpvZUOXnwQ5yGIV2_U">
+<div class="absolute inset-0 bg-gradient-to-t from-slate-surface via-slate-surface/40 to-transparent"></div>
+<div class="absolute bottom-3 left-4 right-4 flex items-center justify-between">
+<span class="font-headline-sm text-label-lg font-bold text-surface-container-lowest">Hội thảo &amp; Tech Summit</span>
+<span class="px-2 py-0.5 rounded-full bg-surface-container-high text-on-surface font-label-sm text-label-sm font-bold">6 Sự kiện</span>
+</div>
+</div>
+<div class="p-space-md flex items-center justify-between">
+<span class="font-body-sm text-body-sm text-on-surface-variant">Doanh số vé tháng này</span>
+<span class="font-label-lg text-label-lg font-bold text-on-surface">1.220 vé</span>
+</div>
+</div>
+</div>
+</div>
+<!-- MODAL / DRAWER: Thêm / Chỉnh sửa danh mục -->
+<div class="fixed inset-0 z-50 hidden" id="categoryModal">
+<!-- Backdrop with blur -->
+<div class="absolute inset-0 bg-slate-surface/60 backdrop-blur-sm transition-opacity" onclick="closeModal()"></div>
+<div class="absolute inset-y-0 right-0 max-w-lg w-full bg-surface-container-lowest shadow-2xl flex flex-col justify-between transform transition-transform duration-300">
+<!-- Modal Header -->
+<div class="p-space-lg bg-surface-container-lowest flex items-center justify-between">
+<div class="flex items-center gap-space-sm">
+<div class="w-10 h-10 rounded-xl bg-primary/10 text-primary flex items-center justify-center">
+<span class="material-symbols-outlined text-[22px]" id="modalHeaderIcon">category</span>
+</div>
+<div class="flex flex-col">
+<h3 class="font-headline-sm text-headline-sm font-bold text-on-surface" id="modalTitle">Thêm danh mục mới</h3>
+<span class="font-label-sm text-label-sm text-on-surface-variant">Thiết lập tham số hiển thị</span>
+</div>
+</div>
+<button class="p-2 rounded-lg text-on-surface-variant hover:text-on-surface hover:bg-surface-container transition-colors" onclick="closeModal()">
+<span class="material-symbols-outlined text-[22px]">close</span>
+</button>
+</div>
+<!-- Modal Body -->
+<div class="p-space-lg flex-1 overflow-y-auto flex flex-col gap-space-lg">
+<!-- Field 1: Category Name -->
+<div class="flex flex-col gap-1.5">
+<label class="font-label-md text-label-md font-bold text-on-surface" for="catNameInput">
+            Tên danh mục <span class="text-error">*</span>
+</label>
+<input class="w-full h-11 px-space-md bg-surface text-on-surface rounded-xl font-body-md text-body-md focus:outline-none focus:bg-surface-container-lowest focus:ring-2 focus:ring-primary-container transition-all" id="catNameInput" placeholder="Ví dụ: Triển lãm sách nghệ thuật..." type="text">
+<span class="font-label-sm text-label-sm text-on-surface-variant">Tên sẽ hiển thị trực tiếp trên trang chủ và bộ lọc tìm kiếm</span>
+</div>
+<!-- Field 2: Icon Selection -->
+<div class="flex flex-col gap-1.5">
+<label class="font-label-md text-label-md font-bold text-on-surface">Biểu tượng phân loại</label>
+<div class="grid grid-cols-5 gap-2" id="iconPicker">
+<button class="icon-btn p-3 rounded-xl bg-primary/15 text-primary flex items-center justify-center hover:bg-primary/20 transition-colors" onclick="selectIcon('music_note', this)" type="button">
+<span class="material-symbols-outlined text-[22px]">music_note</span>
+</button>
+<button class="icon-btn p-3 rounded-xl bg-surface text-on-surface-variant flex items-center justify-center hover:bg-surface-container transition-colors" onclick="selectIcon('directions_run', this)" type="button">
+<span class="material-symbols-outlined text-[22px]">directions_run</span>
+</button>
+<button class="icon-btn p-3 rounded-xl bg-surface text-on-surface-variant flex items-center justify-center hover:bg-surface-container transition-colors" onclick="selectIcon('devices', this)" type="button">
+<span class="material-symbols-outlined text-[22px]">devices</span>
+</button>
+<button class="icon-btn p-3 rounded-xl bg-surface text-on-surface-variant flex items-center justify-center hover:bg-surface-container transition-colors" onclick="selectIcon('palette', this)" type="button">
+<span class="material-symbols-outlined text-[22px]">palette</span>
+</button>
+<button class="icon-btn p-3 rounded-xl bg-surface text-on-surface-variant flex items-center justify-center hover:bg-surface-container transition-colors" onclick="selectIcon('theater_comedy', this)" type="button">
+<span class="material-symbols-outlined text-[22px]">theater_comedy</span>
+</button>
+</div>
+</div>
+<!-- Field 3: Description -->
+<div class="flex flex-col gap-1.5">
+<label class="font-label-md text-label-md font-bold text-on-surface" for="catDescInput">
+            Mô tả chi tiết <span class="text-error">*</span>
+</label>
+<textarea class="w-full p-space-md bg-surface text-on-surface rounded-xl font-body-md text-body-md focus:outline-none focus:bg-surface-container-lowest focus:ring-2 focus:ring-primary-container transition-all resize-none" id="catDescInput" placeholder="Nhập tóm tắt phạm vi sự kiện thuộc danh mục này..." rows="4"></textarea>
+<span class="font-label-sm text-label-sm text-on-surface-variant">Tối đa 250 ký tự</span>
+</div>
+<!-- System Tips Card -->
+<div class="p-space-md rounded-xl bg-surface-container-low flex items-start gap-space-sm">
+<span class="material-symbols-outlined text-primary text-[20px] shrink-0 mt-0.5">info</span>
+<p class="font-body-sm text-body-sm text-on-surface-variant leading-relaxed">
+            Danh mục sau khi kích hoạt sẽ tự động sinh đường dẫn URL SEO tĩnh (slug) theo cấu trúc chuẩn tiếng Việt không dấu.
+          </p>
+</div>
+</div>
+<!-- Modal Footer CTA -->
+<div class="p-space-lg bg-surface-container-low flex items-center justify-end gap-space-md">
+<button class="h-11 px-space-lg rounded-xl bg-surface text-on-surface font-label-lg text-label-lg font-semibold hover:bg-surface-container transition-colors" onclick="closeModal()" type="button">
+          Hủy
+        </button>
+<button class="h-11 px-space-xl rounded-xl bg-primary-container text-on-primary-container font-label-lg text-label-lg font-semibold shadow-md hover:brightness-105 active:scale-95 transition-all flex items-center gap-2" onclick="saveCategory()" type="button">
+<span class="material-symbols-outlined text-[20px]">save</span>
+<span>Lưu danh mục</span>
+</button>
+</div>
+</div>
+</div>
+<!-- POPUP XÁC NHẬN XÓA (Trường hợp 0 sự kiện) -->
+<div class="fixed inset-0 z-50 hidden flex items-center justify-center p-4" id="deleteConfirmModal">
+<div class="absolute inset-0 bg-slate-surface/60 backdrop-blur-sm transition-opacity" onclick="closeDeleteConfirm()"></div>
+<div class="relative bg-surface-container-lowest rounded-2xl p-space-xl shadow-2xl max-w-md w-full flex flex-col items-center text-center">
+<div class="w-16 h-16 rounded-2xl bg-error/15 text-error flex items-center justify-center mb-space-md">
+<span class="material-symbols-outlined text-[36px]">delete_forever</span>
+</div>
+<h3 class="font-headline-sm text-headline-sm font-bold text-on-surface">Xóa vĩnh viễn danh mục?</h3>
+<p class="font-body-md text-body-md text-on-surface-variant mt-2 mb-space-xl" id="deleteConfirmText">
+        Bạn có chắc muốn xóa phân loại <strong id="deleteTargetName">Ẩm thực &amp; Lễ hội văn hóa</strong>? Danh mục này đang có 0 sự kiện nên thao tác này là hợp lệ.
+      </p>
+<div class="flex items-center gap-space-md w-full">
+<button class="flex-1 h-11 rounded-xl bg-surface-container text-on-surface font-label-lg text-label-lg font-semibold hover:bg-surface-container-high transition-colors" onclick="closeDeleteConfirm()">
+          Hủy bỏ
+        </button>
+<button class="flex-1 h-11 rounded-xl bg-error text-on-error font-label-lg text-label-lg font-semibold shadow-md hover:brightness-110 active:scale-95 transition-all" onclick="executeDirectDelete()">
+          Xác nhận xóa
+        </button>
+</div>
+</div>
+</div>
+</div>
+<script>
+  let targetRowIdToDelete = null;
+
+  function showToast(message) {
+    const toast = document.getElementById('toastNotification');
+    const msgEl = document.getElementById('toastMessage');
+    if (msgEl && message) {
+      msgEl.innerText = message;
+    }
+    toast.classList.remove('translate-y-[-120%]', 'opacity-0', 'pointer-events-none');
+    toast.classList.add('translate-y-0', 'opacity-100');
+
+    // Auto dismiss after 4 seconds
+    setTimeout(() => {
+      hideToast();
+    }, 4500);
+  }
+
+  function hideToast() {
+    const toast = document.getElementById('toastNotification');
+    toast.classList.add('translate-y-[-120%]', 'opacity-0', 'pointer-events-none');
+    toast.classList.remove('translate-y-0', 'opacity-100');
+  }
+
+  function handleDeleteCategory(categoryName, eventCount) {
+    if (eventCount > 0) {
+      // Trigger error simulation
+      showToast(`Không thể xóa danh mục đang được sử dụng (${categoryName} đang có ${eventCount} sự kiện hoạt động).`);
+    }
+  }
+
+  function confirmDirectDelete(categoryName, rowId) {
+    targetRowIdToDelete = rowId;
+    document.getElementById('deleteTargetName').innerText = categoryName;
+    const modal = document.getElementById('deleteConfirmModal');
+    modal.classList.remove('hidden');
+  }
+
+  function closeDeleteConfirm() {
+    const modal = document.getElementById('deleteConfirmModal');
+    modal.classList.add('hidden');
+    targetRowIdToDelete = null;
+  }
+
+  function executeDirectDelete() {
+    if (targetRowIdToDelete) {
+      const row = document.getElementById(targetRowIdToDelete);
+      if (row) {
+        row.remove();
+      }
+    }
+    closeDeleteConfirm();
+    
+    // Quick success toast reusing notification container with friendly green state
+    const toast = document.getElementById('toastNotification');
+    const msgEl = document.getElementById('toastMessage');
+    msgEl.innerText = 'Đã xóa thành công danh mục trống khỏi hệ thống TicketBox.';
+    toast.classList.remove('translate-y-[-120%]', 'opacity-0', 'pointer-events-none', 'bg-error-container', 'text-on-error-container');
+    toast.classList.add('translate-y-0', 'opacity-100', 'bg-mint-bright', 'text-on-primary-container');
+
+    setTimeout(() => {
+      hideToast();
+      // restore styles
+      setTimeout(() => {
+        toast.classList.remove('bg-mint-bright', 'text-on-primary-container');
+        toast.classList.add('bg-error-container', 'text-on-error-container');
+      }, 500);
+    }, 3000);
+  }
+
+  function openModal(mode, name = '', desc = '', icon = 'category') {
+    const modal = document.getElementById('categoryModal');
+    const title = document.getElementById('modalTitle');
+    const nameInput = document.getElementById('catNameInput');
+    const descInput = document.getElementById('catDescInput');
+    
+    if (mode === 'edit') {
+      title.innerText = 'Chỉnh sửa danh mục';
+      nameInput.value = name;
+      descInput.value = desc;
+    } else {
+      title.innerText = 'Thêm danh mục mới';
+      nameInput.value = '';
+      descInput.value = '';
+    }
+    modal.classList.remove('hidden');
+  }
+
+  function closeModal() {
+    const modal = document.getElementById('categoryModal');
+    modal.classList.add('hidden');
+  }
+
+  function selectIcon(iconName, btn) {
+    document.querySelectorAll('.icon-btn').forEach(b => {
+      b.classList.remove('bg-primary/15', 'text-primary');
+      b.classList.add('bg-surface', 'text-on-surface-variant');
+    });
+    btn.classList.add('bg-primary/15', 'text-primary');
+    btn.classList.remove('bg-surface', 'text-on-surface-variant');
+    document.getElementById('modalHeaderIcon').innerText = iconName;
+  }
+
+  function saveCategory() {
+    const nameInput = document.getElementById('catNameInput');
+    if (!nameInput.value.trim()) {
+      alert('Vui lòng nhập tên danh mục sự kiện');
+      nameInput.focus();
+      return;
+    }
+    closeModal();
+    const toast = document.getElementById('toastNotification');
+    const msgEl = document.getElementById('toastMessage');
+    msgEl.innerText = `Đã lưu danh mục "${nameInput.value.trim()}" thành công vào bộ máy phát vé.`;
+    toast.classList.remove('translate-y-[-120%]', 'opacity-0', 'pointer-events-none', 'bg-error-container', 'text-on-error-container');
+    toast.classList.add('translate-y-0', 'opacity-100', 'bg-mint-bright', 'text-on-primary-container');
+    
+    setTimeout(() => {
+      hideToast();
+      setTimeout(() => {
+        toast.classList.remove('bg-mint-bright', 'text-on-primary-container');
+        toast.classList.add('bg-error-container', 'text-on-error-container');
+      }, 500);
+    }, 3000);
+  }
+
+  function filterCategories() {
+    const q = document.getElementById('categorySearch').value.toLowerCase();
+    const rows = document.querySelectorAll('#categoryTableBody tr');
+    rows.forEach(r => {
+      const text = r.innerText.toLowerCase();
+      r.style.display = text.includes(q) ? '' : 'none';
+    });
+  }
+</script></main></div></body></html>

@@ -14,6 +14,11 @@ import { UserDetailPage as OrganizerUserDetailPage } from '../features/organizer
 
 // Admin Pages & Layout
 import { AdminLayout } from '../features/admin/pages/AdminLayout'
+import { AdminPage } from '../features/admin/pages/AdminPage'
+import { WithdrawalsPage } from '../features/admin/pages/WithdrawalsPage'
+import { WithdrawalDetailPage } from '../features/admin/pages/WithdrawalDetailPage'
+import { RefundEventsPage } from '../features/admin/pages/RefundEventsPage'
+import { RefundDetailPage } from '../features/admin/pages/RefundDetailPage'
 import { UsersPage } from '../features/admin/pages/UsersPage'
 import { EventCategoriesPage } from '../features/admin/pages/EventCategoriesPage'
 import { PendingEventsPage } from '../features/admin/pages/PendingEventsPage'
@@ -82,6 +87,11 @@ export function AppRouter() {
         <Route element={<AdminRoute />}>
           <Route path="/admin" element={<AdminLayout />}>
             <Route index element={<Navigate to="events/pending" replace />} />
+            <Route path="statistics" element={<AdminPage />} />
+            <Route path="withdrawals" element={<WithdrawalsPage />} />
+            <Route path="withdrawals/:requestId" element={<WithdrawalDetailPage />} />
+            <Route path="refunds" element={<RefundEventsPage />} />
+            <Route path="refunds/:eventId" element={<RefundDetailPage />} />
             <Route path="users" element={<UsersPage />} />
             <Route path="event-categories" element={<EventCategoriesPage />} />
             <Route path="events/pending" element={<PendingEventsPage />} />

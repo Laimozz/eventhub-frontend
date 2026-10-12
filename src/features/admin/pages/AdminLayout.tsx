@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { NavLink, Outlet } from 'react-router'
-import { Users, Tags, BadgeCheck, Ticket, Menu, LogOut, User } from 'lucide-react'
+import { Users, Tags, BadgeCheck, Ticket, Menu, LogOut, User, BarChart3, Wallet, RotateCcw } from 'lucide-react'
 import { useAuth } from '../../auth/hooks/useAuth'
 import { errorMessage } from '../api/admin-api'
 import styles from './Admin.module.css'
@@ -20,6 +20,9 @@ export function AdminLayout() {
       <div className={styles.brand}><Ticket /><div>EventHub<small>ADMIN CONSOLE</small></div></div>
       <p className={styles.eyebrow}>ĐIỀU HƯỚNG CHÍNH</p>
       <nav aria-label="Menu Admin">{[
+        { to: '/admin/statistics', title: 'Thống kê tổng quan', Icon: BarChart3 },
+        { to: '/admin/withdrawals', title: 'Yêu cầu rút tiền', Icon: Wallet },
+        { to: '/admin/refunds', title: 'Sự kiện đã hủy', Icon: RotateCcw },
         { to: '/admin/users', title: 'Quản lý người dùng', Icon: Users },
         { to: '/admin/event-categories', title: 'Quản lý danh mục', Icon: Tags },
         { to: '/admin/events/pending', title: 'Sự kiện chờ duyệt', Icon: BadgeCheck },

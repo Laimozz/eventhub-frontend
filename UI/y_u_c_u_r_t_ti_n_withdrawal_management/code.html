@@ -1,0 +1,843 @@
+<!DOCTYPE html><html lang="vi"><head><meta charset="utf-8"><meta content="width=device-width, initial-scale=1.0" name="viewport"><meta content="web_dashboard" name="shell-type"><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&amp;family=Plus+Jakarta+Sans:wght@600;700;800&amp;display=swap" rel="stylesheet"><link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"><style>@layer base{html,body{margin:0;padding:0;}body{overscroll-behavior:none;}main>:first-child{margin-top:0!important;}main>:last-child{margin-bottom:0!important;}}::-webkit-scrollbar{display:none;}</style><script src="https://cdn.tailwindcss.com"></script><script id="tailwind-config">tailwind.config = { darkMode: "class", theme: { extend: { "colors": { "on-secondary-fixed-variant": "#004c6e", "surface-tint": "#006d3d", "primary": "#006d3d", "surface-container-low": "#f2f4f6", "surface-container": "#eceef0", "surface-variant": "#e1e2e5", "surface-dim": "#d8dadd", "tertiary-fixed": "#6ffbbe", "slate-surface": "#1E2329", "primary-fixed": "#72fca9", "error": "#ba1a1a", "surface": "#f8f9fc", "on-error": "#ffffff", "on-secondary-fixed": "#001e2f", "surface-light": "#F8FAFC", "background": "#f8f9fc", "error-container": "#ffdad6", "secondary": "#006591", "outline": "#6d7b6f", "on-surface": "#191c1e", "surface-bright": "#f8f9fc", "surface-container-highest": "#e1e2e5", "on-tertiary": "#ffffff", "inverse-primary": "#53df8f", "on-primary-fixed": "#00210f", "secondary-fixed-dim": "#89ceff", "inverse-surface": "#2e3133", "outline-variant": "#bccabc", "on-tertiary-fixed-variant": "#005236", "surface-container-high": "#e7e8eb", "on-surface-variant": "#3d4a3f", "primary-container": "#2dc275", "on-primary-fixed-variant": "#00522c", "on-background": "#191c1e", "on-error-container": "#93000a", "on-secondary-container": "#004666", "on-tertiary-fixed": "#002113", "on-primary": "#ffffff", "tertiary": "#006c49", "on-tertiary-container": "#004930", "inverse-on-surface": "#eff1f3", "urgency-coral": "#FF4D4D", "mint-bright": "#A7F3D0", "sold-out-gray": "#94A3B8", "secondary-fixed": "#c9e6ff", "primary-fixed-dim": "#53df8f", "on-primary-container": "#004927", "secondary-container": "#39b8fd", "surface-container-lowest": "#ffffff", "tertiary-container": "#24c188", "on-secondary": "#ffffff", "tertiary-fixed-dim": "#4edea3", "slate-subtle": "#333C48" }, "borderRadius": { "DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px" }, "spacing": { "space-xs": "0.25rem", "margin": "2rem", "margin-sm": "1rem", "gutter-sm": "1rem", "space-xl": "2.5rem", "space-sm": "0.5rem", "gutter": "1.5rem", "space-md": "1rem", "space-lg": "1.5rem" }, "fontFamily": { "headline-sm": ["Plus Jakarta Sans"], "headline-xl-mobile": ["Plus Jakarta Sans"], "label-lg": ["Inter"], "body-sm": ["Inter"], "body-md": ["Inter"], "label-sm": ["Inter"], "headline-lg": ["Plus Jakarta Sans"], "headline-lg-mobile": ["Plus Jakarta Sans"], "headline-xl": ["Plus Jakarta Sans"], "body-lg": ["Inter"], "label-md": ["Inter"], "headline-md": ["Plus Jakarta Sans"] }, "fontSize": { "headline-sm": ["20px", { "lineHeight": "28px", "letterSpacing": "-0.005em", "fontWeight": "600" }], "headline-xl-mobile": ["32px", { "lineHeight": "40px", "letterSpacing": "-0.02em", "fontWeight": "800" }], "label-lg": ["14px", { "lineHeight": "20px", "letterSpacing": "0.01em", "fontWeight": "600" }], "body-sm": ["13px", { "lineHeight": "20px", "fontWeight": "400" }], "body-md": ["15px", { "lineHeight": "24px", "fontWeight": "400" }], "label-sm": ["11px", { "lineHeight": "14px", "letterSpacing": "0.04em", "fontWeight": "700" }], "headline-lg": ["36px", { "lineHeight": "44px", "letterSpacing": "-0.015em", "fontWeight": "700" }], "headline-lg-mobile": ["26px", { "lineHeight": "34px", "letterSpacing": "-0.015em", "fontWeight": "700" }], "headline-xl": ["48px", { "lineHeight": "56px", "letterSpacing": "-0.02em", "fontWeight": "800" }], "body-lg": ["18px", { "lineHeight": "28px", "fontWeight": "400" }], "label-md": ["12px", { "lineHeight": "16px", "letterSpacing": "0.02em", "fontWeight": "600" }], "headline-md": ["24px", { "lineHeight": "32px", "letterSpacing": "-0.01em", "fontWeight": "700" }] } } } };</script></head><body class="bg-surface font-body-md text-on-surface antialiased selection:bg-mint-bright selection:text-on-primary-container"><aside class="fixed left-0 top-0 h-full w-72 bg-surface-container-lowest z-50 flex flex-col justify-between shadow-[0_1px_8px_rgba(0,0,0,0.04)]"><div class="flex flex-col"><div class="h-16 px-space-lg flex items-center gap-space-sm bg-surface-container-lowest"><img alt="Brand logo. - Primary color: #2dc275 - Font: plusJakartaSans - Mode: light - Roundness: rounded-md" class="h-8 w-auto object-contain" src="https://lh3.googleusercontent.com/aida/AEtjO1UicYsGuTunsUa8-glxQnyzmQ5_7Iu0CUcZvq3FYALCGXNS08m5U4UT30IM4FyOKL3Qy1G9O0yduTrUHQty-YBylEZiib5K7Aqez-u1JBP_Fy5WV69CXagWa4bi_Jtq9szvGI1_8KgeszRydaFlMetD_7XLgbRPQuxd1sAA9S8t2XIAlTzHuvvMfR2--pKlA-_sbxu1pQqsgpvdZ-2LfmHF7QqaMvyXlFXWybVmEK3gNJiNQo8f6mue0qU"><div class="flex flex-col"><span class="font-headline-sm text-headline-sm font-bold text-on-surface tracking-tight leading-none">TicketBox</span><span class="font-label-sm text-label-sm text-on-surface-variant font-semibold tracking-wider uppercase mt-0.5">Admin Console</span></div></div><div class="px-space-md py-space-sm"><div class="px-space-sm py-space-xs font-label-sm text-label-sm text-on-surface-variant font-bold uppercase tracking-wider">Điều hướng chính</div></div><nav class="flex flex-col gap-1 px-space-md" data-active-classes="bg-primary-container text-on-primary-container font-semibold shadow-sm"><a class="flex items-center gap-space-sm px-space-md py-2.5 rounded-lg text-on-surface-variant hover:bg-surface-container hover:text-on-surface transition-colors font-label-lg text-label-lg" data-path="dashboard" href="#"><span class="material-symbols-outlined text-[20px]">grid_view</span><span>Dashboard</span></a><a class="flex items-center gap-space-sm px-space-md py-2.5 rounded-lg text-on-surface-variant hover:bg-surface-container hover:text-on-surface transition-colors font-label-lg text-label-lg" data-path="quan-ly-nguoi-dung" href="#"><span class="material-symbols-outlined text-[20px]">group</span><span>Quản lý người dùng</span></a><a class="flex items-center gap-space-sm px-space-md py-2.5 rounded-lg text-on-surface-variant hover:bg-surface-container hover:text-on-surface transition-colors font-label-lg text-label-lg" data-path="quan-ly-danh-muc" href="#"><span class="material-symbols-outlined text-[20px]">category</span><span>Quản lý danh mục</span></a><a class="flex items-center gap-space-sm px-space-md py-2.5 rounded-lg text-on-surface-variant hover:bg-surface-container hover:text-on-surface transition-colors font-label-lg text-label-lg" data-path="su-kien-cho-duyet" href="#"><span class="material-symbols-outlined text-[20px]">verified</span><span>Sự kiện chờ duyệt</span></a><a class="flex items-center gap-space-sm px-space-md py-2.5 rounded-lg text-on-surface-variant hover:bg-surface-container hover:text-on-surface transition-colors font-label-lg text-label-lg" data-path="hoan-tien" href="#"><span class="material-symbols-outlined text-[20px]">currency_exchange</span><span>Hoàn tiền</span></a><a class="flex items-center gap-space-sm px-space-md py-2.5 rounded-lg text-on-surface-variant hover:bg-surface-container hover:text-on-surface transition-colors font-label-lg text-label-lg" data-path="yeu-cau-rut-tien" href="#"><span class="material-symbols-outlined text-[20px]">payments</span><span>Yêu cầu rút tiền</span></a></nav></div><div class="p-space-md"><div class="bg-surface-container-low rounded-xl p-space-md flex flex-col gap-2"><div class="flex items-center justify-between"><span class="font-label-sm text-label-sm text-on-surface-variant font-bold uppercase tracking-wider">Cổng quản trị</span><span class="h-2 w-2 rounded-full bg-primary-container animate-pulse"></span></div><p class="font-body-sm text-body-sm text-on-surface-variant">Hệ thống TicketBox SaaS v2.4 vận hành ổn định</p></div></div></aside><div class="pl-72 flex flex-col min-h-screen"><header class="fixed top-0 left-72 right-0 h-16 bg-surface/85 backdrop-blur-xl z-40 px-space-lg flex items-center justify-between shadow-[0_1px_8px_rgba(0,0,0,0.04)]"><div class="flex items-center gap-space-md w-full max-w-lg"><div class="relative w-full flex items-center"><span class="material-symbols-outlined absolute left-3 text-on-surface-variant text-[20px]">search</span><input class="w-full h-10 pl-10 pr-4 bg-surface-container-lowest text-on-surface placeholder:text-on-surface-variant font-body-sm text-body-sm rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-container transition-all" placeholder="Tìm kiếm giao dịch, sự kiện, người dùng (Ctrl + K)..." type="text"></div></div><div class="flex items-center gap-space-md"><div class="hidden sm:flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-primary/10 text-primary font-label-sm text-label-sm font-bold uppercase tracking-wide"><span class="material-symbols-outlined text-[16px]">shield_person</span><span>Admin</span></div><button aria-label="Thông báo hệ thống" class="relative p-2 rounded-lg text-on-surface-variant hover:bg-surface-container hover:text-on-surface transition-colors" type="button"><span class="material-symbols-outlined text-[22px]">notifications</span><span class="absolute top-1.5 right-1.5 w-2 h-2 rounded-full bg-urgency-coral"></span></button><div class="flex items-center gap-space-sm pl-space-sm"><img alt="Profile" class="w-8 h-8 rounded-full object-cover shadow-sm" src="https://lh3.googleusercontent.com/aida/AEtjO1UzoiGo2usCM7z-EAav6yMCw7Zu9mINgw5jGEIXa5nRxGkxmptYV_com2zT4zPFu-tOiNdlKmX0nsOsbhneUVkZoV6_KJZdfqqHUCfIrdePSx2DrUiFhOskBqXY6eDFuRstPN3D7zUD9JwZ1Bi27hTfqSDbE9oBo_CLSdfr_QYkdRzQ5CkVNG_p4BHhaNJgu8hruuzAFY_rppRFZ6Q6iD-MkBvMxRtRmJGVta7ug_Je2ekdfJytTx--yuw"><div class="hidden md:flex flex-col"><span class="font-label-md text-label-md text-on-surface font-semibold leading-tight">Quản Trị Viên</span><span class="font-label-sm text-label-sm text-on-surface-variant leading-tight">admin@ticketbox.vn</span></div></div></div></header><main class="w-full pt-16 flex-1 bg-surface px-space-lg py-space-lg"><div class="flex flex-col w-full">
+<!-- Top Stat Metrics & Editorial Context -->
+<div class="grid grid-cols-1 md:grid-cols-4 gap-space-md mb-space-lg">
+<!-- Stat 1: Total Pending -->
+<div class="bg-surface-container-lowest rounded-xl p-space-md shadow-sm flex flex-col justify-between relative overflow-hidden">
+<div class="flex items-center justify-between">
+<span class="font-label-sm text-label-sm text-on-surface-variant font-bold uppercase tracking-wider">Cần giải ngân ngay</span>
+<div class="w-8 h-8 rounded-lg bg-urgency-coral/10 text-urgency-coral flex items-center justify-center">
+<span class="material-symbols-outlined text-[20px]">pending_actions</span>
+</div>
+</div>
+<div class="mt-space-sm">
+<div class="font-headline-md text-headline-md text-on-surface font-extrabold tracking-tight">3 <span class="font-label-lg text-label-lg text-urgency-coral font-bold ml-1">yêu cầu</span></div>
+<p class="font-body-sm text-body-sm text-on-surface-variant mt-1">Tổng tiền: <span class="font-semibold text-on-surface">625.000.000 đ</span></p>
+</div>
+<div class="absolute -right-4 -bottom-4 w-20 h-20 bg-urgency-coral/5 rounded-full blur-xl pointer-events-none"></div>
+</div>
+<!-- Stat 2: Processed Today -->
+<div class="bg-surface-container-lowest rounded-xl p-space-md shadow-sm flex flex-col justify-between relative overflow-hidden">
+<div class="flex items-center justify-between">
+<span class="font-label-sm text-label-sm text-on-surface-variant font-bold uppercase tracking-wider">Đã giải ngân hôm nay</span>
+<div class="w-8 h-8 rounded-lg bg-primary/10 text-primary flex items-center justify-center">
+<span class="material-symbols-outlined text-[20px]">task_alt</span>
+</div>
+</div>
+<div class="mt-space-sm">
+<div class="font-headline-md text-headline-md text-on-surface font-extrabold tracking-tight">1.840.000.000 <span class="text-[14px] text-on-surface-variant font-normal">đ</span></div>
+<div class="flex items-center gap-1 mt-1 text-primary font-label-sm text-label-sm font-semibold">
+<span class="material-symbols-outlined text-[16px]">trending_up</span>
+<span>18 đợt thanh toán thành công</span>
+</div>
+</div>
+</div>
+<!-- Stat 3: Processing Time Benchmark -->
+<div class="bg-surface-container-lowest rounded-xl p-space-md shadow-sm flex flex-col justify-between relative overflow-hidden">
+<div class="flex items-center justify-between">
+<span class="font-label-sm text-label-sm text-on-surface-variant font-bold uppercase tracking-wider">Tốc độ đối soát SLA</span>
+<div class="w-8 h-8 rounded-lg bg-secondary/10 text-secondary flex items-center justify-center">
+<span class="material-symbols-outlined text-[20px]">timer</span>
+</div>
+</div>
+<div class="mt-space-sm">
+<div class="font-headline-md text-headline-md text-on-surface font-extrabold tracking-tight">42 <span class="text-[16px] text-on-surface-variant font-normal">phút / lệnh</span></div>
+<p class="font-body-sm text-body-sm text-on-surface-variant mt-1">Đạt <span class="text-primary font-semibold">98.2%</span> cam kết dưới 2 giờ</p>
+</div>
+</div>
+<!-- Stat 4: Risk / Rejected -->
+<div class="bg-surface-container-lowest rounded-xl p-space-md shadow-sm flex flex-col justify-between relative overflow-hidden">
+<div class="flex items-center justify-between">
+<span class="font-label-sm text-label-sm text-on-surface-variant font-bold uppercase tracking-wider">Từ chối / Cảnh báo</span>
+<div class="w-8 h-8 rounded-lg bg-surface-container-highest text-on-surface-variant flex items-center justify-center">
+<span class="material-symbols-outlined text-[20px]">flip_camera_ios</span>
+</div>
+</div>
+<div class="mt-space-sm">
+<div class="font-headline-md text-headline-md text-on-surface font-extrabold tracking-tight">3 <span class="text-[14px] text-on-surface-variant font-normal">lệnh hoàn trả</span></div>
+<p class="font-body-sm text-body-sm text-on-surface-variant mt-1">100% số dư đã hồi chuyển ví OTC</p>
+</div>
+</div>
+</div>
+<!-- Main Management Card & Control Surface -->
+<div class="bg-surface-container-lowest rounded-xl shadow-sm overflow-hidden flex flex-col">
+<!-- Header Toolbar & Filters -->
+<div class="p-space-lg flex flex-col lg:flex-row lg:items-center justify-between gap-space-md bg-surface-container-lowest">
+<div class="flex flex-col gap-1">
+<div class="flex items-center gap-space-sm">
+<h1 class="font-headline-md text-headline-md text-on-surface font-bold tracking-tight">Yêu cầu rút tiền Organizer</h1>
+<span class="px-2.5 py-0.5 rounded-full bg-primary/10 text-primary font-label-sm text-label-sm font-bold">24 yêu cầu</span>
+</div>
+<p class="font-body-sm text-body-sm text-on-surface-variant">Quy trình thẩm định và giải ngân doanh thu bán vé cho ban tổ chức sự kiện.</p>
+</div>
+<!-- Action Utilities -->
+<div class="flex items-center gap-space-sm">
+<div class="relative">
+<span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-[18px] text-on-surface-variant pointer-events-none">search</span>
+<input class="h-10 pl-9 pr-4 bg-surface-container-low text-on-surface placeholder:text-on-surface-variant font-body-sm text-body-sm rounded-lg focus:outline-none focus:bg-surface-container transition-all w-64 md:w-80" placeholder="Tìm theo mã WTH, tên đối tác, STK..." type="text">
+</div>
+<button class="h-10 px-3.5 rounded-lg bg-surface-container-low hover:bg-surface-container text-on-surface font-label-md text-label-md flex items-center gap-1.5 transition-colors" type="button">
+<span class="material-symbols-outlined text-[18px]">tune</span>
+<span class="hidden sm:inline">Bộ lọc</span>
+</button>
+<button class="h-10 px-3.5 rounded-lg bg-surface-container-low hover:bg-surface-container text-on-surface font-label-md text-label-md flex items-center gap-1.5 transition-colors" type="button">
+<span class="material-symbols-outlined text-[18px]">file_download</span>
+<span class="hidden sm:inline">Xuất Excel</span>
+</button>
+</div>
+</div>
+<!-- Segmented Tabs Navigation -->
+<div class="px-space-lg flex items-center gap-2 overflow-x-auto bg-surface-container-lowest pb-space-sm">
+<button class="filter-tab px-4 py-2 rounded-lg font-label-lg text-label-lg transition-all flex items-center gap-2 bg-on-surface text-surface" id="tab-all" onclick="filterStatus('all')" type="button">
+<span>Tất cả</span>
+<span class="px-1.5 py-0.5 rounded-full bg-surface/20 text-[11px] font-bold">24</span>
+</button>
+<button class="filter-tab px-4 py-2 rounded-lg font-label-lg text-label-lg transition-all flex items-center gap-2 bg-surface-container-low text-on-surface-variant hover:bg-surface-container" id="tab-pending" onclick="filterStatus('pending')" type="button">
+<span>Chờ duyệt</span>
+<span class="px-1.5 py-0.5 rounded-full bg-urgency-coral/15 text-urgency-coral text-[11px] font-bold">3</span>
+</button>
+<button class="filter-tab px-4 py-2 rounded-lg font-label-lg text-label-lg transition-all flex items-center gap-2 bg-surface-container-low text-on-surface-variant hover:bg-surface-container" id="tab-approved" onclick="filterStatus('approved')" type="button">
+<span>Đã duyệt</span>
+<span class="px-1.5 py-0.5 rounded-full bg-primary/15 text-primary text-[11px] font-bold">18</span>
+</button>
+<button class="filter-tab px-4 py-2 rounded-lg font-label-lg text-label-lg transition-all flex items-center gap-2 bg-surface-container-low text-on-surface-variant hover:bg-surface-container" id="tab-rejected" onclick="filterStatus('rejected')" type="button">
+<span>Bị từ chối</span>
+<span class="px-1.5 py-0.5 rounded-full bg-surface-container-highest text-on-surface-variant text-[11px] font-bold">3</span>
+</button>
+</div>
+<!-- Table Container -->
+<div class="w-full overflow-x-auto">
+<table class="w-full text-left font-body-sm text-body-sm border-collapse">
+<thead class="bg-surface-container-low text-on-surface-variant font-label-md text-label-md uppercase tracking-wider">
+<tr>
+<th class="py-3.5 px-space-lg font-semibold">Mã yêu cầu &amp; Organizer</th>
+<th class="py-3.5 px-space-md font-semibold text-right">Số tiền rút</th>
+<th class="py-3.5 px-space-md font-semibold">Ngân hàng &amp; Số tài khoản</th>
+<th class="py-3.5 px-space-md font-semibold">Thời điểm tạo</th>
+<th class="py-3.5 px-space-md font-semibold">Trạng thái</th>
+<th class="py-3.5 px-space-lg font-semibold text-right">Thao tác</th>
+</tr>
+</thead>
+<tbody class="divide-y-0" id="withdrawal-table-body">
+<!-- Row 1: Pending (Primary Test Object - Cloud9) -->
+<tr class="request-row hover:bg-surface-container-low/60 transition-colors group" data-status="pending">
+<td class="py-4 px-space-lg">
+<div class="flex items-center gap-3">
+<div class="w-10 h-10 rounded-xl bg-primary-container/20 text-on-primary-container flex items-center justify-center font-headline-sm font-extrabold text-[15px] shrink-0">
+                  C9
+                </div>
+<div class="flex flex-col min-w-0">
+<div class="flex items-center gap-2">
+<span class="font-label-lg text-label-lg font-bold text-on-surface truncate">WTH-2024-8901</span>
+<span class="px-1.5 py-0.2 rounded bg-surface-container text-[10px] font-bold text-on-surface-variant">Tier VIP</span>
+</div>
+<span class="font-body-sm text-body-sm text-on-surface font-semibold truncate">Cloud9 Entertainment</span>
+<span class="font-label-sm text-label-sm text-on-surface-variant">ĐD: Lê Hoàng Long (CEO)</span>
+</div>
+</div>
+</td>
+<td class="py-4 px-space-md text-right whitespace-nowrap">
+<span class="font-headline-sm text-headline-sm font-extrabold text-on-surface tracking-tight">450.000.000</span>
+<span class="font-label-sm text-label-sm text-on-surface-variant block">VNĐ</span>
+</td>
+<td class="py-4 px-space-md">
+<div class="flex flex-col">
+<div class="flex items-center gap-1.5">
+<span class="px-1.5 py-0.5 rounded bg-surface-container font-label-sm text-label-sm font-bold text-on-surface">VCB</span>
+<span class="font-label-md text-label-md font-bold text-on-surface tracking-wide">0071000982341</span>
+</div>
+<span class="font-body-sm text-body-sm text-on-surface-variant truncate uppercase mt-0.5">CTY CP TRUYEN THONG CLOUD9</span>
+</div>
+</td>
+<td class="py-4 px-space-md whitespace-nowrap">
+<span class="font-label-md text-label-md font-semibold text-on-surface">10:30</span>
+<span class="font-body-sm text-body-sm text-on-surface-variant block">Hôm nay, 24/10</span>
+</td>
+<td class="py-4 px-space-md whitespace-nowrap">
+<span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-amber-100 text-amber-900 font-label-sm text-label-sm font-bold">
+<span class="w-1.5 h-1.5 rounded-full bg-amber-500 animate-pulse"></span>
+                Chờ duyệt
+              </span>
+</td>
+<td class="py-4 px-space-lg text-right whitespace-nowrap">
+<div class="flex items-center justify-end gap-2">
+<button class="h-9 px-3 rounded-lg bg-primary-container text-on-primary-container font-label-md text-label-md font-bold hover:bg-primary transition-colors flex items-center gap-1 shadow-sm" onclick="openApproveModal('WTH-2024-8901', 'Cloud9 Entertainment', '450.000.000 VNĐ', 'Vietcombank - 0071000982341')" type="button">
+<span class="material-symbols-outlined text-[16px]">check_circle</span>
+<span>Duyệt giải ngân</span>
+</button>
+<button class="h-9 px-3 rounded-lg bg-urgency-coral/15 text-urgency-coral font-label-md text-label-md font-bold hover:bg-urgency-coral hover:text-white transition-colors flex items-center gap-1" onclick="openRejectModal('WTH-2024-8901', 'Cloud9 Entertainment', '450.000.000 VNĐ')" type="button">
+<span class="material-symbols-outlined text-[16px]">cancel</span>
+<span>Từ chối</span>
+</button>
+<button class="h-9 w-9 rounded-lg bg-surface-container-low hover:bg-surface-container text-on-surface-variant hover:text-on-surface flex items-center justify-center transition-colors" onclick="openDetailDrawer()" title="Xem chi tiết" type="button">
+<span class="material-symbols-outlined text-[18px]">visibility</span>
+</button>
+</div>
+</td>
+</tr>
+<!-- Row 2: Pending (Saigon Soundwaves) -->
+<tr class="request-row hover:bg-surface-container-low/60 transition-colors group" data-status="pending">
+<td class="py-4 px-space-lg">
+<div class="flex items-center gap-3">
+<div class="w-10 h-10 rounded-xl bg-secondary-container/20 text-on-secondary-container flex items-center justify-center font-headline-sm font-extrabold text-[15px] shrink-0">
+                  SS
+                </div>
+<div class="flex flex-col min-w-0">
+<div class="flex items-center gap-2">
+<span class="font-label-lg text-label-lg font-bold text-on-surface truncate">WTH-2024-8898</span>
+</div>
+<span class="font-body-sm text-body-sm text-on-surface font-semibold truncate">Saigon Soundwaves Agency</span>
+<span class="font-label-sm text-label-sm text-on-surface-variant">ĐD: Trần Mai Phương</span>
+</div>
+</div>
+</td>
+<td class="py-4 px-space-md text-right whitespace-nowrap">
+<span class="font-headline-sm text-headline-sm font-extrabold text-on-surface tracking-tight">120.000.000</span>
+<span class="font-label-sm text-label-sm text-on-surface-variant block">VNĐ</span>
+</td>
+<td class="py-4 px-space-md">
+<div class="flex flex-col">
+<div class="flex items-center gap-1.5">
+<span class="px-1.5 py-0.5 rounded bg-surface-container font-label-sm text-label-sm font-bold text-on-surface">TCB</span>
+<span class="font-label-md text-label-md font-bold text-on-surface tracking-wide">19034829103011</span>
+</div>
+<span class="font-body-sm text-body-sm text-on-surface-variant truncate uppercase mt-0.5">CONG TY TNHH SAIGON SOUNDWAVES</span>
+</div>
+</td>
+<td class="py-4 px-space-md whitespace-nowrap">
+<span class="font-label-md text-label-md font-semibold text-on-surface">09:15</span>
+<span class="font-body-sm text-body-sm text-on-surface-variant block">Hôm nay, 24/10</span>
+</td>
+<td class="py-4 px-space-md whitespace-nowrap">
+<span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-amber-100 text-amber-900 font-label-sm text-label-sm font-bold">
+<span class="w-1.5 h-1.5 rounded-full bg-amber-500 animate-pulse"></span>
+                Chờ duyệt
+              </span>
+</td>
+<td class="py-4 px-space-lg text-right whitespace-nowrap">
+<div class="flex items-center justify-end gap-2">
+<button class="h-9 px-3 rounded-lg bg-primary-container text-on-primary-container font-label-md text-label-md font-bold hover:bg-primary transition-colors flex items-center gap-1 shadow-sm" onclick="openApproveModal('WTH-2024-8898', 'Saigon Soundwaves Agency', '120.000.000 VNĐ', 'Techcombank - 19034829103011')" type="button">
+<span class="material-symbols-outlined text-[16px]">check_circle</span>
+<span>Duyệt giải ngân</span>
+</button>
+<button class="h-9 px-3 rounded-lg bg-urgency-coral/15 text-urgency-coral font-label-md text-label-md font-bold hover:bg-urgency-coral hover:text-white transition-colors flex items-center gap-1" onclick="openRejectModal('WTH-2024-8898', 'Saigon Soundwaves Agency', '120.000.000 VNĐ')" type="button">
+<span class="material-symbols-outlined text-[16px]">cancel</span>
+<span>Từ chối</span>
+</button>
+<button class="h-9 w-9 rounded-lg bg-surface-container-low hover:bg-surface-container text-on-surface-variant hover:text-on-surface flex items-center justify-center transition-colors" onclick="openDetailDrawer()" title="Xem chi tiết" type="button">
+<span class="material-symbols-outlined text-[18px]">visibility</span>
+</button>
+</div>
+</td>
+</tr>
+<!-- Row 3: Pending (Nexus Arena) -->
+<tr class="request-row hover:bg-surface-container-low/60 transition-colors group" data-status="pending">
+<td class="py-4 px-space-lg">
+<div class="flex items-center gap-3">
+<div class="w-10 h-10 rounded-xl bg-tertiary-container/20 text-on-tertiary-container flex items-center justify-center font-headline-sm font-extrabold text-[15px] shrink-0">
+                  NA
+                </div>
+<div class="flex flex-col min-w-0">
+<div class="flex items-center gap-2">
+<span class="font-label-lg text-label-lg font-bold text-on-surface truncate">WTH-2024-8894</span>
+</div>
+<span class="font-body-sm text-body-sm text-on-surface font-semibold truncate">Nexus Esports Arena</span>
+<span class="font-label-sm text-label-sm text-on-surface-variant">ĐD: Vũ Khắc Tiệp</span>
+</div>
+</div>
+</td>
+<td class="py-4 px-space-md text-right whitespace-nowrap">
+<span class="font-headline-sm text-headline-sm font-extrabold text-on-surface tracking-tight">55.000.000</span>
+<span class="font-label-sm text-label-sm text-on-surface-variant block">VNĐ</span>
+</td>
+<td class="py-4 px-space-md">
+<div class="flex flex-col">
+<div class="flex items-center gap-1.5">
+<span class="px-1.5 py-0.5 rounded bg-surface-container font-label-sm text-label-sm font-bold text-on-surface">MB</span>
+<span class="font-label-md text-label-md font-bold text-on-surface tracking-wide">098381283921</span>
+</div>
+<span class="font-body-sm text-body-sm text-on-surface-variant truncate uppercase mt-0.5">CTY CP NEXUS VIET NAM</span>
+</div>
+</td>
+<td class="py-4 px-space-md whitespace-nowrap">
+<span class="font-label-md text-label-md font-semibold text-on-surface">08:00</span>
+<span class="font-body-sm text-body-sm text-on-surface-variant block">Hôm nay, 24/10</span>
+</td>
+<td class="py-4 px-space-md whitespace-nowrap">
+<span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-amber-100 text-amber-900 font-label-sm text-label-sm font-bold">
+<span class="w-1.5 h-1.5 rounded-full bg-amber-500 animate-pulse"></span>
+                Chờ duyệt
+              </span>
+</td>
+<td class="py-4 px-space-lg text-right whitespace-nowrap">
+<div class="flex items-center justify-end gap-2">
+<button class="h-9 px-3 rounded-lg bg-primary-container text-on-primary-container font-label-md text-label-md font-bold hover:bg-primary transition-colors flex items-center gap-1 shadow-sm" onclick="openApproveModal('WTH-2024-8894', 'Nexus Esports Arena', '55.000.000 VNĐ', 'MB Bank - 098381283921')" type="button">
+<span class="material-symbols-outlined text-[16px]">check_circle</span>
+<span>Duyệt giải ngân</span>
+</button>
+<button class="h-9 px-3 rounded-lg bg-urgency-coral/15 text-urgency-coral font-label-md text-label-md font-bold hover:bg-urgency-coral hover:text-white transition-colors flex items-center gap-1" onclick="openRejectModal('WTH-2024-8894', 'Nexus Esports Arena', '55.000.000 VNĐ')" type="button">
+<span class="material-symbols-outlined text-[16px]">cancel</span>
+<span>Từ chối</span>
+</button>
+<button class="h-9 w-9 rounded-lg bg-surface-container-low hover:bg-surface-container text-on-surface-variant hover:text-on-surface flex items-center justify-center transition-colors" onclick="openDetailDrawer()" title="Xem chi tiết" type="button">
+<span class="material-symbols-outlined text-[18px]">visibility</span>
+</button>
+</div>
+</td>
+</tr>
+<!-- Row 4: Approved (Live Concert VN) -->
+<tr class="request-row hover:bg-surface-container-low/60 transition-colors group" data-status="approved">
+<td class="py-4 px-space-lg">
+<div class="flex items-center gap-3">
+<div class="w-10 h-10 rounded-xl bg-surface-container text-on-surface-variant flex items-center justify-center font-headline-sm font-extrabold text-[15px] shrink-0">
+                  LC
+                </div>
+<div class="flex flex-col min-w-0">
+<span class="font-label-lg text-label-lg font-bold text-on-surface truncate">WTH-2024-8882</span>
+<span class="font-body-sm text-body-sm text-on-surface font-semibold truncate">Live Concert VietNam</span>
+<span class="font-label-sm text-label-sm text-on-surface-variant">ĐD: Nguyễn Quốc Bảo</span>
+</div>
+</div>
+</td>
+<td class="py-4 px-space-md text-right whitespace-nowrap">
+<span class="font-headline-sm text-headline-sm font-extrabold text-on-surface tracking-tight">850.000.000</span>
+<span class="font-label-sm text-label-sm text-on-surface-variant block">VNĐ</span>
+</td>
+<td class="py-4 px-space-md">
+<div class="flex flex-col">
+<div class="flex items-center gap-1.5">
+<span class="px-1.5 py-0.5 rounded bg-surface-container font-label-sm text-label-sm font-bold text-on-surface">BIDV</span>
+<span class="font-label-md text-label-md font-bold text-on-surface tracking-wide">1201000984920</span>
+</div>
+<span class="font-body-sm text-body-sm text-on-surface-variant truncate uppercase mt-0.5">CTY TNHH CONCERT VIETNAM</span>
+</div>
+</td>
+<td class="py-4 px-space-md whitespace-nowrap">
+<span class="font-label-md text-label-md font-semibold text-on-surface">16:45</span>
+<span class="font-body-sm text-body-sm text-on-surface-variant block">23/10/2024</span>
+</td>
+<td class="py-4 px-space-md whitespace-nowrap">
+<span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-emerald-100 text-emerald-900 font-label-sm text-label-sm font-bold">
+<span class="w-1.5 h-1.5 rounded-full bg-emerald-600"></span>
+                Đã duyệt
+              </span>
+</td>
+<td class="py-4 px-space-lg text-right whitespace-nowrap">
+<button class="h-9 px-3 rounded-lg bg-surface-container-low hover:bg-surface-container text-on-surface font-label-md text-label-md font-semibold inline-flex items-center gap-1.5 transition-colors" onclick="openDetailDrawer()" type="button">
+<span class="material-symbols-outlined text-[16px]">visibility</span>
+<span>Xem chi tiết</span>
+</button>
+</td>
+</tr>
+<!-- Row 5: Approved (V-Festival Arts) -->
+<tr class="request-row hover:bg-surface-container-low/60 transition-colors group" data-status="approved">
+<td class="py-4 px-space-lg">
+<div class="flex items-center gap-3">
+<div class="w-10 h-10 rounded-xl bg-surface-container text-on-surface-variant flex items-center justify-center font-headline-sm font-extrabold text-[15px] shrink-0">
+                  VF
+                </div>
+<div class="flex flex-col min-w-0">
+<span class="font-label-lg text-label-lg font-bold text-on-surface truncate">WTH-2024-8879</span>
+<span class="font-body-sm text-body-sm text-on-surface font-semibold truncate">V-Festival Arts Hub</span>
+<span class="font-label-sm text-label-sm text-on-surface-variant">ĐD: Đỗ Hoàng Yến</span>
+</div>
+</div>
+</td>
+<td class="py-4 px-space-md text-right whitespace-nowrap">
+<span class="font-headline-sm text-headline-sm font-extrabold text-on-surface tracking-tight">210.000.000</span>
+<span class="font-label-sm text-label-sm text-on-surface-variant block">VNĐ</span>
+</td>
+<td class="py-4 px-space-md">
+<div class="flex flex-col">
+<div class="flex items-center gap-1.5">
+<span class="px-1.5 py-0.5 rounded bg-surface-container font-label-sm text-label-sm font-bold text-on-surface">ACB</span>
+<span class="font-label-md text-label-md font-bold text-on-surface tracking-wide">28491028391</span>
+</div>
+<span class="font-body-sm text-body-sm text-on-surface-variant truncate uppercase mt-0.5">CTY TRUYEN THONG V-FEST</span>
+</div>
+</td>
+<td class="py-4 px-space-md whitespace-nowrap">
+<span class="font-label-md text-label-md font-semibold text-on-surface">14:10</span>
+<span class="font-body-sm text-body-sm text-on-surface-variant block">23/10/2024</span>
+</td>
+<td class="py-4 px-space-md whitespace-nowrap">
+<span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-emerald-100 text-emerald-900 font-label-sm text-label-sm font-bold">
+<span class="w-1.5 h-1.5 rounded-full bg-emerald-600"></span>
+                Đã duyệt
+              </span>
+</td>
+<td class="py-4 px-space-lg text-right whitespace-nowrap">
+<button class="h-9 px-3 rounded-lg bg-surface-container-low hover:bg-surface-container text-on-surface font-label-md text-label-md font-semibold inline-flex items-center gap-1.5 transition-colors" onclick="openDetailDrawer()" type="button">
+<span class="material-symbols-outlined text-[16px]">visibility</span>
+<span>Xem chi tiết</span>
+</button>
+</td>
+</tr>
+<!-- Row 6: Rejected (Red Zone Club) -->
+<tr class="request-row hover:bg-surface-container-low/60 transition-colors group" data-status="rejected">
+<td class="py-4 px-space-lg">
+<div class="flex items-center gap-3">
+<div class="w-10 h-10 rounded-xl bg-urgency-coral/10 text-urgency-coral flex items-center justify-center font-headline-sm font-extrabold text-[15px] shrink-0">
+                  RZ
+                </div>
+<div class="flex flex-col min-w-0">
+<span class="font-label-lg text-label-lg font-bold text-on-surface truncate">WTH-2024-8860</span>
+<span class="font-body-sm text-body-sm text-on-surface font-semibold truncate">Red Zone Nightlife Club</span>
+<span class="font-label-sm text-label-sm text-on-surface-variant">ĐD: Huỳnh Tấn Đạt</span>
+</div>
+</div>
+</td>
+<td class="py-4 px-space-md text-right whitespace-nowrap">
+<span class="font-headline-sm text-headline-sm font-extrabold text-on-surface tracking-tight">88.500.000</span>
+<span class="font-label-sm text-label-sm text-on-surface-variant block">VNĐ</span>
+</td>
+<td class="py-4 px-space-md">
+<div class="flex flex-col">
+<div class="flex items-center gap-1.5">
+<span class="px-1.5 py-0.5 rounded bg-surface-container font-label-sm text-label-sm font-bold text-on-surface">VPB</span>
+<span class="font-label-md text-label-md font-bold text-on-surface tracking-wide">19827364102</span>
+</div>
+<span class="font-body-sm text-body-sm text-on-surface-variant truncate uppercase mt-0.5">HUYNH TAN DAT (TK Ca Nhan)</span>
+</div>
+</td>
+<td class="py-4 px-space-md whitespace-nowrap">
+<span class="font-label-md text-label-md font-semibold text-on-surface">11:20</span>
+<span class="font-body-sm text-body-sm text-on-surface-variant block">22/10/2024</span>
+</td>
+<td class="py-4 px-space-md whitespace-nowrap">
+<span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-rose-100 text-rose-900 font-label-sm text-label-sm font-bold">
+<span class="w-1.5 h-1.5 rounded-full bg-urgency-coral"></span>
+                Bị từ chối
+              </span>
+</td>
+<td class="py-4 px-space-lg text-right whitespace-nowrap">
+<button class="h-9 px-3 rounded-lg bg-surface-container-low hover:bg-surface-container text-on-surface font-label-md text-label-md font-semibold inline-flex items-center gap-1.5 transition-colors" onclick="openDetailDrawer()" type="button">
+<span class="material-symbols-outlined text-[16px]">visibility</span>
+<span>Xem chi tiết</span>
+</button>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+<!-- Table Footer / Pagination -->
+<div class="p-space-lg bg-surface-container-lowest flex flex-col sm:flex-row items-center justify-between gap-space-md">
+<span class="font-body-sm text-body-sm text-on-surface-variant">Hiển thị <span class="font-semibold text-on-surface">1 - 6</span> của 24 yêu cầu rút tiền</span>
+<div class="flex items-center gap-1">
+<button class="h-9 w-9 rounded-lg bg-surface-container-low hover:bg-surface-container text-on-surface-variant disabled:opacity-40 flex items-center justify-center transition-colors" type="button">
+<span class="material-symbols-outlined text-[18px]">chevron_left</span>
+</button>
+<button class="h-9 w-9 rounded-lg bg-primary text-on-primary font-label-md text-label-md font-bold flex items-center justify-center" type="button">1</button>
+<button class="h-9 w-9 rounded-lg hover:bg-surface-container text-on-surface font-label-md text-label-md font-bold flex items-center justify-center" type="button">2</button>
+<button class="h-9 w-9 rounded-lg hover:bg-surface-container text-on-surface font-label-md text-label-md font-bold flex items-center justify-center" type="button">3</button>
+<button class="h-9 w-9 rounded-lg hover:bg-surface-container text-on-surface font-label-md text-label-md font-bold flex items-center justify-center" type="button">4</button>
+<button class="h-9 w-9 rounded-lg bg-surface-container-low hover:bg-surface-container text-on-surface-variant flex items-center justify-center transition-colors" type="button">
+<span class="material-symbols-outlined text-[18px]">chevron_right</span>
+</button>
+</div>
+</div>
+</div>
+<!-- Detail Slide-Over Drawer (Right aligned) -->
+<div class="fixed inset-0 z-50 bg-on-surface/40 backdrop-blur-sm opacity-0 pointer-events-none transition-opacity duration-300" id="detail-drawer-overlay">
+<div class="fixed inset-y-0 right-0 max-w-full flex pl-10">
+<div class="w-screen max-w-xl bg-surface-container-lowest shadow-2xl flex flex-col translate-x-full transition-transform duration-300 ease-in-out" id="detail-drawer">
+<!-- Drawer Header -->
+<div class="p-space-lg bg-surface-container flex items-center justify-between">
+<div class="flex flex-col">
+<div class="flex items-center gap-2">
+<span class="font-headline-sm text-headline-sm text-on-surface font-bold">Chi tiết yêu cầu rút tiền</span>
+<span class="px-2 py-0.5 rounded-full bg-amber-100 text-amber-900 font-label-sm text-label-sm font-bold">Chờ duyệt</span>
+</div>
+<span class="font-body-sm text-body-sm text-on-surface-variant mt-0.5">Mã định danh: <span class="font-mono font-bold text-on-surface">WTH-2024-8901</span></span>
+</div>
+<button class="h-9 w-9 rounded-lg hover:bg-surface-container-highest text-on-surface-variant flex items-center justify-center transition-colors" onclick="closeDetailDrawer()" type="button">
+<span class="material-symbols-outlined text-[20px]">close</span>
+</button>
+</div>
+<!-- Drawer Content -->
+<div class="flex-1 overflow-y-auto p-space-lg flex flex-col gap-space-lg">
+<!-- Big Highlight Banner -->
+<div class="bg-gradient-to-br from-primary/10 via-primary-container/10 to-transparent p-space-lg rounded-xl flex flex-col">
+<span class="font-label-sm text-label-sm uppercase tracking-wider text-on-surface-variant font-bold">Số tiền yêu cầu rút</span>
+<div class="flex items-baseline gap-2 mt-1">
+<span class="font-headline-xl text-headline-xl text-on-surface font-extrabold tracking-tight">450.000.000</span>
+<span class="font-headline-sm text-headline-sm text-on-surface-variant font-bold">VNĐ</span>
+</div>
+<div class="mt-space-md pt-space-sm flex items-center justify-between text-on-surface-variant font-body-sm text-body-sm">
+<span>Số dư khả dụng trước khi rút:</span>
+<span class="font-bold text-on-surface">850.000.000 VNĐ</span>
+</div>
+<div class="flex items-center justify-between text-on-surface-variant font-body-sm text-body-sm mt-1">
+<span>Số dư sau khi duyệt lệnh:</span>
+<span class="font-bold text-primary">400.000.000 VNĐ</span>
+</div>
+</div>
+<!-- Organizer Dossier -->
+<div class="flex flex-col gap-space-sm">
+<span class="font-label-sm text-label-sm uppercase tracking-wider text-on-surface-variant font-bold">Đơn vị tổ chức (Organizer)</span>
+<div class="bg-surface-container-low rounded-xl p-space-md flex flex-col gap-3">
+<div class="flex items-center gap-3">
+<div class="w-12 h-12 rounded-xl bg-primary-container text-on-primary-container font-extrabold text-[20px] flex items-center justify-center">
+                  C9
+                </div>
+<div class="flex flex-col">
+<span class="font-headline-sm text-headline-sm text-on-surface font-bold">Cloud9 Entertainment</span>
+<span class="font-body-sm text-body-sm text-on-surface-variant">Thành viên đối tác chiến lược từ 2021</span>
+</div>
+</div>
+<div class="grid grid-cols-2 gap-2 pt-2">
+<div class="flex flex-col">
+<span class="font-label-sm text-label-sm text-on-surface-variant">Đại diện pháp luật</span>
+<span class="font-body-sm text-body-sm font-semibold text-on-surface">Lê Hoàng Long</span>
+</div>
+<div class="flex flex-col">
+<span class="font-label-sm text-label-sm text-on-surface-variant">Mã số thuế</span>
+<span class="font-body-sm text-body-sm font-mono font-semibold text-on-surface">0318928472</span>
+</div>
+<div class="flex flex-col">
+<span class="font-label-sm text-label-sm text-on-surface-variant">Email xác thực</span>
+<span class="font-body-sm text-body-sm font-semibold text-on-surface">finance@cloud9.vn</span>
+</div>
+<div class="flex flex-col">
+<span class="font-label-sm text-label-sm text-on-surface-variant">Hotline ký hợp đồng</span>
+<span class="font-body-sm text-body-sm font-semibold text-on-surface">0903 889 123</span>
+</div>
+</div>
+</div>
+</div>
+<!-- Payout Bank Verification Box -->
+<div class="flex flex-col gap-space-sm">
+<span class="font-label-sm text-label-sm uppercase tracking-wider text-on-surface-variant font-bold">Thông tin tài khoản thụ hưởng</span>
+<div class="bg-surface-container-low rounded-xl p-space-md flex flex-col gap-3">
+<div class="flex items-center justify-between">
+<span class="font-body-sm text-body-sm text-on-surface-variant">Ngân hàng thụ hưởng:</span>
+<span class="font-label-lg text-label-lg font-bold text-on-surface">VCB - Ngân hàng TMCP Ngoại thương Việt Nam</span>
+</div>
+<div class="flex items-center justify-between">
+<span class="font-body-sm text-body-sm text-on-surface-variant">Số tài khoản:</span>
+<span class="font-mono text-[16px] font-extrabold text-on-surface tracking-wider">0071000982341</span>
+</div>
+<div class="flex items-center justify-between">
+<span class="font-body-sm text-body-sm text-on-surface-variant">Tên chủ tài khoản:</span>
+<span class="font-label-lg text-label-lg font-bold text-on-surface uppercase">CTY CP TRUYEN THONG CLOUD9</span>
+</div>
+<div class="flex items-center gap-2 p-2 rounded-lg bg-primary/10 text-primary font-body-sm text-body-sm font-medium">
+<span class="material-symbols-outlined text-[18px]">verified</span>
+<span>Tên tài khoản trùng khớp hoàn toàn với hồ sơ pháp nhân đã KYC</span>
+</div>
+</div>
+</div>
+<!-- Event Revenue Reference -->
+<div class="flex flex-col gap-space-sm">
+<span class="font-label-sm text-label-sm uppercase tracking-wider text-on-surface-variant font-bold">Nguồn doanh thu đối soát</span>
+<div class="bg-surface-container-low rounded-xl p-space-md flex items-center justify-between">
+<div class="flex flex-col">
+<span class="font-label-lg text-label-lg font-bold text-on-surface">Monsoon Music Festival 2024</span>
+<span class="font-body-sm text-body-sm text-on-surface-variant">Đợt quyết toán vé sớm Early Bird (1.200 vé)</span>
+</div>
+<span class="px-2.5 py-1 rounded bg-surface-container font-label-sm text-label-sm font-bold text-on-surface">Đã kết thúc bán</span>
+</div>
+</div>
+<!-- Request Metadata & Timeline -->
+<div class="flex flex-col gap-space-sm">
+<span class="font-label-sm text-label-sm uppercase tracking-wider text-on-surface-variant font-bold">Nhật ký xử lý</span>
+<div class="flex flex-col gap-3 font-body-sm text-body-sm">
+<div class="flex items-start gap-3">
+<div class="w-2 h-2 rounded-full bg-primary mt-1.5 shrink-0"></div>
+<div class="flex flex-col">
+<span class="font-semibold text-on-surface">10:30 - Hôm nay (24/10/2024)</span>
+<span class="text-on-surface-variant">Yêu cầu được khởi tạo tự động bởi đại diện Cloud9 Entertainment</span>
+</div>
+</div>
+<div class="flex items-start gap-3">
+<div class="w-2 h-2 rounded-full bg-amber-500 mt-1.5 shrink-0 animate-ping"></div>
+<div class="flex flex-col">
+<span class="font-semibold text-on-surface">10:35 - Đang trong hàng đợi kiểm tra</span>
+<span class="text-on-surface-variant">Hệ thống TicketBox SaaS gắn cờ: Số tiền trên 200tr yêu cầu Admin thẩm duyệt kép</span>
+</div>
+</div>
+</div>
+</div>
+</div>
+<!-- Drawer Action Footer -->
+<div class="p-space-lg bg-surface-container flex items-center gap-space-sm">
+<button class="flex-1 h-11 rounded-lg bg-primary-container hover:bg-primary text-on-primary-container font-label-lg text-label-lg font-bold flex items-center justify-center gap-2 transition-colors" onclick="closeDetailDrawer(); openApproveModal('WTH-2024-8901', 'Cloud9 Entertainment', '450.000.000 VNĐ', 'Vietcombank - 0071000982341')" type="button">
+<span class="material-symbols-outlined text-[18px]">check_circle</span>
+<span>Duyệt giải ngân ngay</span>
+</button>
+<button class="h-11 px-4 rounded-lg bg-urgency-coral/15 text-urgency-coral hover:bg-urgency-coral hover:text-white font-label-lg text-label-lg font-bold flex items-center justify-center gap-1.5 transition-colors" onclick="closeDetailDrawer(); openRejectModal('WTH-2024-8901', 'Cloud9 Entertainment', '450.000.000 VNĐ')" type="button">
+<span class="material-symbols-outlined text-[18px]">cancel</span>
+<span>Từ chối</span>
+</button>
+</div>
+</div>
+</div>
+</div>
+<!-- Modal: Approve Disbursement (Duyệt giải ngân) -->
+<div class="fixed inset-0 z-50 bg-on-surface/50 backdrop-blur-sm flex items-center justify-center p-4 opacity-0 pointer-events-none transition-opacity duration-200" id="approve-modal">
+<div class="bg-surface-container-lowest rounded-xl max-w-lg w-full shadow-2xl overflow-hidden scale-95 transition-transform duration-200" id="approve-modal-container">
+<div class="p-space-lg flex items-start gap-4 bg-primary/10">
+<div class="w-10 h-10 rounded-full bg-primary-container text-on-primary-container flex items-center justify-center shrink-0">
+<span class="material-symbols-outlined text-[24px]">verified</span>
+</div>
+<div class="flex flex-col">
+<h3 class="font-headline-sm text-headline-sm font-bold text-on-surface">Xác nhận duyệt giải ngân</h3>
+<p class="font-body-sm text-body-sm text-on-surface-variant">Lệnh chuyển khoản sẽ được lưu vết vào sổ cái giao dịch hệ thống.</p>
+</div>
+</div>
+<div class="p-space-lg flex flex-col gap-space-md">
+<!-- Target Info Pill -->
+<div class="bg-surface-container-low rounded-xl p-space-md flex flex-col gap-2">
+<div class="flex justify-between items-center text-body-sm">
+<span class="text-on-surface-variant">Đơn vị thụ hưởng:</span>
+<span class="font-semibold text-on-surface" id="approve-target-organizer">Cloud9 Entertainment</span>
+</div>
+<div class="flex justify-between items-center text-body-sm">
+<span class="text-on-surface-variant">Số tiền giải ngân:</span>
+<span class="font-headline-sm text-headline-sm font-extrabold text-primary" id="approve-target-amount">450.000.000 VNĐ</span>
+</div>
+<div class="flex justify-between items-center text-body-sm">
+<span class="text-on-surface-variant">Ngân hàng &amp; STK:</span>
+<span class="font-mono font-semibold text-on-surface" id="approve-target-bank">VCB - 0071000982341</span>
+</div>
+</div>
+<!-- Mandatory Reference Input -->
+<div class="flex flex-col gap-1.5">
+<label class="font-label-lg text-label-lg font-bold text-on-surface flex items-center gap-1" for="bank-ref-input">
+<span>Mã giao dịch chuyển tiền ngân hàng</span>
+<span class="text-urgency-coral">*</span>
+</label>
+<input class="h-11 px-3.5 bg-surface-container-low rounded-lg text-on-surface font-mono text-[14px] placeholder:text-on-surface-variant focus:outline-none focus:bg-surface-container transition-all" id="bank-ref-input" placeholder="VD: FT242981048201 hoặc VCB.20241024.9928" type="text">
+<p class="font-label-sm text-label-sm text-on-surface-variant">Nhập chính xác mã FT/Transaction ID trên ủy nhiệm chi Internet Banking của ngân hàng.</p>
+</div>
+<!-- System Audit Notice -->
+<div class="p-space-sm bg-surface-container rounded-lg flex items-start gap-2.5">
+<span class="material-symbols-outlined text-[18px] text-on-surface-variant mt-0.5 shrink-0">info</span>
+<span class="font-body-sm text-body-sm text-on-surface-variant">
+            Ghi chú: Hệ thống sẽ tự động ghi nhận mã giao dịch, định danh Quản Trị Viên (admin@ticketbox.vn) và dấu thời gian phê duyệt.
+          </span>
+</div>
+</div>
+<div class="p-space-lg bg-surface-container flex items-center justify-end gap-space-sm">
+<button class="h-10 px-4 rounded-lg hover:bg-surface-container-highest text-on-surface font-label-lg text-label-lg font-semibold transition-colors" onclick="closeApproveModal()" type="button">
+          Hủy bỏ
+        </button>
+<button class="h-10 px-5 rounded-lg bg-primary-container hover:bg-primary text-on-primary-container font-label-lg text-label-lg font-bold flex items-center gap-2 transition-colors" onclick="confirmApproveAction()" type="button">
+<span class="material-symbols-outlined text-[18px]">done_all</span>
+<span>Xác nhận duyệt</span>
+</button>
+</div>
+</div>
+</div>
+<!-- Modal: Reject Withdrawal Request (Từ chối) -->
+<div class="fixed inset-0 z-50 bg-on-surface/50 backdrop-blur-sm flex items-center justify-center p-4 opacity-0 pointer-events-none transition-opacity duration-200" id="reject-modal">
+<div class="bg-surface-container-lowest rounded-xl max-w-lg w-full shadow-2xl overflow-hidden scale-95 transition-transform duration-200" id="reject-modal-container">
+<div class="p-space-lg flex items-start gap-4 bg-urgency-coral/10">
+<div class="w-10 h-10 rounded-full bg-urgency-coral/20 text-urgency-coral flex items-center justify-center shrink-0">
+<span class="material-symbols-outlined text-[24px]">block</span>
+</div>
+<div class="flex flex-col">
+<h3 class="font-headline-sm text-headline-sm font-bold text-on-surface">Từ chối yêu cầu rút tiền</h3>
+<p class="font-body-sm text-body-sm text-on-surface-variant">Lệnh này sẽ bị hủy bỏ và thông báo trực tiếp đến Organizer.</p>
+</div>
+</div>
+<div class="p-space-lg flex flex-col gap-space-md">
+<!-- Target Info Recap -->
+<div class="bg-surface-container-low rounded-xl p-space-md flex flex-col gap-1.5">
+<div class="flex justify-between items-center text-body-sm">
+<span class="text-on-surface-variant">Đơn vị yêu cầu:</span>
+<span class="font-semibold text-on-surface" id="reject-target-organizer">Cloud9 Entertainment</span>
+</div>
+<div class="flex justify-between items-center text-body-sm">
+<span class="text-on-surface-variant">Khoản tiền hoàn trả:</span>
+<span class="font-headline-sm text-headline-sm font-extrabold text-urgency-coral" id="reject-target-amount">450.000.000 VNĐ</span>
+</div>
+</div>
+<!-- Mandatory Reason Input -->
+<div class="flex flex-col gap-1.5">
+<label class="font-label-lg text-label-lg font-bold text-on-surface flex items-center gap-1" for="reject-reason-textarea">
+<span>Lý do từ chối</span>
+<span class="text-urgency-coral">*</span>
+</label>
+<textarea class="p-3 bg-surface-container-low rounded-lg text-on-surface font-body-sm text-body-sm placeholder:text-on-surface-variant focus:outline-none focus:bg-surface-container transition-all" id="reject-reason-textarea" placeholder="VD: Thông tin tài khoản không trùng khớp tên doanh nghiệp..." rows="3"></textarea>
+<!-- Quick presets chips -->
+<div class="flex flex-wrap gap-1.5 mt-1">
+<button class="px-2 py-1 rounded bg-surface-container hover:bg-surface-container-highest text-on-surface-variant font-label-sm text-label-sm transition-colors" onclick="setRejectReason('Thông tin tài khoản không trùng khớp tên doanh nghiệp')" type="button">Sai tên pháp nhân</button>
+<button class="px-2 py-1 rounded bg-surface-container hover:bg-surface-container-highest text-on-surface-variant font-label-sm text-label-sm transition-colors" onclick="setRejectReason('STK nhận tiền không hoạt động hoặc bị phong tỏa')" type="button">STK lỗi</button>
+<button class="px-2 py-1 rounded bg-surface-container hover:bg-surface-container-highest text-on-surface-variant font-label-sm text-label-sm transition-colors" onclick="setRejectReason('Sự kiện đang trong quá trình khiếu nại hoàn tiền')" type="button">Có tranh chấp vé</button>
+</div>
+</div>
+<!-- Reversal Guarantee Box -->
+<div class="p-space-sm bg-mint-bright/20 rounded-lg flex items-start gap-2.5">
+<span class="material-symbols-outlined text-[18px] text-primary mt-0.5 shrink-0">restart_alt</span>
+<span class="font-body-sm text-body-sm text-on-primary-container font-medium">
+            Thông báo: Số tiền sẽ được hoàn trả nguyên vẹn về <strong>Số dư khả dụng</strong> của Organizer ngay sau khi xác nhận.
+          </span>
+</div>
+</div>
+<div class="p-space-lg bg-surface-container flex items-center justify-end gap-space-sm">
+<button class="h-10 px-4 rounded-lg hover:bg-surface-container-highest text-on-surface font-label-lg text-label-lg font-semibold transition-colors" onclick="closeRejectModal()" type="button">
+          Hủy bỏ
+        </button>
+<button class="h-10 px-5 rounded-lg bg-urgency-coral text-white hover:opacity-90 font-label-lg text-label-lg font-bold flex items-center gap-2 transition-opacity" onclick="confirmRejectAction()" type="button">
+<span class="material-symbols-outlined text-[18px]">close</span>
+<span>Xác nhận từ chối</span>
+</button>
+</div>
+</div>
+</div>
+<!-- Notification Toast Toastify (Mock) -->
+<div class="fixed bottom-6 right-6 z-50 bg-slate-surface text-white px-4 py-3 rounded-xl shadow-xl flex items-center gap-3 translate-y-24 opacity-0 transition-all duration-300 pointer-events-none" id="action-toast">
+<span class="material-symbols-outlined text-primary text-[20px]" id="toast-icon">check_circle</span>
+<span class="font-label-lg text-label-lg" id="toast-text">Thao tác thành công</span>
+</div>
+</div>
+<script>
+  // Tab Filter Handling
+  function filterStatus(status) {
+    const rows = document.querySelectorAll('.request-row');
+    const tabs = document.querySelectorAll('.filter-tab');
+
+    // Update active tab styles
+    tabs.forEach(tab => {
+      tab.classList.remove('bg-on-surface', 'text-surface');
+      tab.classList.add('bg-surface-container-low', 'text-on-surface-variant');
+    });
+
+    const activeTab = document.getElementById(`tab-${status}`);
+    if (activeTab) {
+      activeTab.classList.add('bg-on-surface', 'text-surface');
+      activeTab.classList.remove('bg-surface-container-low', 'text-on-surface-variant');
+    }
+
+    // Filter table rows
+    rows.forEach(row => {
+      const rowStatus = row.getAttribute('data-status');
+      if (status === 'all' || rowStatus === status) {
+        row.style.display = '';
+      } else {
+        row.style.display = 'none';
+      }
+    });
+  }
+
+  // Drawer Interactions
+  function openDetailDrawer() {
+    const overlay = document.getElementById('detail-drawer-overlay');
+    const drawer = document.getElementById('detail-drawer');
+    overlay.classList.remove('opacity-0', 'pointer-events-none');
+    overlay.classList.add('opacity-100');
+    drawer.classList.remove('translate-x-full');
+  }
+
+  function closeDetailDrawer() {
+    const overlay = document.getElementById('detail-drawer-overlay');
+    const drawer = document.getElementById('detail-drawer');
+    overlay.classList.add('opacity-0', 'pointer-events-none');
+    overlay.classList.remove('opacity-100');
+    drawer.classList.add('translate-x-full');
+  }
+
+  // Approve Modal Actions
+  function openApproveModal(code, organizer, amount, bank) {
+    document.getElementById('approve-target-organizer').innerText = organizer;
+    document.getElementById('approve-target-amount').innerText = amount;
+    document.getElementById('approve-target-bank').innerText = bank;
+    document.getElementById('bank-ref-input').value = '';
+
+    const modal = document.getElementById('approve-modal');
+    const container = document.getElementById('approve-modal-container');
+    modal.classList.remove('opacity-0', 'pointer-events-none');
+    modal.classList.add('opacity-100');
+    container.classList.remove('scale-95');
+    container.classList.add('scale-100');
+  }
+
+  function closeApproveModal() {
+    const modal = document.getElementById('approve-modal');
+    const container = document.getElementById('approve-modal-container');
+    modal.classList.add('opacity-0', 'pointer-events-none');
+    modal.classList.remove('opacity-100');
+    container.classList.remove('scale-100');
+    container.classList.add('scale-95');
+  }
+
+  function confirmApproveAction() {
+    const refCode = document.getElementById('bank-ref-input').value.trim();
+    if (!refCode) {
+      alert('Vui lòng nhập Mã giao dịch chuyển tiền ngân hàng (Transaction Reference Code)!');
+      document.getElementById('bank-ref-input').focus();
+      return;
+    }
+
+    closeApproveModal();
+    showToast(`Đã duyệt giải ngân thành công! Mã giao dịch: ${refCode}`, 'check_circle', 'text-primary');
+  }
+
+  // Reject Modal Actions
+  function openRejectModal(code, organizer, amount) {
+    document.getElementById('reject-target-organizer').innerText = organizer;
+    document.getElementById('reject-target-amount').innerText = amount;
+    document.getElementById('reject-reason-textarea').value = '';
+
+    const modal = document.getElementById('reject-modal');
+    const container = document.getElementById('reject-modal-container');
+    modal.classList.remove('opacity-0', 'pointer-events-none');
+    modal.classList.add('opacity-100');
+    container.classList.remove('scale-95');
+    container.classList.add('scale-100');
+  }
+
+  function closeRejectModal() {
+    const modal = document.getElementById('reject-modal');
+    const container = document.getElementById('reject-modal-container');
+    modal.classList.add('opacity-0', 'pointer-events-none');
+    modal.classList.remove('opacity-100');
+    container.classList.remove('scale-100');
+    container.classList.add('scale-95');
+  }
+
+  function setRejectReason(reason) {
+    document.getElementById('reject-reason-textarea').value = reason;
+  }
+
+  function confirmRejectAction() {
+    const reason = document.getElementById('reject-reason-textarea').value.trim();
+    if (!reason) {
+      alert('Vui lòng cung cấp Lý do từ chối yêu cầu rút tiền!');
+      document.getElementById('reject-reason-textarea').focus();
+      return;
+    }
+
+    closeRejectModal();
+    showToast('Đã từ chối yêu cầu rút tiền. Số dư đã hoàn trả về ví Organizer.', 'info', 'text-urgency-coral');
+  }
+
+  // Toast Notification Trigger
+  function showToast(message, iconName, iconColor) {
+    const toast = document.getElementById('action-toast');
+    const text = document.getElementById('toast-text');
+    const icon = document.getElementById('toast-icon');
+
+    text.innerText = message;
+    icon.innerText = iconName;
+    icon.className = `material-symbols-outlined text-[20px] ${iconColor}`;
+
+    toast.classList.remove('translate-y-24', 'opacity-0', 'pointer-events-none');
+    toast.classList.add('translate-y-0', 'opacity-100');
+
+    setTimeout(() => {
+      toast.classList.add('translate-y-24', 'opacity-0', 'pointer-events-none');
+      toast.classList.remove('translate-y-0', 'opacity-100');
+    }, 4000);
+  }
+
+  // Escape key closes open overlay/drawers
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') {
+      closeDetailDrawer();
+      closeApproveModal();
+      closeRejectModal();
+    }
+  });
+</script></main></div></body></html>

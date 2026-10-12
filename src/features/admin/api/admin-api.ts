@@ -21,6 +21,11 @@ export function errorMessage(error: unknown): string {
   const status = error instanceof ApiError ? error.status : error.response?.status
   const data = (error instanceof ApiError ? error.data : error.response?.data) as { message?: string; errors?: Record<string, string>; code?: string } | undefined
   const messages: Record<string, string> = {
+    WITHDRAWAL_NOT_PENDING: 'Yêu cầu không còn chờ duyệt. Vui lòng tải lại kết quả xử lý.',
+    INSUFFICIENT_RESERVED_BALANCE: 'Số dư chờ rút không đủ. Cần đối soát ví trước khi xử lý.',
+    TRANSACTION_CODE_IN_USE: 'Mã giao dịch chuyển khoản đã được ghi nhận.',
+    PAYOUT_REQUIRES_RECONCILIATION: 'Yêu cầu đã có giao dịch chi trả. Cần đối soát trước khi xử lý.',
+    EVENT_NOT_CANCELED: 'Sự kiện chưa được hủy chính thức, chưa đủ điều kiện hoàn tiền.',
     EMAIL_ALREADY_EXISTS: 'Email đã được sử dụng.', CATEGORY_NAME_ALREADY_EXISTS: 'Tên danh mục đã tồn tại.',
     CATEGORY_IN_USE: 'Danh mục đang được sử dụng, không thể xóa.', CANNOT_LOCK_SELF: 'Không thể khóa chính tài khoản của bạn.',
     EVENT_VERSION_CONFLICT: 'Nội dung sự kiện đã thay đổi. Vui lòng tải lại để xem trước khi quyết định.',

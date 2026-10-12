@@ -6,13 +6,13 @@ Dự án Frontend được xây dựng bằng **React 19 + Vite + TypeScript**, 
 
 Admin đăng nhập được chuyển tới /admin/events/pending. Feature `src/features/admin` dùng router/AuthProvider và Axios client chung; CSS Modules, Lucide, bố cục theo mẫu platform.
 
-| Route | Chức năng |
-| --- | --- |
-| /admin/users | Tìm tên/email, lọc role, phân trang, tạo CUSTOMER/ORGANIZER, khóa/mở; chặn tự khóa |
-| /admin/event-categories | Thêm/sửa/xóa danh mục; xử lý trùng tên và danh mục đang dùng |
-| /admin/events/pending | Danh sách chỉ sự kiện chờ duyệt |
+| Route                          | Chức năng                                                                                 |
+| ------------------------------ | ----------------------------------------------------------------------------------------- |
+| /admin/users                   | Tìm tên/email, lọc role, phân trang, tạo CUSTOMER/ORGANIZER, khóa/mở; chặn tự khóa        |
+| /admin/event-categories        | Thêm/sửa/xóa danh mục; xử lý trùng tên và danh mục đang dùng                              |
+| /admin/events/pending          | Danh sách chỉ sự kiện chờ duyệt                                                           |
 | /admin/events/pending/:eventId | Hồ sơ, ảnh, địa điểm, khách mời, vé; duyệt có xác nhận, từ chối có lý do tối đa 255 ký tự |
-| /organizer/notifications | Thông báo kết quả xét duyệt từ DB, mở từ biểu tượng chuông |
+| /organizer/notifications       | Thông báo kết quả xét duyệt từ DB, mở từ biểu tượng chuông                                |
 
 UI có loading/lỗi/thử lại/rỗng, dialog giữ dữ liệu khi lỗi, chặn gửi lặp. Quyết định gửi version nhận từ chi tiết; 404/409 chặn quyết định tiếp đến khi đọc lại hồ sơ. Trang Organizer bổ sung trạng thái REJECTED và rejectReason; chưa mở sửa/gửi lại REJECTED.
 
@@ -31,9 +31,9 @@ npm install
 npm run dev
 ```
 
-* Mở trình duyệt tại: `http://localhost:5173`.
-* Backend chạy tại: `http://localhost:8080` (tham khảo README của `eventhub-backend` để cấu hình PostgreSQL và JWT).
-* Vite đã cấu hình proxy tự động chuyển tiếp các request `/api` sang `http://localhost:8080`.
+- Mở trình duyệt tại: `http://localhost:5173`.
+- Backend chạy tại: `http://localhost:8080` (tham khảo README của `eventhub-backend` để cấu hình PostgreSQL và JWT).
+- Vite đã cấu hình proxy tự động chuyển tiếp các request `/api` sang `http://localhost:8080`.
 
 ---
 
@@ -41,19 +41,19 @@ npm run dev
 
 ### 2.1. Danh mục đường dẫn chính
 
-| Đường dẫn | Hành vi |
-| --- | --- |
-| `/register` | Đăng ký CUSTOMER hoặc ORGANIZER; thành công chuyển sang đăng nhập, chưa tạo phiên. |
-| `/login` | Chỉ nhập email, mật khẩu và đăng nhập; không có đăng nhập mạng xã hội hoặc mô phỏng kiểm thử. |
-| `/` | Yêu cầu đăng nhập; Organizer được chuyển tới `/organizer`; các role còn lại có trang đăng xuất. |
-| `/customer` | Cổng thông tin khách hàng, xem chi tiết và cập nhật thông tin cá nhân, đổi mật khẩu. |
-| `/organizer` | Chỉ ORGANIZER; trang tổng quan theo mẫu, các số liệu minh họa và mục quản lý khác chưa kết nối API. |
-| `/organizer/events/new/details` | Bước 1: thông tin, địa điểm, thời gian, ảnh bìa/thumbnail/sơ đồ. |
-| `/organizer/events/new/category` | Bước 2: danh mục từ DB và khách mời (tùy chọn). |
-| `/organizer/events/new/tickets` | Bước 3: thêm/sửa/xóa/nhân bản loại vé, kiểm tra hồ sơ và gửi duyệt. |
-| `/organizer/events` | Danh sách từ API: tìm theo tên, lọc trạng thái và phân trang. |
-| `/organizer/events/:eventId` | Chi tiết, địa điểm, ảnh, khách mời, số vé phát hành/đã bán/giữ chỗ/còn lại; sửa hoặc yêu cầu hủy khi được phép. |
-| `/organizer/events/:eventId/edit/:step` | Dùng lại form tạo với `details`, `category`, `tickets`; tải hồ sơ hiện tại, sửa và gửi duyệt lại. |
+| Đường dẫn                               | Hành vi                                                                                                         |
+| --------------------------------------- | --------------------------------------------------------------------------------------------------------------- |
+| `/register`                             | Đăng ký CUSTOMER hoặc ORGANIZER; thành công chuyển sang đăng nhập, chưa tạo phiên.                              |
+| `/login`                                | Chỉ nhập email, mật khẩu và đăng nhập; không có đăng nhập mạng xã hội hoặc mô phỏng kiểm thử.                   |
+| `/`                                     | Yêu cầu đăng nhập; Organizer được chuyển tới `/organizer`; các role còn lại có trang đăng xuất.                 |
+| `/customer`                             | Cổng thông tin khách hàng, xem chi tiết và cập nhật thông tin cá nhân, đổi mật khẩu.                            |
+| `/organizer`                            | Chỉ ORGANIZER; trang tổng quan theo mẫu, các số liệu minh họa và mục quản lý khác chưa kết nối API.             |
+| `/organizer/events/new/details`         | Bước 1: thông tin, địa điểm, thời gian, ảnh bìa/thumbnail/sơ đồ.                                                |
+| `/organizer/events/new/category`        | Bước 2: danh mục từ DB và khách mời (tùy chọn).                                                                 |
+| `/organizer/events/new/tickets`         | Bước 3: thêm/sửa/xóa/nhân bản loại vé, kiểm tra hồ sơ và gửi duyệt.                                             |
+| `/organizer/events`                     | Danh sách từ API: tìm theo tên, lọc trạng thái và phân trang.                                                   |
+| `/organizer/events/:eventId`            | Chi tiết, địa điểm, ảnh, khách mời, số vé phát hành/đã bán/giữ chỗ/còn lại; sửa hoặc yêu cầu hủy khi được phép. |
+| `/organizer/events/:eventId/edit/:step` | Dùng lại form tạo với `details`, `category`, `tickets`; tải hồ sơ hiện tại, sửa và gửi duyệt lại.               |
 
 ### 2.2. Mô hình phân tầng: Feature ➔ Pages ➔ Components ➔ API Services
 
@@ -93,11 +93,11 @@ Dự án tổ chức mã nguồn theo từng **phân hệ người dùng / tính
                          [ Backend Spring Boot ]
 ```
 
-* **Feature Module (`src/features/<tên-feature>/`)**: Đại diện cho 1 nhóm đối tượng người dùng (`admin`, `customer`, `organizer`, `staff`) hoặc 1 luồng lớn (`auth`, `events`).
-* **Pages (`pages/`)**: Các màn hình hoàn chỉnh mà router trỏ tới (ví dụ: `AdminPage.tsx`, `CreateEventPage.tsx`).
-* **Components (`components/`)**: Các thành phần giao diện nhỏ hơn cấu thành nên Page (ví dụ: `EventEditors.tsx`, `EventFields.tsx`).
-* **API Service (`api/`)**: Chuyên trách việc gọi HTTP request đến server (dùng `httpClient.get`, `httpClient.post`). **Quy chuẩn chung:** Đặt tên thư mục là `api/` (thay vì `services/`) để ngắn gọn và đồng bộ (`auth-api.ts`, `event-api.ts`).
-* **Types (`types/`)**: Định nghĩa interface TypeScript để đảm bảo tính an toàn dữ liệu (Type-safe).
+- **Feature Module (`src/features/<tên-feature>/`)**: Đại diện cho 1 nhóm đối tượng người dùng (`admin`, `customer`, `organizer`, `staff`) hoặc 1 luồng lớn (`auth`, `events`).
+- **Pages (`pages/`)**: Các màn hình hoàn chỉnh mà router trỏ tới (ví dụ: `AdminPage.tsx`, `CreateEventPage.tsx`).
+- **Components (`components/`)**: Các thành phần giao diện nhỏ hơn cấu thành nên Page (ví dụ: `EventEditors.tsx`, `EventFields.tsx`).
+- **API Service (`api/`)**: Chuyên trách việc gọi HTTP request đến server (dùng `httpClient.get`, `httpClient.post`). **Quy chuẩn chung:** Đặt tên thư mục là `api/` (thay vì `services/`) để ngắn gọn và đồng bộ (`auth-api.ts`, `event-api.ts`).
+- **Types (`types/`)**: Định nghĩa interface TypeScript để đảm bảo tính an toàn dữ liệu (Type-safe).
 
 ---
 
@@ -126,15 +126,17 @@ Dự án tổ chức mã nguồn theo từng **phân hệ người dùng / tính
 ## 3. Cơ Chế Xác Thực & Phân Quyền (Auth & RBAC Flow)
 
 ### 3.1. Quản lý phiên bằng HttpOnly Cookie (Tại sao KHÔNG dùng localStorage?)
+
 1. **Lưu Token:** Sau khi đăng nhập thành công (`POST /api/auth/login`), Backend tự động thiết lập 2 cookie:
-   * `access_token` (Path: `/api`, sống 15 phút).
-   * `refresh_token` (Path: `/api/auth`, sống 7 ngày).
+   - `access_token` (Path: `/api`, sống 15 phút).
+   - `refresh_token` (Path: `/api/auth`, sống 7 ngày).
 2. **Bảo mật tuyệt đối:** Cả 2 cookie đều có cờ `HttpOnly`, JavaScript ở Frontend **không thể đọc được** -> Ngăn chặn 100% rủi ro bị đánh cắp token qua lỗ hổng XSS.
 3. **Tuyệt đối KHÔNG lưu token vào `localStorage` hay `sessionStorage`**. Trình duyệt tự động gửi kèm cookie trong mọi request nhờ `withCredentials: true` cấu hình sẵn trong `httpClient`.
 
 ### 3.2. Nơi lưu thông tin User ở Frontend & Cơ chế Silent Refresh khi F5
-* **Vị trí lưu:** Thông tin người dùng (`id`, `email`, `fullName`, `role`) được lưu trong **React State** thông qua `AuthContext` tại [`src/app/AuthProvider.tsx`](src/app/AuthProvider.tsx).
-* **Khi người dùng F5 hoặc mở lại trình duyệt:**
+
+- **Vị trí lưu:** Thông tin người dùng (`id`, `email`, `fullName`, `role`) được lưu trong **React State** thông qua `AuthContext` tại [`src/app/AuthProvider.tsx`](src/app/AuthProvider.tsx).
+- **Khi người dùng F5 hoặc mở lại trình duyệt:**
   1. React State bị reset về `null`, nhưng biến `loading = true`.
   2. `useEffect` trong `AuthProvider` tự động gọi ngay: `POST /api/auth/refresh`.
   3. Trình duyệt tự gửi cookie `refresh_token` lên Backend.
@@ -142,18 +144,19 @@ Dự án tổ chức mã nguồn theo từng **phân hệ người dùng / tính
   5. Người dùng tiếp tục sử dụng ứng dụng mà **không bị văng ra màn hình đăng nhập**.
 
 ### 3.3. Logic kiểm tra quyền và định tuyến trong `AppRouter.tsx`
+
 Trong [`src/app/AppRouter.tsx`](src/app/AppRouter.tsx), Router sử dụng hook `useAuth()` để lấy dữ liệu từ `AuthProvider` và bảo vệ các tuyến đường bằng các Route Guard:
 
-* **`GuestRoute`**: Nếu đã đăng nhập (`user != null`), không cho phép vào `/login` hay `/register` (tự động điều hướng về `/`).
-* **`ProtectedRoute`**: Yêu cầu người dùng phải đăng nhập (`user != null`), nếu chưa sẽ chuyển hướng về `/login`.
-* **`AdminRoute`**: Kiểm tra `user?.role === 'ADMIN'`. Nếu không phải Admin, tự động chuyển về trang chủ `/`.
-* **`OrganizerRoute`**: Kiểm tra `user?.role === 'ORGANIZER'`.
-* **`StaffRoute`**: Kiểm tra `user?.role === 'STAFF'`.
-* **`LandingPage`**: Khi truy cập trang chủ `/`, hệ thống dựa trên `user.role` để chuyển hướng người dùng về đúng trang mặc định của vai trò đó:
-  * Role `ADMIN` ➔ Chuyển hướng sang `/admin`.
-  * Role `ORGANIZER` ➔ Chuyển hướng sang `/organizer`.
-  * Role `STAFF` ➔ Chuyển hướng sang `/staff`.
-  * Role `CUSTOMER` / Khách ➔ Trang mặc định của khách `/customer`.
+- **`GuestRoute`**: Nếu đã đăng nhập (`user != null`), không cho phép vào `/login` hay `/register` (tự động điều hướng về `/`).
+- **`ProtectedRoute`**: Yêu cầu người dùng phải đăng nhập (`user != null`), nếu chưa sẽ chuyển hướng về `/login`.
+- **`AdminRoute`**: Kiểm tra `user?.role === 'ADMIN'`. Nếu không phải Admin, tự động chuyển về trang chủ `/`.
+- **`OrganizerRoute`**: Kiểm tra `user?.role === 'ORGANIZER'`.
+- **`StaffRoute`**: Kiểm tra `user?.role === 'STAFF'`.
+- **`LandingPage`**: Khi truy cập trang chủ `/`, hệ thống dựa trên `user.role` để chuyển hướng người dùng về đúng trang mặc định của vai trò đó:
+  - Role `ADMIN` ➔ Chuyển hướng sang `/admin`.
+  - Role `ORGANIZER` ➔ Chuyển hướng sang `/organizer`.
+  - Role `STAFF` ➔ Chuyển hướng sang `/staff`.
+  - Role `CUSTOMER` / Khách ➔ Trang mặc định của khách `/customer`.
 
 ---
 
@@ -208,16 +211,16 @@ src/
 
 ## 5. Bảng Tra Cứu Đường Dẫn (Route Map)
 
-| Đường dẫn (URL) | Route Guard | Quyền truy cập (Role) | Mô tả giao diện |
-| :--- | :--- | :--- | :--- |
-| `/login` | `GuestRoute` | Khách vãng lai | Trang đăng nhập tài khoản |
-| `/register` | `GuestRoute` | Khách vãng lai | Trang đăng ký tài khoản (Customer / Organizer) |
-| `/` | `ProtectedRoute` | Đã đăng nhập | Tự động chuyển hướng đến trang tương ứng theo Role |
-| `/customer` | `ProtectedRoute` | `CUSTOMER` | Giao diện xem và đặt vé của Khách hàng |
-| `/admin` | `AdminRoute` | `ADMIN` | Giao diện quản trị hệ thống |
-| `/organizer` | `OrganizerRoute` | `ORGANIZER` | Bảng điều khiển Ban tổ chức sự kiện |
-| `/organizer/events/new` | `OrganizerRoute` | `ORGANIZER` | Tạo sự kiện mới (3 bước: chi tiết, danh mục, vé) |
-| `/staff` | `StaffRoute` | `STAFF` | Giao diện quét mã soát vé cho nhân viên |
+| Đường dẫn (URL)         | Route Guard      | Quyền truy cập (Role) | Mô tả giao diện                                    |
+| :---------------------- | :--------------- | :-------------------- | :------------------------------------------------- |
+| `/login`                | `GuestRoute`     | Khách vãng lai        | Trang đăng nhập tài khoản                          |
+| `/register`             | `GuestRoute`     | Khách vãng lai        | Trang đăng ký tài khoản (Customer / Organizer)     |
+| `/`                     | `ProtectedRoute` | Đã đăng nhập          | Tự động chuyển hướng đến trang tương ứng theo Role |
+| `/customer`             | `ProtectedRoute` | `CUSTOMER`            | Giao diện xem và đặt vé của Khách hàng             |
+| `/admin`                | `AdminRoute`     | `ADMIN`               | Giao diện quản trị hệ thống                        |
+| `/organizer`            | `OrganizerRoute` | `ORGANIZER`           | Bảng điều khiển Ban tổ chức sự kiện                |
+| `/organizer/events/new` | `OrganizerRoute` | `ORGANIZER`           | Tạo sự kiện mới (3 bước: chi tiết, danh mục, vé)   |
+| `/staff`                | `StaffRoute`     | `STAFF`               | Giao diện quét mã soát vé cho nhân viên            |
 
 ---
 
