@@ -19,16 +19,21 @@
 .header { height: 74px; background: #fff; display: flex; align-items: center; justify-content: space-between; padding: 0 30px; gap: 20px; border-bottom: 1px solid #eff1f4; }
 .account { display: flex; align-items: center; gap: 15px; margin-left: auto; }
 .role { color: #087e4b; background: #e2f6ec; border-radius: 20px; font-size: 10px; letter-spacing: .4px; padding: 5px 10px; font-weight: 700; white-space: nowrap; }
-.user { text-align: right; display: grid; gap: 3px; font-size: 12px; }
-.user small { font-size: 10px; color: #718079; }
 .accountMenu { position: relative; flex-shrink: 0; }
-.avatar { background: #daf3e6; width: 35px; height: 35px; display: grid; place-items: center; border: 0; padding: 0; border-radius: 50%; color: #087e4b; font-weight: 700; }
-.avatar:hover, .avatar[aria-expanded="true"] { background: #c5ecd8; }
-.accountDropdown { position: absolute; top: calc(100% + 10px); right: 0; min-width: 175px; padding: 6px; background: #fff; border: 1px solid #e6ece8; border-radius: 10px; box-shadow: 0 8px 24px #17241d1a; z-index: 30; }
+.accountButton { display: flex; align-items: center; gap: 10px; padding: 6px 12px 6px 6px; border: 1px solid #e7e8eb; border-radius: 30px; background: #fff; transition: border-color .2s, box-shadow .2s; }
+.accountButton:hover, .accountButton[aria-expanded="true"] { border-color: #006d3d; box-shadow: 0 2px 8px #0000000f; }
+.avatar { background: #e2fbd7; width: 32px; height: 32px; display: grid; place-items: center; border-radius: 50%; color: #006d3d; font-size: 13px; font-weight: 700; flex-shrink: 0; }
+.accountName { max-width: 140px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: #191c1e; font-size: 13.5px; font-weight: 600; }
+.accountChevron { color: #6d7b6f; flex-shrink: 0; }
+.accountDropdown { position: absolute; top: calc(100% + 8px); right: 0; width: 240px; padding: 8px; background: #fff; border: 1px solid #e7e8eb; border-radius: 14px; box-shadow: 0 10px 30px #0000001f, 0 1px 3px #00000014; z-index: 30; }
+.dropdownUserHeader { padding: 8px 12px 10px; border-bottom: 1px solid #f2f4f6; margin-bottom: 6px; }
+.dropdownName { font-size: 14px; font-weight: 700; color: #191c1e; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.dropdownEmail { font-size: 12px; color: #6d7b6f; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .accountProfile { display: flex; align-items: center; gap: 9px; width: 100%; padding: 11px 12px; border: 0; border-radius: 6px; background: none; color: #203128; font-size: 13px; text-align: left; white-space: nowrap; text-decoration: none; }
 .accountProfile:hover { background: #e2f6ec; color: #087e4b; }
-.accountLogout { display: flex; align-items: center; gap: 9px; width: 100%; padding: 11px 12px; border: 0; border-radius: 6px; background: none; color: #203128; font-size: 13px; text-align: left; white-space: nowrap; }
-.accountLogout:hover { background: #e2f6ec; color: #087e4b; }
+.accountDivider { height: 1px; background: #eceef0; margin: 4px 0; }
+.accountLogout { display: flex; align-items: center; gap: 9px; width: 100%; padding: 11px 12px; border: 0; border-radius: 6px; background: none; color: #ba1a1a; font-size: 13px; text-align: left; white-space: nowrap; }
+.accountLogout:hover { background: #ffdad6; }
 .accountLogout:disabled { opacity: .6; cursor: wait; }
 .content { max-width: 1400px; margin: auto; padding: 30px 32px 40px; }
 .menuToggle, .backdrop { display: none; }
@@ -39,5 +44,6 @@
   .main { margin-left: 0; } .header { height: 65px; padding: 0 15px; gap: 12px; }
   .menuToggle { display: grid; place-items: center; border: 0; background: none; color: #1d3928; padding: 5px; }
   .backdrop { display: block; position: fixed; inset: 0; border: 0; background: #12231a66; z-index: 39; }
-  .content { padding: 23px 16px 30px; } .account { gap: 10px; margin-left: auto; } .user strong { max-width: 180px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .content { padding: 23px 16px 30px; } .account { gap: 10px; margin-left: auto; }
 }
+@media (max-width: 640px) { .accountName { display: none; } .accountButton { padding: 4px; gap: 3px; } }

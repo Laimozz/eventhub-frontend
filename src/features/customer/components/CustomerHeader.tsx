@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { Link, useNavigate, useSearchParams } from 'react-router';
 import { useAuth } from '../../auth/hooks/useAuth';
 import type { UserDetailDto } from '../types/user';
@@ -19,6 +19,19 @@ export function CustomerHeader({ user: propUser, onSelectMode }: CustomerHeaderP
 
   const [userMenuOpen, setUserMenuOpen] = useState(false);
   const [logoutModalOpen, setLogoutModalOpen] = useState(false);
+  const userMenuRef = useRef<HTMLDivElement>(null);
+  const userMenuButtonRef = useRef<HTMLButtonElement>(null);
+
+  useEffect(() => {
+    if (!userMenuOpen) return;
+    function closeOnOutsideClick(event: PointerEvent) {
+      if (event.target instanceof Node && !userMenuRef.current?.contains(event.target)) {
+        setUserMenuOpen(false);
+      }
+    }
+    document.addEventListener('pointerdown', closeOnOutsideClick);
+    return () => document.removeEventListener('pointerdown', closeOnOutsideClick);
+  }, [userMenuOpen]);
 
   async function handleLogout() {
     setLogoutModalOpen(false);
@@ -77,10 +90,29 @@ export function CustomerHeader({ user: propUser, onSelectMode }: CustomerHeaderP
 
                 <NotificationBell />
                 {/* User Dropdown Menu */}
-                <div className={styles.userMenuWrapper}>
+                <div
+                  className={styles.userMenuWrapper}
+                  ref={userMenuRef}
+                  onBlur={(event) => {
+                    if (event.relatedTarget && !event.currentTarget.contains(event.relatedTarget)) {
+                      setUserMenuOpen(false);
+                    }
+                  }}
+                  onKeyDown={(event) => {
+                    if (event.key === 'Escape' && userMenuOpen) {
+                      event.preventDefault();
+                      setUserMenuOpen(false);
+                      userMenuButtonRef.current?.focus();
+                    }
+                  }}
+                >
                   <button
                     type="button"
                     className={styles.userMenuBtn}
+                    ref={userMenuButtonRef}
+                    aria-label="Menu tài khoản"
+                    aria-expanded={userMenuOpen}
+                    aria-controls="customer-account-menu"
                     onClick={() => setUserMenuOpen(!userMenuOpen)}
                   >
                     {user?.avatarUrl ? (
@@ -111,7 +143,7 @@ export function CustomerHeader({ user: propUser, onSelectMode }: CustomerHeaderP
                   </button>
 
                   {userMenuOpen && (
-                    <div className={styles.dropdownMenu}>
+                    <div id="customer-account-menu" className={styles.dropdownMenu}>
                       <div className={styles.dropdownUserHeader}>
                         <p className={styles.dropdownName}>{user?.fullName}</p>
                         <p className={styles.dropdownEmail}>{user?.email}</p>
@@ -138,7 +170,7 @@ export function CustomerHeader({ user: propUser, onSelectMode }: CustomerHeaderP
                           if (onSelectMode) {
                             onSelectMode('CHANGE_PASSWORD');
                           } else {
-                            navigate('/customer/profile');
+                            navigate('/customer/profile?mode=CHANGE_PASSWORD');
                           }
                           setUserMenuOpen(false);
                         }}

@@ -30,6 +30,7 @@ async function setup(page: Page, role: keyof typeof paths | 'STAFF') {
     const path = new URL(route.request().url()).pathname
     if (!path.startsWith('/api/')) return route.continue()
     if (path.endsWith('/auth/refresh')) return route.fulfill({ status: state.signedIn ? 200 : 401, json: { id: 1, role, fullName: 'Nguyễn An', email: 'member@example.test', phone: null } })
+    if (path.endsWith('/users/me')) return route.fulfill({ json: { id: 1, role, fullName: 'Nguyễn An', email: 'member@example.test', phone: null, status: 'ACTIVE', avatarUrl: null } })
     if (path.endsWith('/auth/logout')) {
       state.signedIn = false
       return route.fulfill({ status: 204 })
@@ -85,6 +86,74 @@ for (const role of Object.keys(paths) as (keyof typeof paths)[]) {
     await page.screenshot({ path: test.info().outputPath(`notifications-${role}.png`), fullPage: true })
   })
 }
+
+for (const role of ['CUSTOMER', 'ORGANIZER'] as const) {
+  test(`${role} account menu dismisses and opens password and notification pages`, async ({ page }) => {
+    await setup(page, role)
+    await page.goto(paths[role])
+    const trigger = page.getByRole('button', { name: 'Menu tài khoản', exact: true })
+    const dropdown = page.locator(`#${role.toLowerCase()}-account-menu`)
+    await trigger.click()
+    await expect(trigger).toHaveAttribute('aria-expanded', 'true')
+    await expect(dropdown).toContainText('member@example.test')
+    await dropdown.getByText('member@example.test', { exact: true }).click()
+    await expect(dropdown).toBeVisible()
+    await page.getByRole('heading', { name: 'Thông báo', exact: true }).click({ position: { x: 5, y: 5 } })
+    await expect(dropdown).toBeHidden()
+    await expect(trigger).toHaveAttribute('aria-expanded', 'false')
+
+    await trigger.click()
+    await page.keyboard.press('Escape')
+    await expect(dropdown).toBeHidden()
+    await expect(trigger).toBeFocused()
+    await trigger.click()
+    await page.keyboard.press('Shift+Tab')
+    await expect(dropdown).toBeHidden()
+
+    await trigger.click()
+    await page.screenshot({ path: test.info().outputPath(`account-menu-${role}.png`), fullPage: true, animations: 'disabled' })
+    await dropdown.getByText('Đổi mật khẩu', { exact: true }).click()
+    await expect(page).toHaveURL(`/${role.toLowerCase()}/profile?mode=CHANGE_PASSWORD`)
+    await expect(page.getByRole('heading', { name: 'Đổi mật khẩu tài khoản', exact: true })).toBeVisible()
+    await expect(dropdown).toBeHidden()
+    await expect(page.getByLabel(/^Mật khẩu hiện tại/)).toBeVisible()
+    await page.reload()
+    await expect(page.getByRole('heading', { name: 'Đổi mật khẩu tài khoản', exact: true })).toBeVisible()
+
+    await page.getByRole('button', { name: /Quay lại hồ sơ/ }).click()
+    await expect(page.getByRole('heading', { name: 'Thông tin cá nhân', exact: true })).toBeVisible()
+    await trigger.click()
+    await dropdown.getByText('Đổi mật khẩu', { exact: true }).click()
+    await expect(page.getByRole('heading', { name: 'Đổi mật khẩu tài khoản', exact: true })).toBeVisible()
+    await trigger.click()
+    await dropdown.getByRole('link', { name: /Thông báo/ }).click()
+    await expect(page).toHaveURL(paths[role])
+    await expect(dropdown).toBeHidden()
+  })
+}
+
+test('customer notification footer fills short pages and follows long lists', async ({ page }) => {
+  const state = await setup(page, 'CUSTOMER')
+  state.items = []
+  await page.goto(paths.CUSTOMER)
+  await expect(page.getByText('Chưa có thông báo.', { exact: true })).toBeVisible()
+  const footer = page.getByRole('contentinfo')
+  await expect(footer).toBeVisible()
+  const shortBounds = await footer.boundingBox()
+  expect(shortBounds).not.toBeNull()
+  expect(Math.abs(shortBounds!.y + shortBounds!.height - page.viewportSize()!.height)).toBeLessThanOrEqual(1)
+  expect(await page.evaluate(() => document.documentElement.scrollHeight <= innerHeight + 1)).toBe(true)
+  await page.screenshot({ path: test.info().outputPath('customer-notifications-empty.png'), fullPage: true })
+
+  state.items = Array.from({ length: 20 }, (_, index) => item(20 - index))
+  await changed(page)
+  await expect(page.getByRole('article')).toHaveCount(20)
+  const longBounds = await footer.boundingBox()
+  const lastItem = await page.getByRole('article').last().boundingBox()
+  expect(longBounds!.y).toBeGreaterThan(page.viewportSize()!.height)
+  expect(longBounds!.y).toBeGreaterThan(lastItem!.y + lastItem!.height)
+  expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true)
+})
 
 test('SSE refreshes the list and badge, reconnects and keeps one connection across routes', async ({ page }) => {
   const state = await setup(page, 'ORGANIZER')
