@@ -5,7 +5,7 @@ export function StaffRoutes() {
   return (
     <Routes>
       <Route index element={<StaffPage />} />
-      <Route path="*" element={<Navigate to="" replace />} />
+      <Route path="*" element={<Navigate to="/staff" replace />} />
     </Routes>
   )
 }

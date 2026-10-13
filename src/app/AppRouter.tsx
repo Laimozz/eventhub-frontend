@@ -84,6 +84,7 @@ export function AppRouter() {
         {/* Admin Portal */}
         <Route element={<AdminRoute />}>
           <Route path="/admin" element={<AdminLayout />}>
+            <Route path="notifications" element={<NotificationsPage />} />
             <Route index element={<Navigate to="events/pending" replace />} />
             <Route path="users" element={<UsersPage />} />
             <Route path="event-categories" element={<EventCategoriesPage />} />

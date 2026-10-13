@@ -1,1 +1,13 @@
 .page { color:#203c2f; }.page header { display:flex; align-items:center; justify-content:space-between; gap:16px; margin-bottom:24px; }.page h1 { margin:0; font-size:28px; }.page header p { color:#687d71; }.page article { background:white; padding:22px; border:1px solid #e2ebe5; border-radius:12px; margin-bottom:14px; }.page h2 { font-size:18px; margin:0 0 12px; }.page article p { white-space:pre-wrap; overflow-wrap:anywhere; }.page time { color:#687d71; font-size:13px; }.page button { border:1px solid #d5e4da; border-radius:8px; padding:10px 15px; background:white; cursor:pointer; }.page button:disabled { opacity:.5; cursor:not-allowed; }.page footer { display:flex; gap:14px; align-items:center; flex-wrap:wrap; }.page footer span { margin-right:auto; }@media(max-width:600px){.page header{align-items:flex-start;flex-direction:column}}
+.customerLayout { display: flex; flex-direction: column; min-height: 100vh; min-height: 100dvh; }
+.customerContent { flex: 1; min-width: 0; }
+.standalone { max-width: 1200px; margin: 0 auto; padding: 32px 24px; }
+.actions, .itemHeading, .itemFooter { display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
+.actions { justify-content: flex-end; }
+.itemHeading h2 { margin: 0; flex: 1; min-width: 0; overflow-wrap: anywhere; }
+.page article.unread { background: #f3fcf6; border-color: #a6dcb9; border-left: 4px solid #087e4b; }
+.readLabel, .unreadLabel { font-size: 12px; white-space: nowrap; }
+.readLabel { color: #687d71; }
+.unreadLabel { color: #087e4b; font-weight: 600; }
+.itemFooter { margin-top: 16px; }
+@media (max-width: 600px) { .standalone { padding: 24px 16px; } .actions { justify-content: flex-start; } }

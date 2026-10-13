@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { Link, NavLink, Outlet, useNavigate } from 'react-router'
-import { Bell, ChartColumn, CirclePlus, LayoutDashboard, LogOut, Menu, Ticket, User, Users, Wallet, X } from 'lucide-react'
+import { Bell, ChartColumn, ChevronDown, ChevronUp, CirclePlus, KeyRound, LayoutDashboard, LogOut, Menu, Ticket, User, Users, Wallet, X } from 'lucide-react'
+import { NotificationBell } from '../../notifications/components/NotificationBell'
 import { useAuth } from '../../auth/hooks/useAuth'
 import { authErrorMessage } from '../../auth/api/auth-errors'
 import styles from './OrganizerLayout.module.css'
@@ -47,8 +48,7 @@ export function OrganizerLayout() {
         <button className={styles.menuToggle} onClick={() => setMenuOpen(!menuOpen)} aria-label={menuOpen ? 'Đóng menu điều hướng' : 'Mở menu điều hướng'} aria-expanded={menuOpen}>{menuOpen ? <X /> : <Menu />}</button>
         <div className={styles.account}>
           <span className={styles.role}>BAN TỔ CHỨC</span>
-          <Link className={styles.bell} to="/organizer/notifications" aria-label="Thông báo"><Bell size={21} /></Link>
-          <div className={styles.user}><strong>{user?.fullName || 'Nhà tổ chức'}</strong><small>{user?.email}</small></div>
+          <NotificationBell />
           <div className={styles.accountMenu} ref={accountMenuRef}
             onBlur={event => { if (event.relatedTarget && !event.currentTarget.contains(event.relatedTarget)) setAccountMenuOpen(false) }}
             onKeyDown={event => {
@@ -58,14 +58,27 @@ export function OrganizerLayout() {
                 avatarRef.current?.focus()
               }
             }}>
-            <button type="button" className={styles.avatar} ref={avatarRef} aria-label="Menu tài khoản"
+            <button type="button" className={styles.accountButton} ref={avatarRef} aria-label="Menu tài khoản"
               aria-expanded={accountMenuOpen} aria-controls="organizer-account-menu" onClick={() => setAccountMenuOpen(!accountMenuOpen)}>
-              {(user?.fullName || user?.email || 'O').slice(0, 1).toUpperCase()}
+              <span className={styles.avatar}>{(user?.fullName?.trim() || user?.email || 'O').slice(0, 1).toUpperCase()}</span>
+              <span className={styles.accountName}>{user?.fullName || 'Nhà tổ chức'}</span>
+              {accountMenuOpen ? <ChevronUp size={18} className={styles.accountChevron} aria-hidden="true" /> : <ChevronDown size={18} className={styles.accountChevron} aria-hidden="true" />}
             </button>
             {accountMenuOpen && <div id="organizer-account-menu" className={styles.accountDropdown}>
+              <div className={styles.dropdownUserHeader}>
+                <p className={styles.dropdownName}>{user?.fullName || 'Nhà tổ chức'}</p>
+                <p className={styles.dropdownEmail}>{user?.email}</p>
+              </div>
               <Link to="/organizer/profile" className={styles.accountProfile} onClick={() => setAccountMenuOpen(false)}>
                 <User size={17} />Thông tin cá nhân
               </Link>
+              <Link to="/organizer/profile?mode=CHANGE_PASSWORD" className={styles.accountProfile} onClick={() => setAccountMenuOpen(false)}>
+                <KeyRound size={17} />Đổi mật khẩu
+              </Link>
+              <Link to="/organizer/notifications" className={styles.accountProfile} onClick={() => setAccountMenuOpen(false)}>
+                <Bell size={17} />Thông báo
+              </Link>
+              <div className={styles.accountDivider} />
               <button type="button" className={styles.accountLogout} onClick={logout} disabled={pending}>
                 <LogOut size={17} />{pending ? 'Đang đăng xuất…' : 'Đăng xuất'}
               </button>

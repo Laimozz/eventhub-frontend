@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { useLocation } from 'react-router';
+import { useLocation, useSearchParams } from 'react-router';
 import { useAuth } from '../../auth/hooks/useAuth';
 import type { UserDetailDto } from '../types/user';
 import { getUserDetail } from '../api/user-api';
@@ -24,7 +24,16 @@ export function UserDetailPage({ hideNav = false }: UserDetailPageProps = {}) {
   const isInsidePortal = location.pathname.startsWith('/admin') || location.pathname.startsWith('/organizer');
   const shouldHideNav = hideNav || isInsidePortal;
 
-  const [mode, setMode] = useState<PageMode>('VIEW');
+  const [searchParams, setSearchParams] = useSearchParams();
+  const requestedMode = searchParams.get('mode');
+  const mode: PageMode = requestedMode === 'EDIT' || requestedMode === 'CHANGE_PASSWORD' ? requestedMode : 'VIEW';
+  function setMode(nextMode: PageMode) {
+    setSearchParams((params) => {
+      if (nextMode === 'VIEW') params.delete('mode');
+      else params.set('mode', nextMode);
+      return params;
+    }, { replace: true });
+  }
   const [user, setUser] = useState<UserDetailDto | null>(null);
   const [loading, setLoading] = useState(true);
   const [pageError, setPageError] = useState<string | null>(null);
