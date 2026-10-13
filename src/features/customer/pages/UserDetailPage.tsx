@@ -127,7 +127,6 @@ export function UserDetailPage({ hideNav = false }: UserDetailPageProps = {}) {
           mode === 'VIEW' ? (
             <UserDetail
               user={currentUser}
-              onEdit={() => setMode('EDIT')}
             />
           ) : mode === 'EDIT' ? (
             <EditUserDetail

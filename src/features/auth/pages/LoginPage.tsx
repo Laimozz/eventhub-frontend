@@ -30,7 +30,8 @@ export function LoginPage() {
     setPending(true)
     try {
       await signIn({ email: email.trim().toLowerCase(), password })
-      navigate('/', { replace: true })
+      const returnPath = location.state?.from
+      navigate(typeof returnPath === 'string' && returnPath.startsWith('/customer/') ? returnPath : '/', { replace: true })
     } catch (cause) {
       setError(authErrorMessage(cause))
     } finally {

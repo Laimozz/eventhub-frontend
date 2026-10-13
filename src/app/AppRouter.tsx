@@ -1,4 +1,4 @@
-import { Navigate, Outlet, Route, Routes } from 'react-router'
+import { Navigate, Outlet, Route, Routes, useLocation } from 'react-router'
 import { useAuth } from '../features/auth/hooks/useAuth'
 import { LoginPage } from '../features/auth/pages/LoginPage'
 import { RegisterPage } from '../features/auth/pages/RegisterPage'
@@ -29,7 +29,10 @@ import { CustomerRoutes } from '../features/customer/routes/CustomerRoutes'
 
 function GuestRoute() {
   const { user } = useAuth()
-  return user ? <Navigate to="/" replace /> : <Outlet />
+  const location = useLocation()
+  const from = location.state?.from
+  const destination = user?.role === 'CUSTOMER' && typeof from === 'string' && from.startsWith('/customer/') ? from : '/'
+  return user ? <Navigate to={destination} replace /> : <Outlet />
 }
 
 function ProtectedRoute() {

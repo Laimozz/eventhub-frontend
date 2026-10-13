@@ -235,6 +235,26 @@ Khi một thành viên nhận nhiệm vụ phát triển một tính năng mới
 
 ## 7. Kiểm Tra & Đóng Gói
 
+### Đặt vé, thanh toán và QR
+
+| Đường dẫn | Chức năng |
+| --- | --- |
+| `/customer/events/:eventId/book` | Chọn loại vé và số lượng theo kho từ backend |
+| `/customer/bookings/:bookingId/checkout` | Thông tin tài khoản, hạn giữ vé, chuyển sang VNPay Sandbox |
+| `/customer/payment-result` | Xác thực callback với backend và chờ IPN; chỉ thông báo thành công khi booking PAID |
+| `/customer/booking-cua-toi` | Lịch sử booking phân trang |
+| `/customer/bookings/:bookingId` | Chi tiết vé đã chọn, tổng tiền và các lần thanh toán |
+| `/customer/ve-cua-toi` | Vé điện tử/QR, lọc vé chưa dùng/đã check-in |
+| `/customer/bookings/:bookingId/tickets` | Vé theo booking, phóng to QR |
+
+Các trang booking/vé yêu cầu CUSTOMER và sẽ quay lại trang đang mở sau khi đăng nhập. Trang payment-result công khai để nhận redirect, nhưng chi tiết booking/vé vẫn yêu cầu chủ tài khoản. Giá, kho, trạng thái thanh toán và hiệu lực QR do backend quyết định. Vé miễn phí được phát hành ngay theo response PAID.
+
+Khi đã bắt đầu thanh toán và vừa hết hạn, backend có thể trả PAYMENT_CONFIRMING với paymentConfirmationDeadline (mặc định giữ thêm 120 giây để chờ IPN). FE hiển thị “Đang xác nhận thanh toán”, khóa thanh toán lại và đếm ngược theo deadline của backend. Trang kết quả kiểm tra mỗi 2 giây cho đến trạng thái kết thúc, không dừng sau 60 giây; checkout/chi tiết cập nhật mỗi 5 giây khi còn PENDING/PAYMENT_CONFIRMING. Hạn thanh toán ban đầu vẫn là expiredAt. Khi backend trả EXPIRED, trang kết quả cho phép kiểm tra lại để đọc trạng thái của IPN đến muộn.
+
+Backend cần `VNPAY_RETURN_URL=http://localhost:5173/customer/payment-result` khi chạy FE mặc định, cùng merchant/secret Sandbox. IPN đăng ký phía VNPay là `https://<backend-public>/api/payments/vnpay/ipn`, phải truy cập được từ Internet. Khi deploy thay Return URL bằng domain FE; không đưa hash secret vào frontend.
+
+Ảnh QR mã hóa token riêng cho từng vé bằng `qrcode.react`. Trang vé cập nhật mỗi 10 giây và khi tab lấy lại focus; vé có trạng thái USED sẽ ẩn mã QR. Phạm vi customer không bao gồm màn hình hoặc API quét/check-in.
+
 ```bash
 # Kiểm tra linter
 npm run lint
