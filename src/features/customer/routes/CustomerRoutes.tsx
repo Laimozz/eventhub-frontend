@@ -1,9 +1,23 @@
-import { Navigate, Route, Routes } from 'react-router'
+import { Navigate, Outlet, Route, Routes, useLocation } from 'react-router'
+import { useAuth } from '../../auth/hooks/useAuth'
+import { SelectTicketsPage } from '../pages/SelectTicketsPage'
+import { BookingCheckoutPage } from '../pages/BookingCheckoutPage'
+import { BookingHistoryPage } from '../pages/BookingHistoryPage'
+import { BookingDetailPage } from '../pages/BookingDetailPage'
+import { PaymentResultPage } from '../pages/PaymentResultPage'
+import { MyTicketsPage } from '../pages/MyTicketsPage'
 import { UserDetailPage } from '../pages/UserDetailPage'
 import { PlaceholderPage } from '../../../pages/PlaceholderPage'
 import { ExplorePage } from '../pages/ExplorePage'
 import { EventDetailPage } from '../pages/EventDetailPage'
 import { HomePage } from '../pages/HomePage'
+
+function CustomerMemberRoute() {
+  const { user } = useAuth()
+  const location = useLocation()
+  if (!user) return <Navigate to="/login" replace state={{ from: location.pathname + location.search }} />
+  return user.role === 'CUSTOMER' ? <Outlet /> : <Navigate to="/" replace />
+}
 
 export function CustomerRoutes() {
   return (
@@ -16,8 +30,15 @@ export function CustomerRoutes() {
       <Route path="profile" element={<UserDetailPage />} />
 
       {/* Các tính năng thành viên */}
-      <Route path="ve-cua-toi" element={<PlaceholderPage title="Giao diện Vé của tôi" />} />
-      <Route path="booking-cua-toi" element={<PlaceholderPage title="Giao diện Booking của tôi" />} />
+      <Route path="payment-result" element={<PaymentResultPage />} />
+      <Route element={<CustomerMemberRoute />}>
+        <Route path="events/:eventId/book" element={<SelectTicketsPage />} />
+        <Route path="bookings/:bookingId/checkout" element={<BookingCheckoutPage />} />
+        <Route path="bookings/:bookingId" element={<BookingDetailPage />} />
+        <Route path="bookings/:bookingId/tickets" element={<MyTicketsPage />} />
+        <Route path="ve-cua-toi" element={<MyTicketsPage />} />
+        <Route path="booking-cua-toi" element={<BookingHistoryPage />} />
+      </Route>
       <Route path="thong-bao" element={<PlaceholderPage title="Giao diện Thông báo" />} />
       <Route path="danh-muc" element={<PlaceholderPage title="Giao diện Danh mục" />} />
 

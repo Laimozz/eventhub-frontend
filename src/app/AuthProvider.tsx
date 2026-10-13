@@ -21,7 +21,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         currentUserRef.current = null
         setUser(null)
         setSessionError('Phiên đăng nhập đã hết hạn. Vui lòng đăng nhập lại.')
-        navigate('/login', { replace: true })
+        navigate('/login', { replace: true, state: { from: window.location.pathname + window.location.search } })
       }),
     [navigate],
   )

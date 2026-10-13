@@ -3,10 +3,9 @@ import styles from '../pages/UserDetailPage.module.css';
 
 interface UserDetailProps {
   user: UserDetailDto;
-  onEdit: () => void;
 }
 
-export function UserDetail({ user, onEdit }: UserDetailProps) {
+export function UserDetail({ user }: UserDetailProps) {
   const roleDisplay = user.role === 'ADMIN'
     ? 'Quản trị viên / Admin'
     : user.role === 'ORGANIZER'
@@ -49,14 +48,6 @@ export function UserDetail({ user, onEdit }: UserDetailProps) {
               <h2 className={styles.heroName}>{user.fullName}</h2>
               <p className={styles.heroSub}>{roleSub}</p>
             </div>
-            <button
-              type="button"
-              className={styles.btnSecondaryEdit}
-              onClick={onEdit}
-            >
-              <span className="material-symbols-outlined text-[18px]">edit</span>
-              <span>Chỉnh sửa thông tin cá nhân</span>
-            </button>
           </div>
 
           <div className={styles.quickInfoRow}>

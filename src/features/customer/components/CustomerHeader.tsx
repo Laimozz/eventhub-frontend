@@ -41,7 +41,6 @@ export function CustomerHeader({ user: propUser, onSelectMode }: CustomerHeaderP
 
             <nav className={styles.navLinks}>
               <Link to="/customer/explore" className={styles.navLink}>Khám phá</Link>
-              <Link to="/customer/danh-muc" className={styles.navLink}>Danh mục</Link>
             </nav>
           </div>
 
