@@ -12,9 +12,11 @@ Admin đăng nhập được chuyển tới /admin/events/pending. Feature `src/
 | /admin/event-categories | Thêm/sửa/xóa danh mục; xử lý trùng tên và danh mục đang dùng |
 | /admin/events/pending | Danh sách chỉ sự kiện chờ duyệt |
 | /admin/events/pending/:eventId | Hồ sơ, ảnh, địa điểm, khách mời, vé; duyệt có xác nhận, từ chối có lý do tối đa 255 ký tự |
-| /organizer/notifications | Thông báo kết quả xét duyệt từ DB, mở từ biểu tượng chuông |
+| /admin/notifications, /organizer/notifications, /customer/thong-bao | Thông báo của tài khoản đăng nhập, phân trang, đánh dấu đọc và cập nhật realtime qua SSE |
 
 UI có loading/lỗi/thử lại/rỗng, dialog giữ dữ liệu khi lỗi, chặn gửi lặp. Quyết định gửi version nhận từ chi tiết; 404/409 chặn quyết định tiếp đến khi đọc lại hồ sơ. Trang Organizer bổ sung trạng thái REJECTED và rejectReason; chưa mở sửa/gửi lại REJECTED.
+
+Chuông thông báo nằm trên top bar cạnh avatar ở cổng Admin, Organizer và Customer, kèm số chưa đọc. `NotificationsProvider` duy trì một kết nối SSE cho mỗi tab đăng nhập thuộc ba vai trò này; REST dùng Axios client chung, SSE gửi cookie với `withCredentials`. Sau sự kiện SSE hoặc reconnect, frontend tải lại danh sách/số chưa đọc từ backend. Kết nối đóng khi đăng xuất/đổi tài khoản. Staff tạm thời không có giao diện, request API hoặc kết nối SSE thông báo. Kiểm thử UI ở `tests/notifications.spec.ts` giả lập API/SSE; backend có kiểm thử PostgreSQL và SSE riêng.
 
 ApiError giữ thêm code/message/errors từ backend để hiện lỗi nghiệp vụ; cơ chế cookie/refresh vẫn giữ nguyên. Test `tests/admin.spec.ts` chạy desktop/mobile với API giả lập; backend kiểm thử API và DB thật riêng. Trên máy có Edge có thể dùng `$env:PLAYWRIGHT_CHANNEL='msedge'; npm.cmd run test:e2e`. PowerShell chặn npm.ps1 thì dùng npm.cmd.
 

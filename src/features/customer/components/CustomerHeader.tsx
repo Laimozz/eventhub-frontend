@@ -3,6 +3,7 @@ import { Link, useNavigate, useSearchParams } from 'react-router';
 import { useAuth } from '../../auth/hooks/useAuth';
 import type { UserDetailDto } from '../types/user';
 import styles from './CustomerHeader.module.css';
+import { NotificationBell } from '../../notifications/components/NotificationBell';
 
 interface CustomerHeaderProps {
   user?: UserDetailDto | null;
@@ -74,6 +75,7 @@ export function CustomerHeader({ user: propUser, onSelectMode }: CustomerHeaderP
                   <span>Vé của tôi</span>
                 </Link>
 
+                <NotificationBell />
                 {/* User Dropdown Menu */}
                 <div className={styles.userMenuWrapper}>
                   <button

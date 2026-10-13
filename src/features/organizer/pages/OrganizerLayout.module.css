@@ -19,7 +19,6 @@
 .header { height: 74px; background: #fff; display: flex; align-items: center; justify-content: space-between; padding: 0 30px; gap: 20px; border-bottom: 1px solid #eff1f4; }
 .account { display: flex; align-items: center; gap: 15px; margin-left: auto; }
 .role { color: #087e4b; background: #e2f6ec; border-radius: 20px; font-size: 10px; letter-spacing: .4px; padding: 5px 10px; font-weight: 700; white-space: nowrap; }
-.bell { background: none; border: 0; color: #283e30; padding: 3px; cursor: default !important; }
 .user { text-align: right; display: grid; gap: 3px; font-size: 12px; }
 .user small { font-size: 10px; color: #718079; }
 .accountMenu { position: relative; flex-shrink: 0; }

@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { Link, NavLink, Outlet, useNavigate } from 'react-router'
-import { Bell, ChartColumn, CirclePlus, LayoutDashboard, LogOut, Menu, Ticket, User, Users, Wallet, X } from 'lucide-react'
+import { ChartColumn, CirclePlus, LayoutDashboard, LogOut, Menu, Ticket, User, Users, Wallet, X } from 'lucide-react'
+import { NotificationBell } from '../../notifications/components/NotificationBell'
 import { useAuth } from '../../auth/hooks/useAuth'
 import { authErrorMessage } from '../../auth/api/auth-errors'
 import styles from './OrganizerLayout.module.css'
@@ -47,8 +48,8 @@ export function OrganizerLayout() {
         <button className={styles.menuToggle} onClick={() => setMenuOpen(!menuOpen)} aria-label={menuOpen ? 'Đóng menu điều hướng' : 'Mở menu điều hướng'} aria-expanded={menuOpen}>{menuOpen ? <X /> : <Menu />}</button>
         <div className={styles.account}>
           <span className={styles.role}>BAN TỔ CHỨC</span>
-          <Link className={styles.bell} to="/organizer/notifications" aria-label="Thông báo"><Bell size={21} /></Link>
           <div className={styles.user}><strong>{user?.fullName || 'Nhà tổ chức'}</strong><small>{user?.email}</small></div>
+          <NotificationBell />
           <div className={styles.accountMenu} ref={accountMenuRef}
             onBlur={event => { if (event.relatedTarget && !event.currentTarget.contains(event.relatedTarget)) setAccountMenuOpen(false) }}
             onKeyDown={event => {

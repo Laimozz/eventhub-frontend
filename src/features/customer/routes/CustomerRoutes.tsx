@@ -11,6 +11,9 @@ import { PlaceholderPage } from '../../../pages/PlaceholderPage'
 import { ExplorePage } from '../pages/ExplorePage'
 import { EventDetailPage } from '../pages/EventDetailPage'
 import { HomePage } from '../pages/HomePage'
+import { CustomerHeader } from '../components/CustomerHeader'
+import { CustomerFooter } from '../components/CustomerFooter'
+import { NotificationsPage } from '../../notifications/pages/NotificationsPage'
 
 function CustomerMemberRoute() {
   const { user } = useAuth()
@@ -32,6 +35,7 @@ export function CustomerRoutes() {
       {/* Các tính năng thành viên */}
       <Route path="payment-result" element={<PaymentResultPage />} />
       <Route element={<CustomerMemberRoute />}>
+        <Route path="thong-bao" element={<><CustomerHeader /><NotificationsPage standalone /><CustomerFooter /></>} />
         <Route path="events/:eventId/book" element={<SelectTicketsPage />} />
         <Route path="bookings/:bookingId/checkout" element={<BookingCheckoutPage />} />
         <Route path="bookings/:bookingId" element={<BookingDetailPage />} />
@@ -39,7 +43,6 @@ export function CustomerRoutes() {
         <Route path="ve-cua-toi" element={<MyTicketsPage />} />
         <Route path="booking-cua-toi" element={<BookingHistoryPage />} />
       </Route>
-      <Route path="thong-bao" element={<PlaceholderPage title="Giao diện Thông báo" />} />
       <Route path="danh-muc" element={<PlaceholderPage title="Giao diện Danh mục" />} />
 
       <Route path="*" element={<Navigate to="explore" replace />} />
