@@ -12,8 +12,9 @@ export function UserPageHeader({ mode, onSetMode }: UserPageHeaderProps) {
   const location = useLocation();
   const isInsideAdmin = location.pathname.startsWith('/admin');
   const isInsideOrganizer = location.pathname.startsWith('/organizer');
-  const homePath = isInsideAdmin ? '/admin/events/pending' : isInsideOrganizer ? '/organizer' : '/';
-  const homeText = isInsideAdmin ? 'Quản trị' : isInsideOrganizer ? 'Ban tổ chức' : 'Trang chủ';
+  const isInsideStaff = location.pathname.startsWith('/staff');
+  const homePath = isInsideAdmin ? '/admin/events/pending' : isInsideOrganizer ? '/organizer' : isInsideStaff ? '/staff' : '/';
+  const homeText = isInsideAdmin ? 'Quản trị' : isInsideOrganizer ? 'Ban tổ chức' : isInsideStaff ? 'Cổng Nhân viên' : 'Trang chủ';
 
   return (
     <>

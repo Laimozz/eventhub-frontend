@@ -21,7 +21,7 @@ export function UserDetailPage({ hideNav = false }: UserDetailPageProps = {}) {
   const { user: authUser } = useAuth();
   const location = useLocation();
 
-  const isInsidePortal = location.pathname.startsWith('/admin') || location.pathname.startsWith('/organizer');
+  const isInsidePortal = location.pathname.startsWith('/admin') || location.pathname.startsWith('/organizer') || location.pathname.startsWith('/staff');
   const shouldHideNav = hideNav || isInsidePortal;
 
   const [searchParams, setSearchParams] = useSearchParams();

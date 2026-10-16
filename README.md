@@ -56,6 +56,9 @@ npm run dev
 | `/organizer/events` | Danh sách từ API: tìm theo tên, lọc trạng thái và phân trang. |
 | `/organizer/events/:eventId` | Chi tiết, địa điểm, ảnh, khách mời, số vé phát hành/đã bán/giữ chỗ/còn lại; sửa hoặc yêu cầu hủy khi được phép. |
 | `/organizer/events/:eventId/edit/:step` | Dùng lại form tạo với `details`, `category`, `tickets`; tải hồ sơ hiện tại, sửa và gửi duyệt lại. |
+| `/staff` | Cổng Nhân viên soát vé; xem danh sách sự kiện được phân công, lọc theo ngày và trạng thái ca trực. |
+| `/staff/events/:eventId` | Chi tiết sự kiện phân công, thống kê vé (Tổng vé, Đã soát vé, Chưa check-in), thanh lọc 2 cấp (Khách hàng, Loại vé, Trạng thái) và danh sách vé phân trang (chế độ tra cứu chỉ đọc trên Web). |
+| `/staff/profile` | Thông tin cá nhân và đổi mật khẩu của tài khoản nhân viên. |
 
 ### 2.2. Mô hình phân tầng: Feature ➔ Pages ➔ Components ➔ API Services
 
