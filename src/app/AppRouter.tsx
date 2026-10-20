@@ -2,11 +2,12 @@ import { Navigate, Outlet, Route, Routes } from 'react-router'
 import { useAuth } from '../features/auth/hooks/useAuth'
 import { LoginPage } from '../features/auth/pages/LoginPage'
 import { RegisterPage } from '../features/auth/pages/RegisterPage'
-import { HomePage } from '../pages/HomePage'
 
 // Organizer Pages & Layout
 import { OrganizerLayout } from '../features/organizer/pages/OrganizerLayout'
 import { OrganizerDashboard } from '../features/organizer/pages/OrganizerDashboard'
+import { OrganizerStaffDispatchPage } from '../features/organizer/pages/OrganizerStaffDispatchPage'
+import { OrganizerWalletPage } from '../features/organizer/pages/OrganizerWalletPage'
 import { CreateEventPage } from '../features/events/pages/CreateEventPage'
 import { OrganizerEventsPage } from '../features/events/pages/OrganizerEventsPage'
 import { EventDetailPage } from '../features/events/pages/EventDetailPage'
@@ -99,6 +100,8 @@ export function AppRouter() {
             <Route path="events/:eventId" element={<EventDetailPage />} />
             <Route path="events/:eventId/edit" element={<Navigate to="details" replace />} />
             <Route path="events/:eventId/edit/:step" element={<EditEventPage />} />
+            <Route path="staffs" element={<OrganizerStaffDispatchPage />} />
+            <Route path="wallet" element={<OrganizerWalletPage />} />
           </Route>
         </Route>
 

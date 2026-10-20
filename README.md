@@ -47,13 +47,15 @@ npm run dev
 | `/login` | Chỉ nhập email, mật khẩu và đăng nhập; không có đăng nhập mạng xã hội hoặc mô phỏng kiểm thử. |
 | `/` | Yêu cầu đăng nhập; Organizer được chuyển tới `/organizer`; các role còn lại có trang đăng xuất. |
 | `/customer` | Cổng thông tin khách hàng, xem chi tiết và cập nhật thông tin cá nhân, đổi mật khẩu. |
-| `/organizer` | Chỉ ORGANIZER; trang tổng quan theo mẫu, các số liệu minh họa và mục quản lý khác chưa kết nối API. |
+| `/organizer` | Chỉ ORGANIZER; trang tổng quan kết nối dữ liệu thật (Hero sự kiện nổi bật, KPI bán vé, phân tích doanh thu, số dư ví). |
 | `/organizer/events/new/details` | Bước 1: thông tin, địa điểm, thời gian, ảnh bìa/thumbnail/sơ đồ. |
 | `/organizer/events/new/category` | Bước 2: danh mục từ DB và khách mời (tùy chọn). |
 | `/organizer/events/new/tickets` | Bước 3: thêm/sửa/xóa/nhân bản loại vé, kiểm tra hồ sơ và gửi duyệt. |
 | `/organizer/events` | Danh sách từ API: tìm theo tên, lọc trạng thái và phân trang. |
-| `/organizer/events/:eventId` | Chi tiết, địa điểm, ảnh, khách mời, số vé phát hành/đã bán/giữ chỗ/còn lại; sửa hoặc yêu cầu hủy khi được phép. |
+| `/organizer/events/:eventId` | Chi tiết sự kiện, hồ sơ vé và tab Quản lý nhân viên soát vé (UC 21 & UC 22). |
 | `/organizer/events/:eventId/edit/:step` | Dùng lại form tạo với `details`, `category`, `tickets`; tải hồ sơ hiện tại, sửa và gửi duyệt lại. |
+| `/organizer/staffs` | Phân công & điều phối nhân viên soát vé cho các sự kiện (UC 21 & UC 22). |
+| `/organizer/wallet` | Doanh thu & quản lý số dư ví, tạo yêu cầu rút tiền, xem lịch sử và hủy yêu cầu (UC 24, 25, 26, 27). |
 
 ### 2.2. Mô hình phân tầng: Feature ➔ Pages ➔ Components ➔ API Services
 

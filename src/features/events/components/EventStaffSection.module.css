@@ -1,0 +1,839 @@
+.staffSection {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  width: 100%;
+  color: #191c1e;
+  font-family: 'Plus Jakarta Sans', Inter, -apple-system, BlinkMacSystemFont, sans-serif;
+}
+
+/* 1. Top Overview Bar */
+.topBar {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  justify-content: space-between;
+}
+
+@media (min-width: 1024px) {
+  .topBar {
+    flex-direction: row;
+    align-items: center;
+  }
+}
+
+.sectionTitle {
+  font-size: 24px;
+  font-weight: 700;
+  line-height: 32px;
+  letter-spacing: -0.01em;
+  color: #191c1e;
+  margin: 0;
+}
+
+.sectionSubtitle {
+  font-size: 13px;
+  line-height: 20px;
+  color: #3d4a3f;
+  margin: 4px 0 0;
+}
+
+.topActions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-shrink: 0;
+}
+
+.btnExport {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 16px;
+  border-radius: 12px;
+  background: #eceef0;
+  color: #191c1e;
+  font-size: 14px;
+  font-weight: 600;
+  border: none;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.btnExport:hover {
+  background: #e7e8eb;
+}
+
+.btnAddStaff {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 20px;
+  border-radius: 12px;
+  background: #2dc275;
+  color: #ffffff;
+  font-size: 14px;
+  font-weight: 700;
+  border: none;
+  cursor: pointer;
+  box-shadow: 0 2px 8px rgba(45, 194, 117, 0.25);
+  transition: all 0.15s ease;
+}
+
+.btnAddStaff:hover {
+  background: #006d3d;
+}
+
+.noticeBox {
+  padding: 12px 16px;
+  border-radius: 12px;
+  background: rgba(45, 194, 117, 0.15);
+  color: #006d3d;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.errorBox {
+  padding: 12px 16px;
+  border-radius: 12px;
+  background: #ffdad6;
+  color: #ba1a1a;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+/* 2. 4 Gate Shift Allocation Summary Cards */
+.gateGrid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 16px;
+}
+
+@media (min-width: 640px) {
+  .gateGrid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (min-width: 1024px) {
+  .gateGrid {
+    grid-template-columns: repeat(4, 1fr);
+  }
+}
+
+.gateCard {
+  padding: 16px 20px;
+  border-radius: 16px;
+  background: #ffffff;
+  border: 1px solid #eceef0;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.04);
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: 12px;
+  transition: box-shadow 0.2s ease, transform 0.2s ease;
+}
+
+.gateCard:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px -2px rgba(18, 21, 23, 0.08);
+}
+
+.gateTopRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.gateBadgeA {
+  padding: 4px 10px;
+  border-radius: 8px;
+  background: rgba(45, 194, 117, 0.15);
+  color: #006d3d;
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.gateBadgeB {
+  padding: 4px 10px;
+  border-radius: 8px;
+  background: rgba(57, 184, 253, 0.2);
+  color: #006591;
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.gateBadgeC {
+  padding: 4px 10px;
+  border-radius: 8px;
+  background: rgba(111, 251, 190, 0.5);
+  color: #004c6e;
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.gateBadgeD {
+  padding: 4px 10px;
+  border-radius: 8px;
+  background: #e7e8eb;
+  color: #3d4a3f;
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.pulseGreen {
+  width: 8px;
+  height: 8px;
+  border-radius: 9999px;
+  background: #006d3d;
+  animation: pulse 2s infinite;
+}
+
+.pulseCoral {
+  width: 8px;
+  height: 8px;
+  border-radius: 9999px;
+  background: #ff4d4d;
+  animation: pulse 1.5s infinite;
+}
+
+.gateMain {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.gateLeader {
+  font-size: 14px;
+  font-weight: 700;
+  color: #191c1e;
+}
+
+.gateRole {
+  font-size: 13px;
+  color: #3d4a3f;
+}
+
+.gateBottomRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding-top: 12px;
+  border-top: 1px solid #eceef0;
+  font-size: 11px;
+}
+
+.gateCount {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-weight: 600;
+  color: #191c1e;
+}
+
+.gatePosActive {
+  padding: 2px 8px;
+  border-radius: 4px;
+  background: #e7e8eb;
+  color: #006d3d;
+  font-weight: 700;
+}
+
+.gatePosActiveB {
+  padding: 2px 8px;
+  border-radius: 4px;
+  background: #e7e8eb;
+  color: #006591;
+  font-weight: 700;
+}
+
+.gatePosActiveC {
+  padding: 2px 8px;
+  border-radius: 4px;
+  background: #e7e8eb;
+  color: #006c49;
+  font-weight: 700;
+}
+
+.gatePosActiveD {
+  padding: 2px 8px;
+  border-radius: 4px;
+  background: #e7e8eb;
+  color: #3d4a3f;
+  font-weight: 700;
+}
+
+/* 3. Real-time Scan Progress Metric Banner */
+.progressBanner {
+  padding: 24px;
+  border-radius: 16px;
+  background: #ffffff;
+  border: 1px solid #eceef0;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.04);
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+@media (min-width: 768px) {
+  .progressBanner {
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+  }
+}
+
+.progressLeft {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.gaugeBox {
+  width: 56px;
+  height: 56px;
+  border-radius: 16px;
+  background: rgba(45, 194, 117, 0.1);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.gaugeSvg {
+  width: 40px;
+  height: 40px;
+  transform: rotate(-90deg);
+}
+
+.gaugeTrack {
+  stroke: #e1e2e5;
+}
+
+.gaugeFill {
+  stroke: #2dc275;
+}
+
+.progressHeadingRow {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.progressTitle {
+  font-size: 20px;
+  font-weight: 700;
+  letter-spacing: -0.005em;
+  color: #191c1e;
+}
+
+.speedPill {
+  padding: 2px 10px;
+  border-radius: 9999px;
+  background: rgba(0, 109, 61, 0.1);
+  color: #006d3d;
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.progressDesc {
+  font-size: 13px;
+  line-height: 20px;
+  color: #3d4a3f;
+  margin: 4px 0 0;
+  max-width: 600px;
+}
+
+.progressRight {
+  display: flex;
+  align-items: center;
+  gap: 24px;
+  flex-shrink: 0;
+}
+
+.gateStat {
+  text-align: center;
+}
+
+.gateStatLabel {
+  font-size: 11px;
+  font-weight: 600;
+  color: #3d4a3f;
+  text-transform: uppercase;
+  margin-bottom: 2px;
+}
+
+.gateStatVal {
+  font-size: 20px;
+  font-weight: 700;
+  color: #191c1e;
+}
+
+.textPrimaryGreen {
+  color: #006d3d !important;
+}
+
+.textSecondaryBlue {
+  color: #006591 !important;
+}
+
+/* 4. Staff Member Table */
+.tableCard {
+  border-radius: 16px;
+  background: #ffffff;
+  border: 1px solid #eceef0;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.04);
+  overflow: hidden;
+}
+
+.tableToolbar {
+  padding: 16px 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  border-bottom: 1px solid #eceef0;
+}
+
+@media (min-width: 640px) {
+  .tableToolbar {
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+  }
+}
+
+.searchBox {
+  position: relative;
+  width: 100%;
+  max-width: 320px;
+}
+
+.searchIcon {
+  position: absolute;
+  left: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #3d4a3f;
+}
+
+.searchInput {
+  width: 100%;
+  height: 40px;
+  padding-left: 40px;
+  padding-right: 14px;
+  border-radius: 12px;
+  background: #f2f4f6;
+  font-size: 13px;
+  color: #191c1e;
+  border: 1px solid transparent;
+  outline: none;
+  transition: all 0.15s ease;
+}
+
+.searchInput:focus {
+  background: #ffffff;
+  border-color: #2dc275;
+  box-shadow: 0 0 0 3px rgba(45, 194, 117, 0.15);
+}
+
+.filterPill {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 14px;
+  border-radius: 12px;
+  background: #eceef0;
+  color: #191c1e;
+  font-size: 11px;
+  font-weight: 600;
+}
+
+.tableWrapper {
+  width: 100%;
+  overflow-x: auto;
+}
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  text-align: left;
+  font-size: 13px;
+}
+
+.table thead {
+  background: #f2f4f6;
+  color: #3d4a3f;
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.table th {
+  padding: 12px 16px;
+  border: none;
+}
+
+.tableRow {
+  transition: background 0.15s ease;
+  border-bottom: 1px solid #f2f4f6;
+}
+
+.tableRow:hover {
+  background: rgba(242, 244, 246, 0.6);
+}
+
+.table td {
+  padding: 16px;
+  vertical-align: middle;
+}
+
+.staffUserCell {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.avatarCircle {
+  width: 40px;
+  height: 40px;
+  border-radius: 9999px;
+  background: #daf3e6;
+  color: #006d3d;
+  font-size: 15px;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.staffFullName {
+  font-size: 14px;
+  font-weight: 700;
+  color: #191c1e;
+}
+
+.staffIdBadge {
+  font-size: 11px;
+  color: #3d4a3f;
+  margin-top: 2px;
+}
+
+.emailText {
+  font-family: monospace;
+  font-size: 13px;
+  color: #191c1e;
+}
+
+.gatePill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 10px;
+  border-radius: 8px;
+  background: rgba(45, 194, 117, 0.15);
+  color: #006d3d;
+  font-size: 11px;
+  font-weight: 600;
+}
+
+.dotGreen {
+  width: 6px;
+  height: 6px;
+  border-radius: 9999px;
+  background: #006d3d;
+}
+
+.posTerminalCell {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-weight: 500;
+  color: #191c1e;
+}
+
+.statusActivePill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 12px;
+  border-radius: 9999px;
+  background: rgba(45, 194, 117, 0.2);
+  color: #004927;
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.dotLivePulse {
+  width: 6px;
+  height: 6px;
+  border-radius: 9999px;
+  background: #006d3d;
+  animation: pulse 1.5s infinite;
+}
+
+.statusLockedPill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 12px;
+  border-radius: 9999px;
+  background: #e7e8eb;
+  color: #6d7b6f;
+  font-size: 11px;
+  font-weight: 600;
+}
+
+.dotGray {
+  width: 6px;
+  height: 6px;
+  border-radius: 9999px;
+  background: #6d7b6f;
+}
+
+.actionButtonsRow {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 6px;
+}
+
+.btnActionLock, .btnActionUnlock, .btnActionDelete {
+  padding: 8px;
+  border-radius: 10px;
+  border: none;
+  background: transparent;
+  color: #3d4a3f;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.15s ease;
+}
+
+.btnActionLock:hover {
+  background: rgba(255, 77, 77, 0.15);
+  color: #ba1a1a;
+}
+
+.btnActionUnlock:hover {
+  background: rgba(45, 194, 117, 0.15);
+  color: #006d3d;
+}
+
+.btnActionDelete:hover {
+  background: rgba(186, 26, 26, 0.15);
+  color: #ba1a1a;
+}
+
+/* 5. Modal */
+.modalBackdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+  background: rgba(30, 35, 41, 0.6);
+  backdrop-filter: blur(4px);
+}
+
+.modalCard {
+  width: 100%;
+  max-width: 520px;
+  border-radius: 16px;
+  background: #ffffff;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
+  overflow: hidden;
+  animation: scaleUp 0.2s ease;
+}
+
+@keyframes scaleUp {
+  from { transform: scale(0.95); opacity: 0; }
+  to { transform: scale(1); opacity: 1; }
+}
+
+.modalHeader {
+  padding: 16px 20px;
+  background: #f2f4f6;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.modalTitleGroup {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.modalIconBox {
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
+  background: #72fca9;
+  color: #00210f;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.modalTitle {
+  font-size: 18px;
+  font-weight: 700;
+  color: #191c1e;
+  margin: 0;
+}
+
+.modalSubtitle {
+  font-size: 12px;
+  color: #3d4a3f;
+  margin: 2px 0 0;
+}
+
+.btnCloseModal {
+  padding: 6px;
+  border-radius: 8px;
+  background: transparent;
+  border: none;
+  color: #3d4a3f;
+  cursor: pointer;
+}
+
+.btnCloseModal:hover {
+  background: #e7e8eb;
+}
+
+.modalForm {
+  padding: 24px 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.modalAlert {
+  padding: 10px 14px;
+  border-radius: 10px;
+  background: #ffdad6;
+  color: #ba1a1a;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.formGroup {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.formLabel {
+  font-size: 13px;
+  font-weight: 600;
+  color: #191c1e;
+}
+
+.inputWithIcon {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.inputIcon {
+  position: absolute;
+  left: 14px;
+  color: #3d4a3f;
+}
+
+.inputControl {
+  width: 100%;
+  height: 44px;
+  padding-left: 44px;
+  padding-right: 14px;
+  border-radius: 12px;
+  background: #f2f4f6;
+  border: 1px solid transparent;
+  font-size: 14px;
+  color: #191c1e;
+  outline: none;
+}
+
+.inputControl:focus {
+  background: #ffffff;
+  border-color: #2dc275;
+  box-shadow: 0 0 0 3px rgba(45, 194, 117, 0.15);
+}
+
+.selectControl {
+  width: 100%;
+  height: 44px;
+  padding: 0 14px;
+  border-radius: 12px;
+  background: #f2f4f6;
+  border: 1px solid transparent;
+  font-size: 14px;
+  color: #191c1e;
+  outline: none;
+  cursor: pointer;
+}
+
+.selectControl:focus {
+  background: #ffffff;
+  border-color: #2dc275;
+  box-shadow: 0 0 0 3px rgba(45, 194, 117, 0.15);
+}
+
+.formHint {
+  font-size: 11px;
+  color: #3d4a3f;
+  margin: 2px 0 0;
+}
+
+.modalActions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 12px;
+  padding-top: 12px;
+  border-top: 1px solid #eceef0;
+}
+
+.btnModalCancel {
+  padding: 10px 18px;
+  border-radius: 12px;
+  background: #eceef0;
+  color: #191c1e;
+  font-size: 13px;
+  font-weight: 600;
+  border: none;
+  cursor: pointer;
+}
+
+.btnModalCancel:hover {
+  background: #e7e8eb;
+}
+
+.btnModalSubmit {
+  padding: 10px 22px;
+  border-radius: 12px;
+  background: #2dc275;
+  color: #ffffff;
+  font-size: 13px;
+  font-weight: 700;
+  border: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  transition: opacity 0.15s ease;
+}
+
+.btnModalSubmit:hover {
+  background: #006d3d;
+}
+
+.btnModalSubmit:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
