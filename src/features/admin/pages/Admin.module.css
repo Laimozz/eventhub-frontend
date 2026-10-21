@@ -26,3 +26,4 @@
 @media(max-width:760px) { .sidebar { display:none; }.sidebarOpen { width:260px; }.main { margin-left:0; }.menu { display:inline-flex!important; margin-right:auto; }.topbar { padding:14px 18px; gap:12px; }.content { padding:22px 16px; }.heading { align-items:flex-start; flex-direction:column; }.heading h1 { font-size:25px; }.panel { padding:16px; }.filters { gap:12px; }.filters label { min-width:100%; }.pagination { flex-wrap:wrap; }.topbar small { max-width:170px; overflow:hidden; text-overflow:ellipsis; }.detailGrid dl { grid-template-columns:100px 1fr; } }
 .adminUserBadge { display:flex; flex-direction:column; text-decoration:none; color:inherit; text-align:right; cursor:pointer; }
 .adminUserBadge:hover strong { color:#087f50; }
+.sidebar,.sidebarOpen { overflow-y:auto; }

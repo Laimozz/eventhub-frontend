@@ -12,7 +12,8 @@ export function AdminPage() {
     <LoadState loading={loading} error={error} retry={reload} />
     {data && <>
       <div className={finance.metrics}>{[
-        ['Tổng doanh thu hệ thống', money(data.grossRevenue)],
+        ['Doanh thu gộp', money(data.grossRevenue)],
+        ['Doanh thu ròng', money(data.netRevenue)],
         ['Tổng số sự kiện', data.totalEvents.toLocaleString('vi-VN')],
         ['Tổng số vé đã bán', data.totalTicketsSold.toLocaleString('vi-VN')],
         ['Tổng số người dùng', data.totalUsers.toLocaleString('vi-VN')],
@@ -21,7 +22,8 @@ export function AdminPage() {
         ['Số dư chờ xác nhận', money(data.pendingBalance)],
         ['Số dư chờ rút', money(data.withdrawalPendingBalance)],
       ].map(([label, value]) => <article key={label} className={styles.panel}><p className={styles.eyebrow}>{label}</p><strong>{value}</strong></article>)}</div>
-      <p className={styles.notice}>{data.revenueUnavailableReason}</p>
+      <p>Số dư là tổng ví của các nhà tổ chức, không phải doanh thu hay tiền thuộc sở hữu của nền tảng.</p>
+      {data.revenueUnavailableReason && <p className={styles.notice}>{data.revenueUnavailableReason}</p>}
       <div className={styles.panel}><h2>Xử lý tài chính</h2><div className={styles.actions}><Link to="/admin/withdrawals">Yêu cầu rút tiền</Link><Link to="/admin/refunds">Sự kiện đã hủy</Link></div></div>
     </>}
   </>

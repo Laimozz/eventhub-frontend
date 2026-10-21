@@ -2,6 +2,13 @@
 
 Dự án Frontend được xây dựng bằng **React 19 + Vite + TypeScript**, áp dụng kiến trúc **Feature-driven (hướng phân hệ và tính năng)** kết hợp với phân quyền người dùng **RBAC (Role-Based Access Control)** và cơ chế bảo mật xác thực qua **HttpOnly Cookie**. Đã triển khai đăng ký, đăng nhập; thông tin cá nhân và đổi mật khẩu; Organizer tạo sự kiện theo ba bước, xem danh sách/chi tiết, sửa và gửi yêu cầu hủy, kết nối API của `eventhub-backend`.
 
+## Tài chính Admin UC37–UC42
+
+- `/admin/statistics`: số liệu từ API, số dư ví Organizer và doanh thu gộp/ròng. Doanh thu chưa được backend xác định hiển thị “Chưa xác định”, không đổi null thành 0.
+- `/admin/withdrawals`, `/admin/withdrawals/:requestId`: lọc/phân trang, xem chi tiết, ghi nhận chuyển khoản đã thực hiện ngoài hệ thống và từ chối có lý do. Khi lỗi quyết định, tải lại dữ liệu; chặn gửi khi chưa tải xong, yêu cầu đã xử lý hoặc đã có payout cần đối soát.
+- `/admin/refunds`, `/admin/refunds/:eventId`: đối soát chỉ đọc cho sự kiện CANCELED, chưa thực hiện hoàn tiền.
+- API dùng client cookie/CSRF hiện có. Kiểm thử giả lập ở `tests/admin-finance.spec.ts`; chạy `npm.cmd run test:e2e -- tests/admin-finance.spec.ts`. Cần tích hợp UC11/UC25 và hợp đồng hoàn tiền để nghiệm thu toàn luồng; xem `../plan.md`.
+
 ## Quản trị UC31–36
 
 Admin đăng nhập được chuyển tới /admin/events/pending. Feature `src/features/admin` dùng router/AuthProvider và Axios client chung; CSS Modules, Lucide, bố cục theo mẫu platform.

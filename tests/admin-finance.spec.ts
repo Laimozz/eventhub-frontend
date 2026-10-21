@@ -21,7 +21,7 @@ test('overview shows API balances and unknown revenue on desktop and mobile', as
   } }))
   await page.goto('/admin/statistics')
   await expect(page.getByRole('heading', { name: 'Thống kê tổng quan' })).toBeVisible()
-  await expect(page.getByText('Chưa xác định', { exact: true })).toBeVisible()
+  await expect(page.getByText('Chưa xác định', { exact: true })).toHaveCount(2)
   await expect(page.getByText('Số dư khả dụng Organizer').locator('..')).toContainText('200')
   expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(page.viewportSize()!.width)
   await page.screenshot({ path: test.info().outputPath('finance-overview.png'), fullPage: true })
@@ -128,4 +128,38 @@ test('finance loading, error, retry, and non-admin routing work', async ({ page 
   await login(page, 'CUSTOMER')
   await page.goto('/admin/withdrawals/7')
   await expect(page).not.toHaveURL('/admin/withdrawals/7')
+})
+
+test('lost approval response reloads committed status and prevents another decision', async ({ page }) => {
+  await login(page)
+  let approved = false, calls = 0
+  await page.route('**/api/admin/withdrawal-requests/7', route => route.fulfill({ json: { ...pending, status: approved ? 'APPROVED' : 'PENDING' } }))
+  await page.route('**/api/admin/withdrawal-requests/7/approve', route => {
+    calls++; approved = true
+    return route.abort('failed')
+  })
+  await page.goto('/admin/withdrawals/7')
+  await page.getByRole('button', { name: 'Duyệt', exact: true }).click()
+  await page.getByLabel('Mã giao dịch chuyển tiền').fill('BANK-7')
+  await page.getByRole('dialog').getByRole('button', { name: 'Xác nhận', exact: true }).click()
+  await expect(page.getByText('Đã duyệt', { exact: true })).toBeVisible()
+  await expect(page.getByRole('dialog').getByRole('button', { name: 'Xác nhận', exact: true })).toBeDisabled()
+  expect(calls).toBe(1)
+})
+
+test('concurrent payout discovered on reload blocks the still-open decision dialog', async ({ page }) => {
+  await login(page)
+  let hasPayout = false, calls = 0
+  await page.route('**/api/admin/withdrawal-requests/7', route => route.fulfill({ json: { ...pending, payouts: hasPayout ? [{ id: 9, amount: 1000000, status: 'PENDING', transactionCode: null, failureReason: null, initiatedAt: null, completedAt: null }] : [] } }))
+  await page.route('**/api/admin/withdrawal-requests/7/approve', route => {
+    calls++; hasPayout = true
+    return route.fulfill({ status: 409, json: { code: 'PAYOUT_REQUIRES_RECONCILIATION' } })
+  })
+  await page.goto('/admin/withdrawals/7')
+  await page.getByRole('button', { name: 'Duyệt', exact: true }).click()
+  await page.getByLabel('Mã giao dịch chuyển tiền').fill('BANK-7')
+  await page.getByRole('dialog').getByRole('button', { name: 'Xác nhận', exact: true }).click()
+  await expect(page.getByText('Yêu cầu đã có giao dịch chi trả, cần đối soát trước khi xử lý.')).toBeVisible()
+  await expect(page.getByRole('dialog').getByRole('button', { name: 'Xác nhận', exact: true })).toBeDisabled()
+  expect(calls).toBe(1)
 })

@@ -9,6 +9,10 @@ import styles from './Admin.module.css'
 
 export function WithdrawalDetailPage() {
   const { requestId } = useParams()
+  return <WithdrawalDetail key={requestId} requestId={requestId} />
+}
+
+function WithdrawalDetail({ requestId }: { requestId: string | undefined }) {
   const id = Number(requestId)
   const load = useCallback((signal: AbortSignal) => financeApi.withdrawal(id, signal), [id])
   const { data, loading, error, reload } = useAdminData(load)
@@ -20,7 +24,7 @@ export function WithdrawalDetailPage() {
   const [notice, setNotice] = useState('')
   async function submit(e: FormEvent) {
     e.preventDefault()
-    if (!action || sending.current || !value.trim() || loading || data?.status !== 'PENDING') return
+    if (!action || sending.current || !value.trim() || value.trim().length > 255 || loading || data?.status !== 'PENDING' || data.payouts.length !== 0) return
     sending.current = true; setBusy(true); setActionError('')
     try {
       if (action === 'approve') await financeApi.approve(id, value.trim())
@@ -47,7 +51,7 @@ export function WithdrawalDetailPage() {
       <p>{action === 'approve' ? 'Xác nhận bạn đã chuyển khoản cho Nhà tổ chức. Hệ thống ghi nhận mã giao dịch và cập nhật số dư chờ rút.' : 'Khoản tiền chờ rút sẽ được trả về số dư khả dụng của Nhà tổ chức.'}</p>
       <label>{action === 'approve' ? 'Mã giao dịch chuyển tiền' : 'Lý do từ chối'}<textarea required maxLength={255} value={value} disabled={busy} onChange={e => setValue(e.target.value)} /></label>
       {actionError && <p role="alert" className={styles.error}>{actionError}</p>}
-      <div className={styles.actions}><button type="button" disabled={busy} onClick={() => setAction(null)}>Hủy bỏ</button><button className={styles.primary} disabled={busy || !value.trim() || loading || !data || data.status !== 'PENDING'}>{busy ? 'Đang xử lý…' : 'Xác nhận'}</button></div>
+      <div className={styles.actions}><button type="button" disabled={busy} onClick={() => setAction(null)}>Hủy bỏ</button><button className={styles.primary} disabled={busy || !value.trim() || loading || !data || data.status !== 'PENDING' || data.payouts.length !== 0}>{busy ? 'Đang xử lý…' : 'Xác nhận'}</button></div>
     </form></Dialog>}
   </>
 }
