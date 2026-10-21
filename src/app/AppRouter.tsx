@@ -1,4 +1,4 @@
-import { Navigate, Outlet, Route, Routes } from 'react-router'
+import { Navigate, Outlet, Route, Routes, useLocation } from 'react-router'
 import { useAuth } from '../features/auth/hooks/useAuth'
 import { LoginPage } from '../features/auth/pages/LoginPage'
 import { RegisterPage } from '../features/auth/pages/RegisterPage'
@@ -6,6 +6,8 @@ import { RegisterPage } from '../features/auth/pages/RegisterPage'
 // Organizer Pages & Layout
 import { OrganizerLayout } from '../features/organizer/pages/OrganizerLayout'
 import { OrganizerDashboard } from '../features/organizer/pages/OrganizerDashboard'
+import { OrganizerStaffDispatchPage } from '../features/organizer/pages/OrganizerStaffDispatchPage'
+import { OrganizerWalletPage } from '../features/organizer/pages/OrganizerWalletPage'
 import { CreateEventPage } from '../features/events/pages/CreateEventPage'
 import { OrganizerEventsPage } from '../features/events/pages/OrganizerEventsPage'
 import { EventDetailPage } from '../features/events/pages/EventDetailPage'
@@ -34,7 +36,10 @@ import { CustomerRoutes } from '../features/customer/routes/CustomerRoutes'
 
 function GuestRoute() {
   const { user } = useAuth()
-  return user ? <Navigate to="/" replace /> : <Outlet />
+  const location = useLocation()
+  const from = location.state?.from
+  const destination = user?.role === 'CUSTOMER' && typeof from === 'string' && from.startsWith('/customer/') ? from : '/'
+  return user ? <Navigate to={destination} replace /> : <Outlet />
 }
 
 function ProtectedRoute() {
@@ -86,6 +91,7 @@ export function AppRouter() {
         {/* Admin Portal */}
         <Route element={<AdminRoute />}>
           <Route path="/admin" element={<AdminLayout />}>
+            <Route path="notifications" element={<NotificationsPage />} />
             <Route index element={<Navigate to="events/pending" replace />} />
             <Route path="statistics" element={<AdminPage />} />
             <Route path="withdrawals" element={<WithdrawalsPage />} />
@@ -111,6 +117,8 @@ export function AppRouter() {
             <Route path="events/:eventId" element={<EventDetailPage />} />
             <Route path="events/:eventId/edit" element={<Navigate to="details" replace />} />
             <Route path="events/:eventId/edit/:step" element={<EditEventPage />} />
+            <Route path="staffs" element={<OrganizerStaffDispatchPage />} />
+            <Route path="wallet" element={<OrganizerWalletPage />} />
             <Route path="profile" element={<OrganizerUserDetailPage />} />
           </Route>
         </Route>

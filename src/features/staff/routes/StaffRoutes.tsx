@@ -1,11 +1,15 @@
 import { Navigate, Route, Routes } from 'react-router'
-import { StaffPage } from '../pages/StaffPage'
+import { StaffDashboardPage } from '../pages/StaffDashboardPage'
+import { EventDetailPage } from '../pages/EventDetailPage'
+import { StaffProfilePage } from '../pages/StaffProfilePage'
 
 export function StaffRoutes() {
   return (
     <Routes>
-      <Route index element={<StaffPage />} />
-      <Route path="*" element={<Navigate to="" replace />} />
+      <Route index element={<StaffDashboardPage />} />
+      <Route path="events/:eventId" element={<EventDetailPage />} />
+      <Route path="profile" element={<StaffProfilePage />} />
+      <Route path="*" element={<Navigate to="/staff" replace />} />
     </Routes>
   )
 }

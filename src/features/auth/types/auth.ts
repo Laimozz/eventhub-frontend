@@ -6,6 +6,7 @@ export interface User {
   fullName: string | null
   phone: string | null
   role: RegistrationRole | 'ADMIN' | 'STAFF'
+  avatarUrl?: string | null
 }
 
 export interface LoginRequest {

@@ -1,0 +1,830 @@
+.page {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  width: 100%;
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 8px 0 32px 0;
+  color: #191c1e;
+  font-family: 'Plus Jakarta Sans', Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+}
+
+.topSection {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+@media (min-width: 768px) {
+  .topSection {
+    flex-direction: row;
+    align-items: center;
+  }
+}
+
+.eyebrow {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  font-weight: 700;
+  color: #006d3d;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  margin-bottom: 4px;
+}
+
+.title {
+  font-size: 28px;
+  font-weight: 800;
+  color: #191c1e;
+  letter-spacing: -0.02em;
+  margin: 0;
+}
+
+.subtitle {
+  font-size: 14px;
+  color: #556257;
+  margin: 4px 0 0 0;
+  max-width: 650px;
+}
+
+.btnCreateWithdrawal {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 22px;
+  border-radius: 12px;
+  background: linear-gradient(135deg, #006d3d 0%, #2dc275 100%);
+  color: #ffffff;
+  font-size: 14px;
+  font-weight: 700;
+  border: none;
+  cursor: pointer;
+  box-shadow: 0 4px 12px rgba(0, 109, 61, 0.25);
+  transition: all 0.2s ease;
+}
+
+.btnCreateWithdrawal:hover {
+  opacity: 0.95;
+  transform: translateY(-1px);
+  box-shadow: 0 6px 16px rgba(0, 109, 61, 0.35);
+}
+
+/* 4 Financial Cards */
+.metricGrid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 16px;
+}
+
+@media (min-width: 640px) {
+  .metricGrid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (min-width: 1100px) {
+  .metricGrid {
+    grid-template-columns: repeat(4, 1fr);
+  }
+}
+
+.metricCard {
+  background: #ffffff;
+  border-radius: 16px;
+  border: 1px solid #e1e2e5;
+  box-shadow: 0 2px 8px -2px rgba(18, 21, 23, 0.04);
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.metricCard:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px -4px rgba(18, 21, 23, 0.08);
+}
+
+.heroMetricCard {
+  background: #ffffff;
+  border: 2px solid #2dc275;
+  box-shadow: 0 4px 20px -4px rgba(45, 194, 117, 0.15);
+  position: relative;
+  overflow: hidden;
+}
+
+.cardHeader {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+}
+
+.cardLabel {
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: #556257;
+}
+
+.heroLabel {
+  color: #006d3d;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.pulse {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #2dc275;
+}
+
+.iconBox {
+  width: 40px;
+  height: 40px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.iconGreen {
+  background: rgba(45, 194, 117, 0.15);
+  color: #006d3d;
+}
+
+.iconBlue {
+  background: rgba(57, 184, 253, 0.15);
+  color: #006591;
+}
+
+.iconGray {
+  background: #f2f4f6;
+  color: #556257;
+}
+
+.iconTeal {
+  background: rgba(36, 193, 136, 0.15);
+  color: #006c49;
+}
+
+.cardAmount {
+  font-size: 24px;
+  font-weight: 800;
+  color: #191c1e;
+  margin-top: 10px;
+  letter-spacing: -0.01em;
+}
+
+.heroAmount {
+  color: #006d3d;
+  font-size: 26px;
+}
+
+.cardFooter {
+  margin-top: 14px;
+  padding-top: 10px;
+  border-top: 1px solid #f2f4f6;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 12px;
+  color: #718079;
+}
+
+.btnQuickWithdraw {
+  background: transparent;
+  border: none;
+  color: #006d3d;
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.btnQuickWithdraw:hover {
+  text-decoration: underline;
+}
+
+/* Main Grid: Left Tables + Right Drawer */
+.mainLayout {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 24px;
+  align-items: start;
+}
+
+@media (min-width: 1100px) {
+  .mainLayout {
+    grid-template-columns: 7fr 5fr;
+  }
+}
+
+.leftColumn {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+/* Section Card */
+.sectionCard {
+  background: #ffffff;
+  border-radius: 18px;
+  border: 1px solid #e1e2e5;
+  box-shadow: 0 1px 6px rgba(0, 0, 0, 0.03);
+  overflow: hidden;
+}
+
+.sectionHeader {
+  padding: 18px 20px;
+  background: #f8f9fc;
+  border-bottom: 1px solid #e1e2e5;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.sectionTitle {
+  font-size: 17px;
+  font-weight: 700;
+  color: #191c1e;
+  margin: 0;
+}
+
+.sectionSubtitle {
+  font-size: 12px;
+  color: #556257;
+  margin: 2px 0 0 0;
+}
+
+/* Tabs Filter */
+.tabsFilter {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 20px;
+  border-bottom: 1px solid #eceef0;
+  overflow-x: auto;
+}
+
+.tabItem {
+  padding: 6px 14px;
+  border-radius: 10px;
+  border: 1px solid #d8dadd;
+  background: #ffffff;
+  color: #556257;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+  white-space: nowrap;
+}
+
+.tabItem:hover {
+  background: #f2f4f6;
+  color: #191c1e;
+}
+
+.tabItemActive {
+  background: #191c1e;
+  color: #ffffff;
+  border-color: #191c1e;
+}
+
+.tabItemActive:hover {
+  background: #2e3133;
+  color: #ffffff;
+}
+
+/* Table */
+.tableContainer {
+  width: 100%;
+  overflow-x: auto;
+}
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  text-align: left;
+  font-size: 13px;
+}
+
+.table thead {
+  background: #f2f4f6;
+  color: #556257;
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.table th {
+  padding: 12px 18px;
+  border-bottom: 1px solid #e1e2e5;
+}
+
+.table td {
+  padding: 14px 18px;
+  border-bottom: 1px solid #eceef0;
+  vertical-align: middle;
+}
+
+.tableRowClickable {
+  cursor: pointer;
+  transition: background 0.15s ease;
+}
+
+.tableRowClickable:hover {
+  background: #f8f9fc;
+}
+
+.tableRowSelected {
+  background: rgba(45, 194, 117, 0.08) !important;
+}
+
+/* Badges */
+.badgePending {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 3px 10px;
+  border-radius: 9999px;
+  background: rgba(255, 165, 0, 0.15);
+  color: #c07000;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.badgeApproved {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 3px 10px;
+  border-radius: 9999px;
+  background: rgba(45, 194, 117, 0.15);
+  color: #006d3d;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.badgeRejected {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 3px 10px;
+  border-radius: 9999px;
+  background: rgba(255, 77, 77, 0.15);
+  color: #ba1a1a;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.badgeCanceled {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 3px 10px;
+  border-radius: 9999px;
+  background: rgba(148, 163, 184, 0.2);
+  color: #475569;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+/* Right Column: UC 27 Drawer Panel */
+.drawerPanel {
+  background: #ffffff;
+  border-radius: 18px;
+  border: 1px solid #e1e2e5;
+  box-shadow: 0 4px 16px -2px rgba(18, 21, 23, 0.07);
+  overflow: hidden;
+  position: sticky;
+  top: 80px;
+}
+
+.drawerHeader {
+  padding: 18px 20px;
+  background: #f8f9fc;
+  border-bottom: 1px solid #e1e2e5;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.drawerBody {
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.amountBox {
+  background: #f2f4f6;
+  border-radius: 14px;
+  padding: 16px;
+  text-align: center;
+}
+
+.amountBoxLabel {
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  color: #556257;
+  letter-spacing: 0.05em;
+}
+
+.amountBoxVal {
+  font-size: 26px;
+  font-weight: 800;
+  color: #006d3d;
+  margin-top: 4px;
+}
+
+/* Stepper */
+.stepper {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  position: relative;
+  padding-left: 28px;
+}
+
+.stepperLine {
+  position: absolute;
+  left: 9px;
+  top: 10px;
+  bottom: 10px;
+  width: 2px;
+  background: #d8dadd;
+}
+
+.stepItem {
+  position: relative;
+}
+
+.stepDot {
+  position: absolute;
+  left: -28px;
+  top: 2px;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: #ffffff;
+  border: 2px solid #d8dadd;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.stepDotActive {
+  background: #2dc275;
+  border-color: #2dc275;
+  color: #ffffff;
+}
+
+.stepDotCurrent {
+  background: #39b8fd;
+  border-color: #39b8fd;
+  color: #ffffff;
+}
+
+.stepDotError {
+  background: #ba1a1a;
+  border-color: #ba1a1a;
+  color: #ffffff;
+}
+
+.stepTextTitle {
+  font-size: 13px;
+  font-weight: 700;
+  color: #191c1e;
+}
+
+.stepTextDesc {
+  font-size: 11px;
+  color: #718079;
+  margin-top: 2px;
+}
+
+/* Beneficiary Box */
+.beneficiaryBox {
+  background: #f8f9fc;
+  border-radius: 12px;
+  padding: 14px;
+  font-size: 13px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.beneficiaryRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.beneficiaryLabel {
+  color: #556257;
+}
+
+.beneficiaryVal {
+  font-weight: 600;
+  color: #191c1e;
+}
+
+.btnCancelWithdrawal {
+  width: 100%;
+  padding: 12px;
+  border-radius: 12px;
+  background: #ffdad6;
+  color: #ba1a1a;
+  font-size: 13px;
+  font-weight: 700;
+  border: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  transition: all 0.2s;
+}
+
+.btnCancelWithdrawal:hover:not(:disabled) {
+  background: #ba1a1a;
+  color: #ffffff;
+}
+
+.btnCancelWithdrawal:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* Modal Form Styles */
+.modalBackdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  background: rgba(0, 0, 0, 0.6);
+  backdrop-filter: blur(4px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+}
+
+.modalBox {
+  background: #ffffff;
+  width: 100%;
+  max-width: 500px;
+  border-radius: 24px;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
+  padding: 28px;
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.modalHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.modalTitle {
+  font-size: 20px;
+  font-weight: 700;
+  color: #191c1e;
+  margin: 0;
+}
+
+.inputField {
+  width: 100%;
+  height: 44px;
+  padding: 0 14px;
+  border-radius: 12px;
+  border: 1px solid #d8dadd;
+  background: #f8f9fc;
+  font-size: 14px;
+  color: #191c1e;
+  outline: none;
+}
+
+.inputField:focus {
+  background: #ffffff;
+  border-color: #2dc275;
+  box-shadow: 0 0 0 3px rgba(45, 194, 117, 0.15);
+}
+
+.modalActions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 12px;
+  margin-top: 10px;
+}
+
+.btnModalCancel {
+  padding: 10px 18px;
+  border-radius: 12px;
+  border: 1px solid #d8dadd;
+  background: #ffffff;
+  color: #191c1e;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.btnModalSubmit {
+  padding: 10px 20px;
+  border-radius: 12px;
+  background: #2dc275;
+  color: #ffffff;
+  font-size: 13px;
+  font-weight: 700;
+  border: none;
+  cursor: pointer;
+}
+
+.errorBox {
+  padding: 10px 14px;
+  border-radius: 10px;
+  background: #ffdad6;
+  color: #ba1a1a;
+  font-size: 13px;
+  font-weight: 500;
+}
+
+.toastSuccess {
+  position: fixed;
+  bottom: 24px;
+  right: 24px;
+  z-index: 1000;
+  background: #191c1e;
+  color: #ffffff;
+  padding: 14px 20px;
+  border-radius: 14px;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+/* Detail & Search Enhancements */
+.btnViewDetail {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 6px 14px;
+  border-radius: 8px;
+  background: #f2f4f6;
+  color: #191c1e;
+  font-size: 12px;
+  font-weight: 600;
+  border: 1px solid #d8dadd;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+}
+
+.btnViewDetail:hover {
+  background: #2dc275;
+  color: #ffffff;
+  border-color: #2dc275;
+}
+
+.tableSearchBox {
+  position: relative;
+  width: 100%;
+  max-width: 260px;
+}
+
+.tableSearchInput {
+  width: 100%;
+  height: 38px;
+  padding: 0 12px 0 36px;
+  border-radius: 10px;
+  border: 1px solid #d8dadd;
+  background: #f8f9fc;
+  font-size: 13px;
+  color: #191c1e;
+  outline: none;
+  transition: all 0.2s;
+  box-sizing: border-box;
+}
+
+.tableSearchInput:focus {
+  background: #ffffff;
+  border-color: #2dc275;
+  box-shadow: 0 0 0 3px rgba(45, 194, 117, 0.2);
+}
+
+.tableSearchIcon {
+  position: absolute;
+  left: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #718079;
+  pointer-events: none;
+}
+
+.tabCountBadge {
+  margin-left: 6px;
+  padding: 1px 7px;
+  border-radius: 9999px;
+  font-size: 10px;
+  font-weight: 700;
+  background: #e1e2e5;
+  color: #191c1e;
+}
+
+.tabItemActive .tabCountBadge {
+  background: rgba(255, 255, 255, 0.25);
+  color: #ffffff;
+}
+
+.drawerCloseBtn {
+  background: transparent;
+  border: none;
+  color: #718079;
+  cursor: pointer;
+  padding: 4px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s;
+}
+
+.drawerCloseBtn:hover {
+  background: #e1e2e5;
+  color: #191c1e;
+}
+
+.cautionBox {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 12px 14px;
+  border-radius: 10px;
+  background: #f2f4f6;
+  border-left: 3px solid #006591;
+  font-size: 12px;
+  line-height: 1.5;
+  color: #3d4a3f;
+}
+
+.btnPrintReceipt {
+  width: 100%;
+  height: 40px;
+  border-radius: 12px;
+  background: #eceef0;
+  color: #191c1e;
+  border: 1px solid #d8dadd;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  transition: all 0.2s;
+}
+
+.btnPrintReceipt:hover {
+  background: #e1e2e5;
+  color: #191c1e;
+}
+
+.btnExportExcel {
+  height: 44px;
+  padding: 0 18px;
+  border-radius: 12px;
+  background: #ffffff;
+  color: #191c1e;
+  font-size: 13px;
+  font-weight: 600;
+  border: 1px solid #d8dadd;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  transition: all 0.2s;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.04);
+}
+
+.btnExportExcel:hover {
+  background: #f2f4f6;
+  border-color: #bccabc;
+}
+

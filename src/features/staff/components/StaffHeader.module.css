@@ -1,0 +1,388 @@
+.header {
+  position: sticky;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 50;
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(16px);
+  border-bottom: 1px solid #e7e8eb;
+  box-shadow: 0 1px 8px rgba(18, 21, 23, 0.05);
+}
+
+.inner {
+  max-width: 1280px;
+  margin: 0 auto;
+  height: 70px;
+  padding: 0 24px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.left {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  text-decoration: none;
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-weight: 800;
+  font-size: 20px;
+  color: #191c1e;
+}
+
+.brandBadge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
+  background: #006d3d;
+  color: #ffffff;
+}
+
+.roleTag {
+  background: #f0f2f4;
+  color: #006d3d;
+  font-size: 10px;
+  letter-spacing: 0.5px;
+  padding: 4px 8px;
+  border-radius: 6px;
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
+.shiftStatus {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: #1e2329;
+  color: #a7f3d0;
+  padding: 6px 14px;
+  border-radius: 9999px;
+  font-size: 12px;
+  font-weight: 600;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
+}
+
+.pulseDot {
+  position: relative;
+  display: flex;
+  width: 8px;
+  height: 8px;
+}
+
+.pulseRing {
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  background: #2dc275;
+  opacity: 0.75;
+  animation: ping 1.5s cubic-bezier(0, 0, 0.2, 1) infinite;
+}
+
+.pulseCore {
+  position: relative;
+  display: inline-flex;
+  border-radius: 50%;
+  width: 8px;
+  height: 8px;
+  background: #2dc275;
+}
+
+@keyframes ping {
+  75%, 100% {
+    transform: scale(2);
+    opacity: 0;
+  }
+}
+
+.navLinks {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.navLink {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 14px;
+  border-radius: 8px;
+  color: #3d4a3f;
+  font-size: 13.5px;
+  font-weight: 600;
+  text-decoration: none;
+  transition: all 0.15s ease;
+}
+
+.navLink:hover {
+  background: #f2f4f6;
+  color: #006d3d;
+  text-decoration: none;
+}
+
+.navLinkActive {
+  background: #e2f6ec;
+  color: #006d3d;
+}
+
+.right {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.accountMenu {
+  position: relative;
+}
+
+.accountButton {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 5px 12px 5px 5px;
+  border: 1px solid #e7e8eb;
+  border-radius: 30px;
+  background: #ffffff;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.accountButton:hover {
+  border-color: #006d3d;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+}
+
+.avatar {
+  position: relative;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: #e2fbd7;
+  color: #006d3d;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: 14px;
+  overflow: hidden;
+  flex-shrink: 0;
+  border: 1.5px solid #2dc275;
+}
+
+.avatar img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 50%;
+  z-index: 2;
+}
+
+.avatarFallback {
+  position: relative;
+  z-index: 1;
+}
+
+.accountInfo {
+  text-align: left;
+  line-height: 1.2;
+}
+
+.accountName {
+  font-size: 13.5px;
+  font-weight: 600;
+  color: #191c1e;
+  max-width: 130px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.accountRole {
+  font-size: 11px;
+  color: #6d7b6f;
+  text-transform: uppercase;
+  font-weight: 500;
+}
+
+.dropdown {
+  position: absolute;
+  top: calc(100% + 8px);
+  right: 0;
+  width: 270px;
+  background: #ffffff;
+  border: 1px solid #e7e8eb;
+  border-radius: 14px;
+  box-shadow: 0 16px 36px rgba(18, 21, 23, 0.12), 0 4px 12px rgba(18, 21, 23, 0.06);
+  padding: 8px;
+  z-index: 60;
+  animation: fadeIn 0.15s ease;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(-4px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.dropdownHeader {
+  padding: 10px 12px 12px;
+  border-bottom: 1px solid #f0f2f4;
+  margin-bottom: 6px;
+  background: #fbfcfc;
+  border-radius: 10px;
+}
+
+.dropdownUserRow {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.dropdownAvatarWrapper {
+  position: relative;
+  flex-shrink: 0;
+}
+
+.dropdownAvatar {
+  position: relative;
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: #e2fbd7;
+  color: #006d3d;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 800;
+  font-size: 17px;
+  overflow: hidden;
+  border: 2px solid #2dc275;
+  box-shadow: 0 2px 8px rgba(0, 109, 61, 0.12);
+}
+
+.dropdownAvatar img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 50%;
+  z-index: 2;
+}
+
+.dropdownOnlineBadge {
+  position: absolute;
+  bottom: 0;
+  right: 0;
+  width: 12px;
+  height: 12px;
+  background: #2dc275;
+  border: 2px solid #ffffff;
+  border-radius: 50%;
+  z-index: 3;
+}
+
+.dropdownUserInfo {
+  flex: 1;
+  min-width: 0;
+}
+
+.dropdownName {
+  font-size: 13.5px;
+  font-weight: 700;
+  color: #191c1e;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  line-height: 1.3;
+}
+
+.dropdownEmail {
+  font-size: 12px;
+  color: #6d7b6f;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  margin-bottom: 4px;
+}
+
+.dropdownRoleBadge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  background: #e2f6ec;
+  color: #006d3d;
+  font-size: 10.5px;
+  font-weight: 600;
+  padding: 2px 8px;
+  border-radius: 9999px;
+  width: fit-content;
+}
+
+.dropdownItem {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  padding: 10px 12px;
+  border: 0;
+  border-radius: 8px;
+  background: none;
+  color: #191c1e;
+  font-size: 13px;
+  font-weight: 500;
+  text-decoration: none;
+  cursor: pointer;
+  text-align: left;
+  transition: all 0.15s ease;
+}
+
+.dropdownItem:hover {
+  background: #f2f4f6;
+  color: #006d3d;
+  text-decoration: none;
+}
+
+.divider {
+  height: 1px;
+  background: #f2f4f6;
+  margin: 6px 0;
+}
+
+.logoutItem {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  padding: 10px 12px;
+  border: 0;
+  border-radius: 8px;
+  background: none;
+  color: #ba1a1a;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  text-align: left;
+  transition: all 0.15s ease;
+}
+
+.logoutItem:hover {
+  background: #ffdad6;
+}
+
+@media (max-width: 768px) {
+  .inner { padding: 0 16px; height: 62px; }
+  .shiftStatus { display: none; }
+  .accountInfo { display: none; }
+}

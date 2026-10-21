@@ -35,3 +35,20 @@ export async function updateEvent(id: number, draft: EventDraft) {
 export async function cancelEvent(id: number, reason: string) {
   return (await httpClient.post<EventDetail>(`/events/${id}/cancel`, { reason: reason.trim() })).data
 }
+
+export async function getEventStaffs(eventId: number, signal?: AbortSignal) {
+  return (await httpClient.get<import('../types/event').EventStaff[]>(`/events/${eventId}/staffs`, { signal })).data
+}
+
+export async function addEventStaff(eventId: number, email: string) {
+  return (await httpClient.post<import('../types/event').EventStaff>(`/events/${eventId}/staffs`, { email: email.trim() })).data
+}
+
+export async function updateStaffStatus(eventId: number, staffId: number, status: 'ACTIVE' | 'LOCKED' | 'INACTIVE') {
+  const normalizedStatus = (status === 'INACTIVE' ? 'LOCKED' : status).toUpperCase()
+  return (await httpClient.patch<import('../types/event').EventStaff>(`/events/${eventId}/staffs/${staffId}/status`, { status: normalizedStatus })).data
+}
+
+export async function deleteEventStaff(eventId: number, staffId: number) {
+  await httpClient.delete(`/events/${eventId}/staffs/${staffId}`)
+}

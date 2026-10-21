@@ -22,6 +22,10 @@
 .filters button { display: flex; align-items: center; gap: 7px; background: #fff; border: 1px solid #e9edef; padding: 8px 13px; border-radius: 22px; font-size: 11px; color: #647167; }
 .filters button span { font-size: 10px; background: #f1f3f5; border-radius: 12px; padding: 2px 6px; }
 .filters .selected { background: #087e4b; border-color: #087e4b; color: #fff; }.filters .selected span { background: #ffffff26; }
+.tabsBar { display: flex; gap: 10px; border-bottom: 2px solid #eef0f4; margin: 20px 0 24px; padding-bottom: 0; }
+.tabButton { display: inline-flex; align-items: center; gap: 8px; padding: 12px 18px; border: none; background: transparent; font-size: 14px; font-weight: 600; color: #65716a; border-bottom: 3px solid transparent; cursor: pointer; transition: all 0.2s; margin-bottom: -2px; }
+.tabButton:hover { color: #168554; }
+.tabButtonActive { color: #087e4b; border-bottom-color: #24bf76; font-weight: 700; }
 .toolbar { padding: 17px; background: #fff; border: 1px solid #eef0f4; border-radius: 11px; display: flex; align-items: center; gap: 10px; margin-bottom: 20px; }
 .search { display: flex; gap: 9px; align-items: center; flex: 1; background: #f7f8fa; border: 1px solid #eef0f3; border-radius: 7px; padding: 10px 12px; color: #849088; }
 .search input { border: 0; outline: none; width: 100%; min-width: 0; background: none; font-size: 12px; color: #233b2d; }

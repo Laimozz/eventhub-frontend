@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { Link, useSearchParams } from 'react-router'
-import { CalendarDays, ChevronLeft, ChevronRight, CirclePlus, Clock3, MapPin, Pencil, Search, Ticket, XCircle } from 'lucide-react'
+import { CalendarDays, ChevronLeft, ChevronRight, CirclePlus, Clock3, MapPin, Pencil, Search, Ticket, Users, XCircle } from 'lucide-react'
 import { getOrganizerEvents } from '../api/event-api'
 import { CancelEventDialog } from '../components/CancelEventDialog'
 import { eventDate, eventStatuses } from '../event-display'
@@ -56,7 +56,7 @@ export function OrganizerEventsPage() {
       <div className={styles.grid}>{data.content.map(event => <article className={styles.eventCard} key={event.id}>
         <Link className={styles.poster} to={`/organizer/events/${event.id}`}><img src={event.thumbnailImageUrl} alt={event.name} /><span className={`${styles.badge} ${styles[eventStatuses[event.status].tone]}`}>{eventStatuses[event.status].label}</span></Link>
         <div className={styles.cardBody}><small className={styles.category}>{event.categoryName} · #{event.id}</small><h2><Link to={`/organizer/events/${event.id}`}>{event.name}</Link></h2><p><CalendarDays size={14} />{eventDate(event.startTime)}</p><p><MapPin size={14} />{event.address}, {event.city}</p>{event.description && <div className={styles.description}>{event.description}</div>}</div>
-        <div className={styles.actions}><Link className={styles.primary} to={`/organizer/events/${event.id}`}>Xem chi tiết</Link>{event.canEdit && <Link className={styles.iconButton} to={`/organizer/events/${event.id}/edit/details`} aria-label={`Sửa ${event.name}`}><Pencil size={16} /></Link>}{event.canCancel && <button className={styles.cancelButton} onClick={() => setCanceling(event)} aria-label={`Hủy ${event.name}`}><XCircle size={17} /></button>}</div>
+        <div className={styles.actions}><Link className={styles.primary} to={`/organizer/events/${event.id}`}>Xem chi tiết</Link><Link className={styles.iconButton} to={`/organizer/events/${event.id}?tab=staffs`} aria-label={`Phân công staff ${event.name}`} title="Phân công nhân viên soát vé"><Users size={16} /></Link>{event.canEdit && <Link className={styles.iconButton} to={`/organizer/events/${event.id}/edit/details`} aria-label={`Sửa ${event.name}`}><Pencil size={16} /></Link>}{event.canCancel && <button className={styles.cancelButton} onClick={() => setCanceling(event)} aria-label={`Hủy ${event.name}`}><XCircle size={17} /></button>}</div>
       </article>)}<Link className={styles.newCard} to="/organizer/events/new/details"><CirclePlus size={35} /><strong>Tạo thêm sự kiện mới</strong><span>Bắt đầu một trải nghiệm tiếp theo</span></Link></div>
       <div className={styles.pagination}><small>Hiển thị {page * data.size + 1}–{page * data.size + data.content.length} trong {data.totalElements} sự kiện</small><div><button className={styles.secondary} disabled={page === 0} aria-label="Trang trước" onClick={() => filter(status, search, page - 1)}><ChevronLeft size={17} /></button><span>Trang {page + 1} / {data.totalPages}</span><button className={styles.secondary} disabled={page + 1 >= data.totalPages} aria-label="Trang sau" onClick={() => filter(status, search, page + 1)}><ChevronRight size={17} /></button></div></div>
     </>}

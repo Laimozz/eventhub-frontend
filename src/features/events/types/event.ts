@@ -42,3 +42,18 @@ export interface EventList {
   statusCounts: Record<EventStatus, number>
 }
 export type FieldErrors = Record<string, string>
+
+export interface EventStaff {
+  id?: number
+  staffId: number
+  eventId?: number
+  fullName: string
+  email: string
+  phone: string | null
+  role?: string
+  status: 'ACTIVE' | 'LOCKED' | 'INACTIVE' | string
+  inCheckinShift?: boolean
+  assignedAt?: string
+  createdAt?: string
+}
+
