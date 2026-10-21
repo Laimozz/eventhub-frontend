@@ -487,17 +487,17 @@
 }
 
 
-.content {
-  max-width: 1440px;
-  margin: 0 auto;
-  padding: 24px 32px 48px;
+.dropdownUserHeader {
+  padding: 8px 12px 10px;
+  border-bottom: 1px solid #f2f4f6;
+  margin-bottom: 6px;
 }
 
-.menuToggle,
-.backdrop {
-  display: none;
-}
-
-.error {
-  padding: 12px 24px;
+.dropdownName {
+  font-size: 14px;
+  font-weight: 700;
+  color: #191c1e;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
