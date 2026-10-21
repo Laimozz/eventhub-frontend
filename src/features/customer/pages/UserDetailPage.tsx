@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { useLocation, useSearchParams } from 'react-router';
 import { useAuth } from '../../auth/hooks/useAuth';
 import type { UserDetailDto } from '../types/user';
 import { getUserDetail } from '../api/user-api';
@@ -12,10 +13,27 @@ import { Toast, type ToastData } from '../components/Toast';
 import { UserPageHeader, type PageMode } from '../components/UserPageHeader';
 import styles from './UserDetailPage.module.css';
 
-export function UserDetailPage() {
-  const { user: authUser } = useAuth();
+interface UserDetailPageProps {
+  hideNav?: boolean;
+}
 
-  const [mode, setMode] = useState<PageMode>('VIEW');
+export function UserDetailPage({ hideNav = false }: UserDetailPageProps = {}) {
+  const { user: authUser } = useAuth();
+  const location = useLocation();
+
+  const isInsidePortal = location.pathname.startsWith('/admin') || location.pathname.startsWith('/organizer') || location.pathname.startsWith('/staff');
+  const shouldHideNav = hideNav || isInsidePortal;
+
+  const [searchParams, setSearchParams] = useSearchParams();
+  const requestedMode = searchParams.get('mode');
+  const mode: PageMode = requestedMode === 'EDIT' || requestedMode === 'CHANGE_PASSWORD' ? requestedMode : 'VIEW';
+  function setMode(nextMode: PageMode) {
+    setSearchParams((params) => {
+      if (nextMode === 'VIEW') params.delete('mode');
+      else params.set('mode', nextMode);
+      return params;
+    }, { replace: true });
+  }
   const [user, setUser] = useState<UserDetailDto | null>(null);
   const [loading, setLoading] = useState(true);
   const [pageError, setPageError] = useState<string | null>(null);
@@ -81,18 +99,20 @@ export function UserDetailPage() {
   } : null);
 
   return (
-    <div className={styles.pageWrapper}>
+    <div className={`${styles.pageWrapper} ${shouldHideNav ? styles.portalWrapper : ''}`}>
       {/* Toast Notification Alert */}
       <Toast toast={toast} onClose={() => setToast(null)} />
 
       {/* Header & Account Menu */}
-      <CustomerHeader
-        user={currentUser}
-        onSelectMode={(targetMode) => setMode(targetMode)}
-      />
+      {!shouldHideNav && (
+        <CustomerHeader
+          user={currentUser}
+          onSelectMode={(targetMode) => setMode(targetMode)}
+        />
+      )}
 
       {/* Main Body */}
-      <main className={styles.mainContent}>
+      <main className={`${styles.mainContent} ${shouldHideNav ? styles.portalMainContent : ''}`}>
         <UserPageHeader mode={mode} onSetMode={setMode} />
 
         {/* State Display: Loading / Error / Active View Component */}
@@ -116,7 +136,6 @@ export function UserDetailPage() {
           mode === 'VIEW' ? (
             <UserDetail
               user={currentUser}
-              onEdit={() => setMode('EDIT')}
             />
           ) : mode === 'EDIT' ? (
             <EditUserDetail
@@ -166,7 +185,7 @@ export function UserDetailPage() {
       </main>
 
       {/* Footer */}
-      <CustomerFooter />
+      {!shouldHideNav && <CustomerFooter />}
     </div>
   );
 }

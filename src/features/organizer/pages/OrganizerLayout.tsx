@@ -4,16 +4,19 @@ import {
   Bell,
   ChartColumn,
   CirclePlus,
+  KeyRound,
   LayoutDashboard,
   LogOut,
   Menu,
   Receipt,
   Search,
   Ticket,
+  User,
   Users,
   Wallet,
   X,
 } from 'lucide-react'
+import { NotificationBell } from '../../notifications/components/NotificationBell'
 import { useAuth } from '../../auth/hooks/useAuth'
 import { authErrorMessage } from '../../auth/api/auth-errors'
 import styles from './OrganizerLayout.module.css'
@@ -142,6 +145,15 @@ export function OrganizerLayout() {
               <Wallet size={19} />
               <span>Doanh thu &amp; Rút tiền</span>
             </NavLink>
+
+            <NavLink
+              to="/organizer/profile"
+              className={({ isActive }) => (isActive ? styles.active : '')}
+              onClick={() => setMenuOpen(false)}
+            >
+              <User size={19} />
+              <span>Thông tin cá nhân</span>
+            </NavLink>
           </nav>
         </div>
 
@@ -189,19 +201,11 @@ export function OrganizerLayout() {
           <div className={styles.account}>
             <span className={styles.role}>BAN TỔ CHỨC</span>
 
-            <button
-              type="button"
-              className={styles.bellBtn}
-              aria-label="Thông báo"
-              onClick={() => alert('Chưa có thông báo mới.')}
-            >
-              <Bell size={20} />
-              <span className={styles.bellBadge} />
-            </button>
+            <NotificationBell />
 
             <div className={styles.user}>
-              <strong>{user?.fullName || 'Cloud9 Entertainment'}</strong>
-              <small>{user?.email || 'organizer@cloud9.vn'}</small>
+              <strong>{user?.fullName || 'Nhà tổ chức'}</strong>
+              <small>{user?.email || 'organizer@eventhub.vn'}</small>
             </div>
 
             <div
@@ -229,11 +233,40 @@ export function OrganizerLayout() {
                 aria-controls="organizer-account-menu"
                 onClick={() => setAccountMenuOpen(!accountMenuOpen)}
               >
-                {(user?.fullName || user?.email || 'C').slice(0, 1).toUpperCase()}
+                {(user?.fullName || user?.email || 'O').slice(0, 1).toUpperCase()}
               </button>
 
               {accountMenuOpen && (
                 <div id="organizer-account-menu" className={styles.accountDropdown}>
+                  <div className={styles.dropdownUserHeader}>
+                    <p className={styles.dropdownName}>{user?.fullName || 'Nhà tổ chức'}</p>
+                    <p className={styles.dropdownEmail}>{user?.email}</p>
+                  </div>
+                  <Link
+                    to="/organizer/profile"
+                    className={styles.accountProfile}
+                    onClick={() => setAccountMenuOpen(false)}
+                  >
+                    <User size={16} />
+                    <span>Thông tin cá nhân</span>
+                  </Link>
+                  <Link
+                    to="/organizer/profile?mode=CHANGE_PASSWORD"
+                    className={styles.accountProfile}
+                    onClick={() => setAccountMenuOpen(false)}
+                  >
+                    <KeyRound size={16} />
+                    <span>Đổi mật khẩu</span>
+                  </Link>
+                  <Link
+                    to="/organizer/notifications"
+                    className={styles.accountProfile}
+                    onClick={() => setAccountMenuOpen(false)}
+                  >
+                    <Bell size={16} />
+                    <span>Thông báo</span>
+                  </Link>
+                  <div className={styles.accountDivider} />
                   <button
                     type="button"
                     className={styles.accountLogout}

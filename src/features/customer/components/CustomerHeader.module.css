@@ -372,3 +372,20 @@
   text-decoration: none;
   transform: scale(1.02);
 }
+
+@media (max-width: 900px) {
+  .headerSearch { display: none; }
+  .headerInner { gap: 12px; }
+  .navLink { padding: 8px; }
+}
+
+@media (max-width: 640px) {
+  .headerInner { height: 64px; padding: 0 16px; }
+  .navLinks, .userNameHeader { display: none; }
+  .logoLink { font-size: 18px; gap: 8px; white-space: nowrap; }
+  .logoBadge { width: 32px; height: 32px; }
+  .headerActions { gap: 8px; }
+  .ticketBtn { padding: 8px 10px; font-size: 12px; gap: 6px; white-space: nowrap; }
+  .userMenuBtn { padding: 4px; gap: 3px; }
+  .btnLogin, .btnRegister { padding: 0 10px; font-size: 12px; }
+}

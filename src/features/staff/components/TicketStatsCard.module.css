@@ -1,0 +1,140 @@
+.container {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 16px;
+  width: 100%;
+}
+
+.kpiCard {
+  background: #ffffff;
+  border: 1px solid #e7e8eb;
+  border-radius: 14px;
+  padding: 16px 20px;
+  box-shadow: 0 1px 3px rgba(18, 21, 23, 0.04);
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+.kpiCard:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(18, 21, 23, 0.08);
+}
+
+.kpiHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 12px;
+}
+
+.kpiTitle {
+  font-size: 13px;
+  font-weight: 600;
+  color: #6d7b6f;
+}
+
+.kpiIconWrap {
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #f2f4f6;
+  color: #191c1e;
+}
+
+.iconSuccess {
+  background: rgba(45, 194, 117, 0.15);
+  color: #006d3d;
+}
+
+.iconPending {
+  background: rgba(245, 158, 11, 0.15);
+  color: #b45309;
+}
+
+.iconTotal {
+  background: rgba(0, 101, 145, 0.15);
+  color: #006591;
+}
+
+.iconRate {
+  background: rgba(111, 251, 190, 0.25);
+  color: #005236;
+}
+
+.kpiValueArea {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+}
+
+.kpiNumber {
+  font-size: 28px;
+  font-weight: 800;
+  color: #191c1e;
+  line-height: 1.1;
+  letter-spacing: -0.02em;
+}
+
+.numberSuccess {
+  color: #006d3d;
+}
+
+.numberPending {
+  color: #b45309;
+}
+
+.kpiSub {
+  font-size: 12px;
+  color: #6d7b6f;
+  margin-top: 6px;
+}
+
+.progressBarTrack {
+  width: 100%;
+  height: 6px;
+  background: #eceef0;
+  border-radius: 9999px;
+  overflow: hidden;
+  margin-top: 10px;
+}
+
+.progressBarFill {
+  height: 100%;
+  background: linear-gradient(90deg, #2dc275 0%, #006d3d 100%);
+  border-radius: 9999px;
+  transition: width 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.skeletonCard {
+  background: #ffffff;
+  border: 1px solid #e7e8eb;
+  border-radius: 14px;
+  padding: 16px 20px;
+  height: 110px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  animation: pulse 1.5s infinite;
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.5; }
+}
+
+@media (max-width: 1024px) {
+  .container {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 600px) {
+  .container {
+    grid-template-columns: 1fr;
+  }
+}

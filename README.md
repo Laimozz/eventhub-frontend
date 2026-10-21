@@ -12,9 +12,11 @@ Admin đăng nhập được chuyển tới /admin/events/pending. Feature `src/
 | /admin/event-categories | Thêm/sửa/xóa danh mục; xử lý trùng tên và danh mục đang dùng |
 | /admin/events/pending | Danh sách chỉ sự kiện chờ duyệt |
 | /admin/events/pending/:eventId | Hồ sơ, ảnh, địa điểm, khách mời, vé; duyệt có xác nhận, từ chối có lý do tối đa 255 ký tự |
-| /organizer/notifications | Thông báo kết quả xét duyệt từ DB, mở từ biểu tượng chuông |
+| /admin/notifications, /organizer/notifications, /customer/thong-bao | Thông báo của tài khoản đăng nhập, phân trang, đánh dấu đọc và cập nhật realtime qua SSE |
 
 UI có loading/lỗi/thử lại/rỗng, dialog giữ dữ liệu khi lỗi, chặn gửi lặp. Quyết định gửi version nhận từ chi tiết; 404/409 chặn quyết định tiếp đến khi đọc lại hồ sơ. Trang Organizer bổ sung trạng thái REJECTED và rejectReason; chưa mở sửa/gửi lại REJECTED.
+
+Chuông thông báo nằm trên top bar cạnh avatar ở cổng Admin, Organizer và Customer, kèm số chưa đọc. `NotificationsProvider` duy trì một kết nối SSE cho mỗi tab đăng nhập thuộc ba vai trò này; REST dùng Axios client chung, SSE gửi cookie với `withCredentials`. Sau sự kiện SSE hoặc reconnect, frontend tải lại danh sách/số chưa đọc từ backend. Kết nối đóng khi đăng xuất/đổi tài khoản. Staff tạm thời không có giao diện, request API hoặc kết nối SSE thông báo. Kiểm thử UI ở `tests/notifications.spec.ts` giả lập API/SSE; backend có kiểm thử PostgreSQL và SSE riêng.
 
 ApiError giữ thêm code/message/errors từ backend để hiện lỗi nghiệp vụ; cơ chế cookie/refresh vẫn giữ nguyên. Test `tests/admin.spec.ts` chạy desktop/mobile với API giả lập; backend kiểm thử API và DB thật riêng. Trên máy có Edge có thể dùng `$env:PLAYWRIGHT_CHANNEL='msedge'; npm.cmd run test:e2e`. PowerShell chặn npm.ps1 thì dùng npm.cmd.
 
@@ -56,6 +58,9 @@ npm run dev
 | `/organizer/events/:eventId/edit/:step` | Dùng lại form tạo với `details`, `category`, `tickets`; tải hồ sơ hiện tại, sửa và gửi duyệt lại. |
 | `/organizer/staffs` | Phân công & điều phối nhân viên soát vé cho các sự kiện (UC 21 & UC 22). |
 | `/organizer/wallet` | Doanh thu & quản lý số dư ví, tạo yêu cầu rút tiền, xem lịch sử và hủy yêu cầu (UC 24, 25, 26, 27). |
+| `/staff` | Cổng Nhân viên soát vé (**UC28**); xem danh sách sự kiện được phân công, lọc theo ngày và trạng thái ca trực. |
+| `/staff/events/:eventId` | Chi tiết sự kiện phân công (**UC29**), thống kê vé (Tổng vé, Đã soát vé, Chưa check-in), thanh lọc 2 cấp (Khách hàng, Loại vé, Trạng thái) và danh sách vé phân trang (chế độ tra cứu chỉ đọc trên Web). |
+| `/staff/profile` | Thông tin cá nhân và đổi mật khẩu của tài khoản nhân viên. |
 
 ### 2.2. Mô hình phân tầng: Feature ➔ Pages ➔ Components ➔ API Services
 
@@ -236,6 +241,26 @@ Khi một thành viên nhận nhiệm vụ phát triển một tính năng mới
 ---
 
 ## 7. Kiểm Tra & Đóng Gói
+
+### Đặt vé, thanh toán và QR
+
+| Đường dẫn | Chức năng |
+| --- | --- |
+| `/customer/events/:eventId/book` | Chọn loại vé và số lượng theo kho từ backend |
+| `/customer/bookings/:bookingId/checkout` | Thông tin tài khoản, hạn giữ vé, chuyển sang VNPay Sandbox |
+| `/customer/payment-result` | Xác thực callback với backend và chờ IPN; chỉ thông báo thành công khi booking PAID |
+| `/customer/booking-cua-toi` | Lịch sử booking phân trang |
+| `/customer/bookings/:bookingId` | Chi tiết vé đã chọn, tổng tiền và các lần thanh toán |
+| `/customer/ve-cua-toi` | Vé điện tử/QR, lọc vé chưa dùng/đã check-in |
+| `/customer/bookings/:bookingId/tickets` | Vé theo booking, phóng to QR |
+
+Các trang booking/vé yêu cầu CUSTOMER và sẽ quay lại trang đang mở sau khi đăng nhập. Trang payment-result công khai để nhận redirect, nhưng chi tiết booking/vé vẫn yêu cầu chủ tài khoản. Giá, kho, trạng thái thanh toán và hiệu lực QR do backend quyết định. Vé miễn phí được phát hành ngay theo response PAID.
+
+Khi đã bắt đầu thanh toán và vừa hết hạn, backend có thể trả PAYMENT_CONFIRMING với paymentConfirmationDeadline (mặc định giữ thêm 120 giây để chờ IPN). FE hiển thị “Đang xác nhận thanh toán”, khóa thanh toán lại và đếm ngược theo deadline của backend. Trang kết quả kiểm tra mỗi 2 giây cho đến trạng thái kết thúc, không dừng sau 60 giây; checkout/chi tiết cập nhật mỗi 5 giây khi còn PENDING/PAYMENT_CONFIRMING. Hạn thanh toán ban đầu vẫn là expiredAt. Khi backend trả EXPIRED, trang kết quả cho phép kiểm tra lại để đọc trạng thái của IPN đến muộn.
+
+Backend cần `VNPAY_RETURN_URL=http://localhost:5173/customer/payment-result` khi chạy FE mặc định, cùng merchant/secret Sandbox. IPN đăng ký phía VNPay là `https://<backend-public>/api/payments/vnpay/ipn`, phải truy cập được từ Internet. Khi deploy thay Return URL bằng domain FE; không đưa hash secret vào frontend.
+
+Ảnh QR mã hóa token riêng cho từng vé bằng `qrcode.react`. Trang vé cập nhật mỗi 10 giây và khi tab lấy lại focus; vé có trạng thái USED sẽ ẩn mã QR. Phạm vi customer không bao gồm màn hình hoặc API quét/check-in.
 
 ```bash
 # Kiểm tra linter

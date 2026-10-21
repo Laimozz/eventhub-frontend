@@ -1184,3 +1184,16 @@
   }
 }
 
+.portalWrapper {
+  min-height: auto;
+  background: transparent;
+  width: 100%;
+}
+
+.portalMainContent {
+  max-width: 1280px;
+  width: 100%;
+  margin: 0 auto;
+  padding: 0 0 48px;
+}
+

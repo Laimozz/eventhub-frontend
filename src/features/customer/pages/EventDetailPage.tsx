@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { useParams, Link } from 'react-router'
+import { useParams, Link, useNavigate } from 'react-router'
 import { getPublicEventDetail } from '../api/event-api'
 import type { PublicEventDetailResponse } from '../types/event'
 import { EventCard } from '../components/EventCard'
@@ -8,6 +8,7 @@ import styles from './EventDetailPage.module.css'
 
 export function EventDetailPage() {
   const { eventId } = useParams()
+  const navigate = useNavigate()
   const [event, setEvent] = useState<PublicEventDetailResponse | null>(null)
   const [loading, setLoading] = useState(true)
 
@@ -77,7 +78,7 @@ export function EventDetailPage() {
     : 'Miễn phí'
 
   const handleBookTicket = () => {
-    alert('Tính năng đặt vé đang được phát triển!')
+    navigate(`/customer/events/${event.id}/book`)
   }
 
   return (

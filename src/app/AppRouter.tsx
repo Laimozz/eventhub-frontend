@@ -1,4 +1,4 @@
-import { Navigate, Outlet, Route, Routes } from 'react-router'
+import { Navigate, Outlet, Route, Routes, useLocation } from 'react-router'
 import { useAuth } from '../features/auth/hooks/useAuth'
 import { LoginPage } from '../features/auth/pages/LoginPage'
 import { RegisterPage } from '../features/auth/pages/RegisterPage'
@@ -12,6 +12,7 @@ import { CreateEventPage } from '../features/events/pages/CreateEventPage'
 import { OrganizerEventsPage } from '../features/events/pages/OrganizerEventsPage'
 import { EventDetailPage } from '../features/events/pages/EventDetailPage'
 import { EditEventPage } from '../features/events/pages/EditEventPage'
+import { UserDetailPage as OrganizerUserDetailPage } from '../features/organizer/pages/UserDetailPage'
 
 // Admin Pages & Layout
 import { AdminLayout } from '../features/admin/pages/AdminLayout'
@@ -19,6 +20,7 @@ import { UsersPage } from '../features/admin/pages/UsersPage'
 import { EventCategoriesPage } from '../features/admin/pages/EventCategoriesPage'
 import { PendingEventsPage } from '../features/admin/pages/PendingEventsPage'
 import { EventReviewDetailPage } from '../features/admin/pages/EventReviewDetailPage'
+import { UserDetailPage as AdminUserDetailPage } from '../features/admin/pages/UserDetailPage'
 
 // Notifications
 import { NotificationsPage } from '../features/notifications/pages/NotificationsPage'
@@ -29,7 +31,10 @@ import { CustomerRoutes } from '../features/customer/routes/CustomerRoutes'
 
 function GuestRoute() {
   const { user } = useAuth()
-  return user ? <Navigate to="/" replace /> : <Outlet />
+  const location = useLocation()
+  const from = location.state?.from
+  const destination = user?.role === 'CUSTOMER' && typeof from === 'string' && from.startsWith('/customer/') ? from : '/'
+  return user ? <Navigate to={destination} replace /> : <Outlet />
 }
 
 function ProtectedRoute() {
@@ -81,11 +86,13 @@ export function AppRouter() {
         {/* Admin Portal */}
         <Route element={<AdminRoute />}>
           <Route path="/admin" element={<AdminLayout />}>
+            <Route path="notifications" element={<NotificationsPage />} />
             <Route index element={<Navigate to="events/pending" replace />} />
             <Route path="users" element={<UsersPage />} />
             <Route path="event-categories" element={<EventCategoriesPage />} />
             <Route path="events/pending" element={<PendingEventsPage />} />
             <Route path="events/pending/:eventId" element={<EventReviewDetailPage />} />
+            <Route path="profile" element={<AdminUserDetailPage />} />
           </Route>
         </Route>
 
@@ -102,6 +109,7 @@ export function AppRouter() {
             <Route path="events/:eventId/edit/:step" element={<EditEventPage />} />
             <Route path="staffs" element={<OrganizerStaffDispatchPage />} />
             <Route path="wallet" element={<OrganizerWalletPage />} />
+            <Route path="profile" element={<OrganizerUserDetailPage />} />
           </Route>
         </Route>
 

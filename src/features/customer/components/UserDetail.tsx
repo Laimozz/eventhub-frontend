@@ -3,11 +3,25 @@ import styles from '../pages/UserDetailPage.module.css';
 
 interface UserDetailProps {
   user: UserDetailDto;
-  onEdit: () => void;
 }
 
-export function UserDetail({ user, onEdit }: UserDetailProps) {
-  const roleDisplay = user.role === 'CUSTOMER' ? 'Khách mua vé / Customer' : user.role;
+export function UserDetail({ user }: UserDetailProps) {
+  const roleDisplay = user.role === 'ADMIN'
+    ? 'Quản trị viên / Admin'
+    : user.role === 'ORGANIZER'
+    ? 'Ban tổ chức / Organizer'
+    : user.role === 'STAFF'
+    ? 'Nhân viên / Staff'
+    : 'Khách mua vé / Customer';
+
+  const roleSub = user.role === 'ADMIN'
+    ? 'Tài khoản quản trị viên hệ thống'
+    : user.role === 'ORGANIZER'
+    ? 'Tài khoản ban tổ chức sự kiện'
+    : user.role === 'STAFF'
+    ? 'Tài khoản nhân viên vận hành'
+    : 'Tài khoản đặt vé sự kiện cá nhân';
+
   const initial = user.fullName?.trim() ? user.fullName.trim().charAt(0).toUpperCase() : 'U';
 
   return (
@@ -32,16 +46,8 @@ export function UserDetail({ user, onEdit }: UserDetailProps) {
           <div className={styles.heroHeaderRow}>
             <div>
               <h2 className={styles.heroName}>{user.fullName}</h2>
-              <p className={styles.heroSub}>Tài khoản đặt vé sự kiện cá nhân</p>
+              <p className={styles.heroSub}>{roleSub}</p>
             </div>
-            <button
-              type="button"
-              className={styles.btnSecondaryEdit}
-              onClick={onEdit}
-            >
-              <span className="material-symbols-outlined text-[18px]">edit</span>
-              <span>Chỉnh sửa thông tin cá nhân</span>
-            </button>
           </div>
 
           <div className={styles.quickInfoRow}>
