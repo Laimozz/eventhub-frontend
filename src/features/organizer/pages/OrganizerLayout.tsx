@@ -145,15 +145,6 @@ export function OrganizerLayout() {
               <Wallet size={19} />
               <span>Doanh thu &amp; Rút tiền</span>
             </NavLink>
-
-            <NavLink
-              to="/organizer/profile"
-              className={({ isActive }) => (isActive ? styles.active : '')}
-              onClick={() => setMenuOpen(false)}
-            >
-              <User size={19} />
-              <span>Thông tin cá nhân</span>
-            </NavLink>
           </nav>
         </div>
 
