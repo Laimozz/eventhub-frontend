@@ -4,6 +4,7 @@ import { useAuth } from '../../auth/hooks/useAuth';
 import type { UserDetailDto } from '../types/user';
 import styles from './CustomerHeader.module.css';
 import { NotificationBell } from '../../notifications/components/NotificationBell';
+import { authErrorMessage } from '../../auth/api/auth-errors';
 
 interface CustomerHeaderProps {
   user?: UserDetailDto | null;
@@ -19,6 +20,9 @@ export function CustomerHeader({ user: propUser, onSelectMode }: CustomerHeaderP
 
   const [userMenuOpen, setUserMenuOpen] = useState(false);
   const [logoutModalOpen, setLogoutModalOpen] = useState(false);
+  const [logoutPending, setLogoutPending] = useState(false);
+  const [logoutError, setLogoutError] = useState('');
+  const logoutInFlight = useRef(false);
   const userMenuRef = useRef<HTMLDivElement>(null);
   const userMenuButtonRef = useRef<HTMLButtonElement>(null);
 
@@ -34,9 +38,19 @@ export function CustomerHeader({ user: propUser, onSelectMode }: CustomerHeaderP
   }, [userMenuOpen]);
 
   async function handleLogout() {
-    setLogoutModalOpen(false);
-    await signOut();
-    navigate('/login');
+    if (logoutInFlight.current) return;
+    logoutInFlight.current = true;
+    setLogoutPending(true);
+    setLogoutError('');
+    try {
+      await signOut();
+      navigate('/login');
+    } catch (cause) {
+      setLogoutError(authErrorMessage(cause));
+    } finally {
+      logoutInFlight.current = false;
+      setLogoutPending(false);
+    }
   }
 
   const initial = user?.fullName?.trim() ? user.fullName.trim().charAt(0).toUpperCase() : 'U';
@@ -249,6 +263,7 @@ export function CustomerHeader({ user: propUser, onSelectMode }: CustomerHeaderP
               Bạn có chắc chắn muốn đăng xuất khỏi tài khoản EventHub không?
             </p>
             <div className={styles.modalFooter}>
+              {logoutError && <p role="alert">{logoutError}</p>}
               <button
                 type="button"
                 className={styles.btnCancel}
@@ -260,6 +275,7 @@ export function CustomerHeader({ user: propUser, onSelectMode }: CustomerHeaderP
                 type="button"
                 className={styles.btnConfirmLogout}
                 onClick={handleLogout}
+                disabled={logoutPending}
               >
                 Xác nhận
               </button>

@@ -47,6 +47,8 @@ async function setup(page: Page, role: keyof typeof paths | 'STAFF') {
       const pageNumber = Number(new URL(route.request().url()).searchParams.get('page') || 0)
       return route.fulfill({ json: { items: state.items.slice(pageNumber * 20, (pageNumber + 1) * 20), page: pageNumber, totalPages: Math.ceil(state.items.length / 20), totalElements: state.items.length } })
     }
+    if (path.endsWith('/events/mine')) return route.fulfill({ json: { content: [], totalElements: 0 } })
+    if (path.includes('/organizer/')) return route.fulfill({ status: 503, json: {} })
     return route.fulfill({ json: {} })
   })
   return state
@@ -175,7 +177,7 @@ test('SSE refreshes the list and badge, reconnects and keeps one connection acro
   await expect.poll(() => page.evaluate(() => (window as typeof window & { notificationStreams: EventSource[] }).notificationStreams.length)).toBeGreaterThan(1)
   const menu = page.getByRole('button', { name: 'Mở menu điều hướng', exact: true })
   if (await menu.isVisible()) await menu.click()
-  await page.getByRole('link', { name: /^EventHub/ }).click()
+  await page.getByRole('link', { name: 'TicketBo', exact: true }).click()
   await page.getByRole('link', { name: 'Thông báo, 4 chưa đọc', exact: true }).click()
   await expect(page.getByRole('heading', { name: 'Thông báo 4', exact: true })).toBeVisible()
   expect(await page.evaluate(() => (window as typeof window & { notificationStreams: EventSource[] }).notificationStreams.filter(source => source.readyState !== 2).length)).toBe(1)

@@ -37,7 +37,7 @@ test('customer cannot enter admin routes', async ({ page }) => {
   let calls = 0
   await page.route('**/api/admin/**', route => { calls++; return route.fulfill({ status: 403 }) })
   await page.goto('/admin/users')
-  await expect(page).toHaveURL('/')
+  await expect(page).toHaveURL('/customer')
   expect(calls).toBe(0)
 })
 test('user form handles duplicate email, creates user and locks account', async ({ page }) => {

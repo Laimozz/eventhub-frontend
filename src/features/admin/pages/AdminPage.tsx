@@ -4,6 +4,7 @@ import { useAdminData } from '../hooks/use-admin-data'
 import { LoadState } from '../components/AdminComponents'
 import styles from './Admin.module.css'
 import finance from './Finance.module.css'
+import { RefundManagement } from '../components/RefundManagement'
 
 export function AdminPage() {
   const { data, loading, error, reload } = useAdminData(financeApi.overview)
@@ -12,8 +13,9 @@ export function AdminPage() {
     <LoadState loading={loading} error={error} retry={reload} />
     {data && <>
       <div className={finance.metrics}>{[
-        ['Doanh thu gộp', money(data.grossRevenue)],
-        ['Doanh thu ròng', money(data.netRevenue)],
+        ['Tiền vé thanh toán thành công', money(data.grossRevenue)],
+        ['Tiền đã hoàn', money(data.totalRefunded)],
+        ['Doanh thu nền tảng (5% sau hoàn)', money(data.netRevenue)],
         ['Tổng số sự kiện', data.totalEvents.toLocaleString('vi-VN')],
         ['Tổng số vé đã bán', data.totalTicketsSold.toLocaleString('vi-VN')],
         ['Tổng số người dùng', data.totalUsers.toLocaleString('vi-VN')],
@@ -26,5 +28,6 @@ export function AdminPage() {
       {data.revenueUnavailableReason && <p className={styles.notice}>{data.revenueUnavailableReason}</p>}
       <div className={styles.panel}><h2>Xử lý tài chính</h2><div className={styles.actions}><Link to="/admin/withdrawals">Yêu cầu rút tiền</Link><Link to="/admin/refunds">Sự kiện đã hủy</Link></div></div>
     </>}
+    <RefundManagement />
   </>
 }

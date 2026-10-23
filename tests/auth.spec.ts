@@ -1,6 +1,13 @@
 import { expect, test } from '@playwright/test'
 import type { Page, Route } from '@playwright/test'
 
+test.beforeEach(async ({ page }) => {
+  await page.route('**/api/notifications/unread-count', route => route.fulfill({ json: 0 }))
+  await page.route('**/api/public/events**', route => route.fulfill({ json: { content: [], totalPages: 0 } }))
+  await page.route('**/api/categories', route => route.fulfill({ json: [] }))
+  await page.addInitScript(() => { window.EventSource = class extends EventTarget { readyState = 1; close() { this.readyState = 2 } } as unknown as typeof EventSource })
+})
+
 const user = { id: 1, email: 'member@example.test', fullName: 'Nguyễn An', phone: null, role: 'CUSTOMER' }
 const password = 'Test-password-123'
 
@@ -27,7 +34,7 @@ async function fillRegistration(page: Page) {
 
 test('anonymous visitors are redirected and login only contains email/password', async ({ page }) => {
   await anonymous(page)
-  await page.goto('/')
+  await page.goto('/customer/thong-bao')
   await expect(page).toHaveURL('/login')
   await expect(page.getByRole('heading', { name: 'Đăng nhập', exact: true })).toBeVisible()
   await expect(page.locator('form input')).toHaveCount(2)
@@ -60,7 +67,7 @@ for (const role of ['CUSTOMER', 'ORGANIZER']) {
     await expect(page).toHaveURL('/login')
     await expect(page.getByRole('status')).toContainText('Đăng ký thành công')
     expect(registrations).toBe(1)
-    await expect(page.getByRole('button', { name: 'Đăng xuất', exact: true })).toHaveCount(0)
+    await expect(page.getByRole('button', { name: /Đăng xuất$/ })).toHaveCount(0)
   })
 }
 
@@ -121,18 +128,20 @@ test('login, reload with HttpOnly cookie, and logout use the backend contract', 
   await page.goto('/login')
   await fillLogin(page)
   await page.getByRole('button', { name: 'Đăng nhập', exact: true }).click()
-  await expect(page).toHaveURL('/')
-  await expect(page.locator('body')).toHaveText('Đăng xuất')
+  await expect(page).toHaveURL('/customer')
+  await expect(page.getByRole('button', { name: 'Menu tài khoản', exact: true })).toBeVisible()
   expect(await page.evaluate(() => localStorage.length)).toBe(0)
   expect(await page.evaluate(() => document.cookie)).not.toContain('refresh_token')
   await page.reload()
-  await expect(page.getByRole('button', { name: 'Đăng xuất', exact: true })).toBeVisible()
+  await expect(page.getByRole('button', { name: 'Menu tài khoản', exact: true })).toBeVisible()
   expect(refreshCalls).toBe(2)
-  await page.getByRole('button', { name: 'Đăng xuất', exact: true }).click()
+  await page.getByRole('button', { name: 'Menu tài khoản', exact: true }).click()
+  await page.getByRole('button', { name: /Đăng xuất$/ }).click()
+  await page.getByRole('button', { name: 'Xác nhận', exact: true }).click()
   await expect(page).toHaveURL('/login')
   expect(logouts).toBe(1)
   expect((await context.cookies()).some((cookie) => cookie.name === 'refresh_token')).toBe(false)
-  await page.goto('/')
+  await page.goto('/customer/thong-bao')
   await expect(page).toHaveURL('/login')
 })
 
@@ -152,12 +161,14 @@ test('wrong credentials and network errors remain recoverable', async ({ page })
 test('failed logout keeps the session and allows retry', async ({ page }) => {
   await page.route('**/api/auth/refresh', (route) => route.fulfill({ status: 200, json: user }))
   await page.route('**/api/auth/logout', (route) => route.abort())
-  await page.goto('/')
-  await page.getByRole('button', { name: 'Đăng xuất', exact: true }).click()
-  await expect(page).toHaveURL('/')
+  await page.goto('/customer')
+  await page.getByRole('button', { name: 'Menu tài khoản', exact: true }).click()
+  await page.getByRole('button', { name: /Đăng xuất$/ }).click()
+  await page.getByRole('button', { name: 'Xác nhận', exact: true }).click()
+  await expect(page).toHaveURL('/customer')
   await expect(page.getByRole('alert')).toContainText('Không thể kết nối')
-  await expect(page.getByRole('button', { name: 'Đăng xuất', exact: true })).toBeEnabled()
+  await expect(page.getByRole('button', { name: 'Xác nhận', exact: true })).toBeEnabled()
   await page.route('**/api/auth/logout', (route) => route.fulfill({ status: 204 }))
-  await page.getByRole('button', { name: 'Đăng xuất', exact: true }).click()
+  await page.getByRole('button', { name: 'Xác nhận', exact: true }).click()
   await expect(page).toHaveURL('/login')
 })

@@ -18,6 +18,9 @@ async function selectImage(page: Page, id: string) {
 }
 
 async function session(page: Page, role = 'ORGANIZER') {
+  await page.route('**/api/notifications/unread-count', route => route.fulfill({ json: 0 }))
+  await page.route('**/api/events/mine?**', route => route.fulfill({ json: { content: [], totalElements: 0 } }))
+  await page.route('**/api/organizer/**', route => route.fulfill({ status: 503, json: {} }))
   await page.route('**/api/auth/refresh', route => route.fulfill({ json: { ...organizer, role }, headers: { 'Set-Cookie': 'access_token=event-test-session; Path=/api; HttpOnly; SameSite=Lax' } }))
   await page.route('**/api/categories', route => route.fulfill({ json: categories }))
 }
@@ -51,12 +54,12 @@ async function addTicket(page: Page, quantity = '100') {
   await expect(dialog).not.toBeVisible()
 }
 
-test('organizer dashboard follows reference and unrelated sections remain placeholders', async ({ page }) => {
+test('organizer dashboard and event creation navigation remain responsive', async ({ page }) => {
   await session(page)
   await page.goto('/')
   await expect(page).toHaveURL('/organizer')
-  await expect(page.getByRole('heading', { name: 'Tổng quan ban tổ chức' })).toBeVisible()
-  await expect(page.getByText(/Giao diện minh họa/)).toBeVisible()
+  await expect(page.getByRole('heading', { name: /Xin chào, Cloud9 Entertainment/ })).toBeVisible()
+  await expect(page.getByText('Tổng quan hoạt động và hiệu suất sự kiện của bạn trong thời gian thực.')).toBeVisible()
   await page.screenshot({ path: test.info().outputPath('organizer-dashboard.png'), fullPage: true })
   if (test.info().project.name === 'mobile') await page.getByRole('button', { name: 'Mở menu điều hướng' }).click()
   await expect(page.getByRole('button', { name: 'Quản lý Booking' })).toBeDisabled()
@@ -88,7 +91,7 @@ test('organizer avatar opens logout, dismisses with outside click or Escape, and
   await expect(avatar).toHaveAttribute('aria-expanded', 'true')
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true)
   await page.screenshot({ path: test.info().outputPath('organizer-avatar-logout.png') })
-  await page.getByRole('heading', { name: 'Tổng quan ban tổ chức' }).click({ position: { x: 5, y: 5 } })
+  await page.getByRole('heading', { name: /Xin chào, Cloud9 Entertainment/ }).click({ position: { x: 5, y: 5 } })
   await expect(dropdown).toHaveCount(0)
   await avatar.focus()
   await page.keyboard.press('Enter')
@@ -131,8 +134,8 @@ test('organizer avatar logout failure keeps the session and allows retry', async
 test('only organizer can access wizard and incomplete direct links return to step one', async ({ page }) => {
   await session(page, 'CUSTOMER')
   await page.goto('/organizer/events/new/details')
-  await expect(page).toHaveURL('/')
-  await expect(page.getByRole('button', { name: 'Đăng xuất' })).toBeVisible()
+  await expect(page).toHaveURL('/customer')
+  await expect(page.getByRole('button', { name: 'Menu tài khoản', exact: true })).toBeVisible()
   await session(page)
   await page.goto('/organizer/events/new/tickets')
   await expect(page).toHaveURL('/organizer/events/new/details')

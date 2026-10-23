@@ -6,8 +6,8 @@ Dự án Frontend được xây dựng bằng **React 19 + Vite + TypeScript**, 
 
 - `/admin/statistics`: số liệu từ API, số dư ví Organizer và doanh thu gộp/ròng. Doanh thu chưa được backend xác định hiển thị “Chưa xác định”, không đổi null thành 0.
 - `/admin/withdrawals`, `/admin/withdrawals/:requestId`: lọc/phân trang, xem chi tiết, ghi nhận chuyển khoản đã thực hiện ngoài hệ thống và từ chối có lý do. Khi lỗi quyết định, tải lại dữ liệu; chặn gửi khi chưa tải xong, yêu cầu đã xử lý hoặc đã có payout cần đối soát.
-- `/admin/refunds`, `/admin/refunds/:eventId`: đối soát chỉ đọc cho sự kiện CANCELED, chưa thực hiện hoàn tiền.
-- API dùng client cookie/CSRF hiện có. Kiểm thử giả lập ở `tests/admin-finance.spec.ts`; chạy `npm.cmd run test:e2e -- tests/admin-finance.spec.ts`. Cần tích hợp UC11/UC25 và hợp đồng hoàn tiền để nghiệm thu toàn luồng; xem `../plan.md`.
+- `/admin/refunds`, `/admin/refunds/:eventId`: danh sách sự kiện CANCELED, hoàn hàng loạt; dashboard hỗ trợ hoàn cá nhân, truy vấn kết quả và hoàn thủ công với tài khoản/chứng từ chỉ Admin được xem.
+- API dùng client cookie/CSRF hiện có. Kiểm thử giả lập ở `tests/admin-finance.spec.ts`; chạy `npm.cmd run test:e2e -- tests/admin-finance.spec.ts`. Đã nối UC11/UC25; nghiệm thu VNPAY sandbox cần quyền merchant và cấu hình thực tế; xem `../plan.md`.
 
 ## Quản trị UC31–36
 
@@ -19,11 +19,7 @@ Admin đăng nhập được chuyển tới /admin/events/pending. Feature `src/
 | /admin/event-categories        | Thêm/sửa/xóa danh mục; xử lý trùng tên và danh mục đang dùng                              |
 | /admin/events/pending          | Danh sách chỉ sự kiện chờ duyệt                                                           |
 | /admin/events/pending/:eventId | Hồ sơ, ảnh, địa điểm, khách mời, vé; duyệt có xác nhận, từ chối có lý do tối đa 255 ký tự |
-<<<<<<< HEAD
-| /organizer/notifications       | Thông báo kết quả xét duyệt từ DB, mở từ biểu tượng chuông                                |
-=======
 | /admin/notifications, /organizer/notifications, /customer/thong-bao | Thông báo của tài khoản đăng nhập, phân trang, đánh dấu đọc và cập nhật realtime qua SSE |
->>>>>>> develop
 
 UI có loading/lỗi/thử lại/rỗng, dialog giữ dữ liệu khi lỗi, chặn gửi lặp. Quyết định gửi version nhận từ chi tiết; 404/409 chặn quyết định tiếp đến khi đọc lại hồ sơ. Trang Organizer bổ sung trạng thái REJECTED và rejectReason; chưa mở sửa/gửi lại REJECTED.
 
@@ -54,21 +50,6 @@ npm run dev
 
 ### 2.1. Danh mục đường dẫn chính
 
-<<<<<<< HEAD
-| Đường dẫn                               | Hành vi                                                                                                         |
-| --------------------------------------- | --------------------------------------------------------------------------------------------------------------- |
-| `/register`                             | Đăng ký CUSTOMER hoặc ORGANIZER; thành công chuyển sang đăng nhập, chưa tạo phiên.                              |
-| `/login`                                | Chỉ nhập email, mật khẩu và đăng nhập; không có đăng nhập mạng xã hội hoặc mô phỏng kiểm thử.                   |
-| `/`                                     | Yêu cầu đăng nhập; Organizer được chuyển tới `/organizer`; các role còn lại có trang đăng xuất.                 |
-| `/customer`                             | Cổng thông tin khách hàng, xem chi tiết và cập nhật thông tin cá nhân, đổi mật khẩu.                            |
-| `/organizer`                            | Chỉ ORGANIZER; trang tổng quan theo mẫu, các số liệu minh họa và mục quản lý khác chưa kết nối API.             |
-| `/organizer/events/new/details`         | Bước 1: thông tin, địa điểm, thời gian, ảnh bìa/thumbnail/sơ đồ.                                                |
-| `/organizer/events/new/category`        | Bước 2: danh mục từ DB và khách mời (tùy chọn).                                                                 |
-| `/organizer/events/new/tickets`         | Bước 3: thêm/sửa/xóa/nhân bản loại vé, kiểm tra hồ sơ và gửi duyệt.                                             |
-| `/organizer/events`                     | Danh sách từ API: tìm theo tên, lọc trạng thái và phân trang.                                                   |
-| `/organizer/events/:eventId`            | Chi tiết, địa điểm, ảnh, khách mời, số vé phát hành/đã bán/giữ chỗ/còn lại; sửa hoặc yêu cầu hủy khi được phép. |
-| `/organizer/events/:eventId/edit/:step` | Dùng lại form tạo với `details`, `category`, `tickets`; tải hồ sơ hiện tại, sửa và gửi duyệt lại.               |
-=======
 | Đường dẫn | Hành vi |
 | --- | --- |
 | `/register` | Đăng ký CUSTOMER hoặc ORGANIZER; thành công chuyển sang đăng nhập, chưa tạo phiên. |
@@ -80,14 +61,13 @@ npm run dev
 | `/organizer/events/new/category` | Bước 2: danh mục từ DB và khách mời (tùy chọn). |
 | `/organizer/events/new/tickets` | Bước 3: thêm/sửa/xóa/nhân bản loại vé, kiểm tra hồ sơ và gửi duyệt. |
 | `/organizer/events` | Danh sách từ API: tìm theo tên, lọc trạng thái và phân trang. |
-| `/organizer/events/:eventId` | Chi tiết sự kiện, hồ sơ vé và tab Quản lý nhân viên soát vé (UC 21 & UC 22). |
+| `/organizer/events/:eventId` | Chi tiết, địa điểm, ảnh, khách mời, số vé phát hành/đã bán/giữ chỗ/còn lại; sửa hoặc yêu cầu hủy khi được phép; tab Quản lý nhân viên soát vé (UC 21 & UC 22). |
 | `/organizer/events/:eventId/edit/:step` | Dùng lại form tạo với `details`, `category`, `tickets`; tải hồ sơ hiện tại, sửa và gửi duyệt lại. |
 | `/organizer/staffs` | Phân công & điều phối nhân viên soát vé cho các sự kiện (UC 21 & UC 22). |
 | `/organizer/wallet` | Doanh thu & quản lý số dư ví, tạo yêu cầu rút tiền, xem lịch sử và hủy yêu cầu (UC 24, 25, 26, 27). |
 | `/staff` | Cổng Nhân viên soát vé (**UC28**); xem danh sách sự kiện được phân công, lọc theo ngày và trạng thái ca trực. |
 | `/staff/events/:eventId` | Chi tiết sự kiện phân công (**UC29**), thống kê vé (Tổng vé, Đã soát vé, Chưa check-in), thanh lọc 2 cấp (Khách hàng, Loại vé, Trạng thái) và danh sách vé phân trang (chế độ tra cứu chỉ đọc trên Web). |
 | `/staff/profile` | Thông tin cá nhân và đổi mật khẩu của tài khoản nhân viên. |
->>>>>>> develop
 
 ### 2.2. Mô hình phân tầng: Feature ➔ Pages ➔ Components ➔ API Services
 
@@ -141,7 +121,7 @@ Dự án tổ chức mã nguồn theo từng **phân hệ người dùng / tính
 - Chi tiết lấy `GET /api/events/:id`, hiển thị hồ sơ và loại vé/khách mời thật. Số vé đã bán loại trừ số giữ chỗ. API chỉ trả sự kiện thuộc tài khoản; FE không nhận Organizer ID từ URL để thay đổi quyền sở hữu.
 - Sửa dùng cùng `CreateEventPage` và các hộp chỉnh sửa hiện có. Thời gian UTC được đổi về GMT+7, giữ ID loại vé/khách mời, hiện ảnh đã lưu. Thay ảnh thì chỉ gửi file mới; không thay thì giữ URL ở backend. Có thể xóa sơ đồ và ảnh khách mời, thêm/sửa/xóa khách mời và loại vé; vé đã bán/giữ chỗ không cho xóa hoặc giảm số lượng dưới mức đã phân bổ. Backend kiểm tra cả liên kết booking cũ.
 - `PUT /api/events/:id` gửi hồ sơ multipart và các file theo thứ tự mảng đã chỉnh sửa. Ảnh bắt buộc của loại vé mới phải được chọn; khi nhân bản vé cũ cần chọn ảnh cho vé mới. Sửa chỉ được phép trước giờ bắt đầu với trạng thái Chờ duyệt/Đã duyệt. Thành công trở về chi tiết, trạng thái Chờ duyệt và vé tạm ngừng bán để Admin xét lại. Không lưu bản chỉnh sửa vào bản nháp tạo sự kiện trong sessionStorage.
-- Hủy mở hộp nhập lý do (bắt buộc, tối đa 255 ký tự), gọi `POST /api/events/:id/cancel`. Thành công hiển thị Chờ hủy và lý do, tắt thao tác sửa/hủy tiếp. Đây là yêu cầu gửi Admin theo UC23; thời điểm hủy chính thức chỉ được ghi khi Admin xử lý. Không thêm nghiệp vụ hoàn tiền/duyệt Admin.
+- Hủy mở hộp nhập lý do (bắt buộc, tối đa 255 ký tự), gọi `POST /api/events/:id/cancel`. Chỉ hủy trước giờ bắt đầu; thành công hiển thị Đã hủy và lý do. Backend ngừng bán, vô hiệu vé và tạo hồ sơ chờ hoàn; Admin nhấn hoàn hàng loạt hoặc xử lý cá nhân trên dashboard.
 - Các request dùng client cookie/CSRF/refresh hiện có. Chặn gửi lặp, giữ form khi API lỗi. Tạo/sửa multipart có timeout 180 giây để chờ upload ảnh; các API đọc vẫn dùng timeout mặc định.
 
 - Đăng ký kiểm tra họ tên, email, mật khẩu 8–72 ký tự/tối đa 72 byte UTF-8 và xác nhận mật khẩu. Số điện thoại không bắt buộc theo DTO backend, tối đa 20 ký tự. Không trim mật khẩu.
@@ -164,7 +144,7 @@ Dự án tổ chức mã nguồn theo từng **phân hệ người dùng / tính
 1. **Lưu Token:** Sau khi đăng nhập thành công (`POST /api/auth/login`), Backend tự động thiết lập 2 cookie:
    - `access_token` (Path: `/api`, sống 15 phút).
    - `refresh_token` (Path: `/api/auth`, sống 7 ngày).
-2. **Bảo mật tuyệt đối:** Cả 2 cookie đều có cờ `HttpOnly`, JavaScript ở Frontend **không thể đọc được** -> Ngăn chặn 100% rủi ro bị đánh cắp token qua lỗ hổng XSS.
+2. **Hạn chế lộ token:** Cả 2 cookie có cờ `HttpOnly` nên JavaScript không đọc trực tiếp được token. XSS vẫn có thể gửi request trong phiên người dùng; cần tiếp tục kiểm soát dữ liệu đầu vào và nội dung hiển thị.
 3. **Tuyệt đối KHÔNG lưu token vào `localStorage` hay `sessionStorage`**. Trình duyệt tự động gửi kèm cookie trong mọi request nhờ `withCredentials: true` cấu hình sẵn trong `httpClient`.
 
 ### 3.2. Nơi lưu thông tin User ở Frontend & Cơ chế Silent Refresh khi F5

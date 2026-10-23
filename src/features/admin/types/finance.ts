@@ -10,6 +10,7 @@ export interface Overview {
   totalWithdrawn: number
   grossRevenue: number | null
   netRevenue: number | null
+  totalRefunded: number
   revenueUnavailableReason: string
 }
 export interface Payout {
