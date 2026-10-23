@@ -1,18 +1,35 @@
 import { useEffect, useState } from 'react'
 import { Link } from 'react-router'
 import { getPublicEvents } from '../api/event-api'
+// import { getRecommendedEvents } from '../api/event-api'
 import type { PublicEventSummaryResponse } from '../types/event'
+import { useAuth } from '../../auth/hooks/useAuth'
 import { EventCard } from '../components/EventCard'
 import { CustomerHeader } from '../components/CustomerHeader'
 import styles from './HomePage.module.css'
 
 export function HomePage() {
+  const { user } = useAuth()
   const [events, setEvents] = useState<PublicEventSummaryResponse[]>([])
+  // Tạm thời comment state gợi ý AI vì hệ thống AI đang bảo trì
+  // const [aiEvents, setAiEvents] = useState<PublicEventSummaryResponse[]>([])
+  // const [aiPage, setAiPage] = useState(1)
+  // const AI_PAGE_SIZE = 5
 
   useEffect(() => {
-    // Fetch a larger set to fill multiple rows (4 per row * 3 rows = 12 events)
-    getPublicEvents({ size: 12 }).then((res) => setEvents(res.content))
-  }, [])
+    // Fetch regular public events
+    getPublicEvents({ size: 12 })
+      .then((res) => setEvents(res.content))
+      .catch((err) => console.error('Lỗi khi tải sự kiện nổi bật:', err))
+
+    // Tạm thời comment gọi gợi ý AI vì hệ thống AI đang bảo trì sửa chữa sau
+    // getRecommendedEvents(user?.id, 10)
+    //   .then((res) => setAiEvents(res.cards || []))
+    //   .catch((err) => console.warn('Lỗi khi tải gợi ý sự kiện từ AI:', err))
+  }, [user?.id])
+
+  // const totalAiPages = Math.ceil(aiEvents.length / AI_PAGE_SIZE)
+  // const visibleAiEvents = aiEvents.slice((aiPage - 1) * AI_PAGE_SIZE, aiPage * AI_PAGE_SIZE)
 
   return (
     <div className={styles.page}>
@@ -109,6 +126,83 @@ export function HomePage() {
             </div>
           </div>
         </section>
+
+        {/* GỢI Ý DÀNH RIÊNG CHO BẠN (AI) - Tạm thời comment vì hệ thống AI đang bảo trì sửa chữa */}
+        {/*
+        {aiEvents.length > 0 && (
+          <section className={styles.featuredSection} style={{ paddingTop: '24px', paddingBottom: '32px' }}>
+            <div className={styles.container}>
+              <div className={styles.sectionHeader}>
+                <div className={styles.headerLeft}>
+                  <div className={styles.sectionSubtitle} style={{ color: '#818cf8' }}>
+                    <span className={styles.subtitleDot} style={{ background: '#818cf8' }}></span>
+                    {user ? 'Cá nhân hoá theo sở thích của bạn' : 'Sự kiện thịnh hành đề xuất'}
+                  </div>
+                  <h2 className={styles.sectionTitle} style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                    <span>Gợi ý cho bạn</span>
+                    <span style={{
+                      fontSize: '12px',
+                      padding: '2px 8px',
+                      background: 'linear-gradient(135deg, #6366f1, #a855f7)',
+                      borderRadius: '12px',
+                      color: '#fff',
+                      fontWeight: 600,
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      gap: '4px'
+                    }}>
+                      <span className="material-symbols-outlined" style={{ fontSize: '13px' }}>auto_awesome</span>
+                      AI Powered
+                    </span>
+                  </h2>
+                </div>
+
+                {totalAiPages > 1 && (
+                  <div className={styles.aiPagination}>
+                    <span className={styles.aiPageIndicator}>
+                      Trang {aiPage} / {totalAiPages}
+                    </span>
+                    <div className={styles.aiPageNav}>
+                      <button
+                        className={styles.aiNavBtn}
+                        onClick={() => setAiPage((prev) => Math.max(1, prev - 1))}
+                        disabled={aiPage === 1}
+                        title="Trang trước"
+                        aria-label="Trang trước"
+                      >
+                        <span className="material-symbols-outlined">chevron_left</span>
+                      </button>
+                      {Array.from({ length: totalAiPages }, (_, idx) => idx + 1).map((pageNum) => (
+                        <button
+                          key={pageNum}
+                          className={pageNum === aiPage ? styles.aiPageBtnActive : styles.aiPageBtn}
+                          onClick={() => setAiPage(pageNum)}
+                        >
+                          Trang {pageNum}
+                        </button>
+                      ))}
+                      <button
+                        className={styles.aiNavBtn}
+                        onClick={() => setAiPage((prev) => Math.min(totalAiPages, prev + 1))}
+                        disabled={aiPage === totalAiPages}
+                        title="Trang sau"
+                        aria-label="Trang sau"
+                      >
+                        <span className="material-symbols-outlined">chevron_right</span>
+                      </button>
+                    </div>
+                  </div>
+                )}
+              </div>
+              <div className={styles.aiGrid}>
+                {visibleAiEvents.map((e) => (
+                  <EventCard key={`ai-${e.id}`} event={e} />
+                ))}
+              </div>
+            </div>
+          </section>
+        )}
+        */}
 
         {/* SỰ KIỆN NỔI BẬT */}
         <section className={styles.featuredSection}>

@@ -1,5 +1,7 @@
 import { Link } from 'react-router'
 import type { PublicEventSummaryResponse } from '../types/event'
+// import { useAuth } from '../../auth/hooks/useAuth'
+// import { recordEventInteraction } from '../api/event-api'
 import styles from './EventCard.module.css'
 
 interface EventCardProps {
@@ -7,6 +9,20 @@ interface EventCardProps {
 }
 
 export function EventCard({ event }: EventCardProps) {
+  // const { user } = useAuth()
+
+  const handleCardClick = () => {
+    // Tạm thời comment vì hệ thống AI đang bảo trì sửa chữa
+    /*
+    recordEventInteraction({
+      userId: user?.id,
+      eventId: event.id,
+      actionType: 'CLICK',
+      recLogId: event.recLogId
+    })
+    */
+  }
+
   const startDate = new Date(event.startTime)
   const day = startDate.getDate().toString().padStart(2, '0')
   const month = `Th${startDate.getMonth() + 1}`
@@ -58,6 +74,25 @@ export function EventCard({ event }: EventCardProps) {
             {event.categoryName || 'Sự kiện'}
           </span>
           
+          {/* AI Match Badge if available */}
+          {event.similarityScore != null && (
+            <span style={{
+              position: 'absolute',
+              top: '12px',
+              right: '12px',
+              background: 'linear-gradient(135deg, #6366f1, #a855f7)',
+              color: '#fff',
+              fontSize: '11px',
+              fontWeight: 700,
+              padding: '3px 8px',
+              borderRadius: '999px',
+              boxShadow: '0 2px 8px rgba(99,102,241,0.5)',
+              zIndex: 3
+            }}>
+              AI {Math.min(98, Math.max(50, Math.round(event.similarityScore * 100)))}%
+            </span>
+          )}
+
           {/* Urgency Tag (Optional - hardcoded demo state) */}
           <div className={styles.urgencyBadge}>
             <span className={styles.pulseDot}></span>
@@ -89,7 +124,7 @@ export function EventCard({ event }: EventCardProps) {
           <span className={styles.priceLabel}>Giá vé từ</span>
           <span className={styles.priceValue}>{formattedPrice}</span>
         </div>
-        <Link to={`/customer/events/${event.id}`} className={styles.actionBtn}>
+        <Link to={`/customer/events/${event.id}`} onClick={handleCardClick} className={styles.actionBtn}>
           <span>Mua vé</span>
           <span className="material-symbols-outlined text-[14px]">arrow_forward</span>
         </Link>

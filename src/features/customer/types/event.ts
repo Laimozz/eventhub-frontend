@@ -7,6 +7,8 @@ export interface PublicEventSummaryResponse {
   city: string
   startingPrice: number | null
   categoryName?: string
+  recLogId?: number | null
+  similarityScore?: number | null
 }
 
 export interface PublicEventListResponse {

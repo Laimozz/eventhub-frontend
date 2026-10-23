@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { useParams, Link, useNavigate } from 'react-router'
 import { getPublicEventDetail } from '../api/event-api'
 import type { PublicEventDetailResponse } from '../types/event'
+// import { useAuth } from '../../auth/hooks/useAuth'
 import { EventCard } from '../components/EventCard'
 import { CustomerHeader } from '../components/CustomerHeader'
 import styles from './EventDetailPage.module.css'
@@ -9,8 +10,28 @@ import styles from './EventDetailPage.module.css'
 export function EventDetailPage() {
   const { eventId } = useParams()
   const navigate = useNavigate()
+  // const { user } = useAuth()
   const [event, setEvent] = useState<PublicEventDetailResponse | null>(null)
   const [loading, setLoading] = useState(true)
+
+  // Tạm thời comment ghi nhận dwell time vì hệ thống AI đang bảo trì sửa chữa
+  /*
+  useEffect(() => {
+    const startTime = Date.now()
+    const id = Number(eventId)
+    if (!id) return
+
+    return () => {
+      const dwellSeconds = Math.max(1, Math.round((Date.now() - startTime) / 1000))
+      recordEventInteraction({
+        userId: user?.id,
+        eventId: id,
+        actionType: 'VIEW',
+        dwellSeconds
+      })
+    }
+  }, [eventId, user?.id])
+  */
 
   useEffect(() => {
     async function fetchEvent() {

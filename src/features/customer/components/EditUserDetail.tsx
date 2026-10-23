@@ -37,6 +37,8 @@ export function EditUserDetail({
   const [email, setEmail] = useState(user.email || '');
   const [phone, setPhone] = useState(user.phone || '');
   const [birthDate, setBirthDate] = useState(user.dateOfBirth || '');
+  const [city, setCity] = useState(user.city || 'TP. Hồ Chí Minh');
+  const [preferredCategories, setPreferredCategories] = useState(user.preferredCategories || '');
   const [pending, setPending] = useState(false);
   const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
   const [otpModalOpen, setOtpModalOpen] = useState(false);
@@ -115,6 +117,8 @@ export function EditUserDetail({
         email: trimmedEmail.toLowerCase(),
         phone: cleanPhone,
         dateOfBirth: birthDate || null,
+        city: city || null,
+        preferredCategories: preferredCategories || null,
       });
       onSuccess({ ...updated, avatarUrl: avatarUrl || updated.avatarUrl });
     } catch (err: unknown) {
@@ -411,6 +415,62 @@ export function EditUserDetail({
                 Nhận ưu đãi và quà tặng sinh nhật từ đơn vị tổ chức sự kiện.
               </p>
             )}
+          </div>
+
+          {/* Thành phố sinh sống (Vị trí) */}
+          <div className={styles.fieldGroup}>
+            <div className={styles.fieldLabelRow}>
+              <label htmlFor="city">Thành phố sinh sống <span className={styles.requiredStar}>*</span></label>
+              <span className={styles.fieldSubNote}>AI ưu tiên gợi ý sự kiện gần bạn</span>
+            </div>
+            <div className={styles.inputControlWrapper}>
+              <span className={`material-symbols-outlined ${styles.fieldIcon}`}>location_on</span>
+              <select
+                id="city"
+                name="city"
+                className={styles.formInput}
+                value={city}
+                onChange={(e) => setCity(e.target.value)}
+                disabled={pending}
+                style={{ paddingLeft: '42px', cursor: 'pointer' }}
+              >
+                <option value="TP. Hồ Chí Minh">TP. Hồ Chí Minh</option>
+                <option value="Hà Nội">Hà Nội</option>
+                <option value="Đà Nẵng">Đà Nẵng</option>
+                <option value="Đà Lạt">Đà Lạt</option>
+                <option value="Nha Trang">Nha Trang</option>
+                <option value="Hải Phòng">Hải Phòng</option>
+                <option value="Cần Thơ">Cần Thơ</option>
+                <option value="Khác">Tỉnh thành khác</option>
+              </select>
+            </div>
+            <p className={styles.fieldHelperText}>
+              Hệ thống AI sẽ tự động tăng điểm ưu tiên (+0.20) cho các sự kiện tổ chức tại thành phố này.
+            </p>
+          </div>
+
+          {/* Sở thích sự kiện (AI Cá nhân hóa) */}
+          <div className={styles.fieldGroup}>
+            <div className={styles.fieldLabelRow}>
+              <label htmlFor="preferredCategories">Sở thích &amp; Thể loại quan tâm</label>
+              <span className={styles.fieldSubNote}>Định hình gu gợi ý</span>
+            </div>
+            <div className={styles.inputControlWrapper}>
+              <span className={`material-symbols-outlined ${styles.fieldIcon}`}>interests</span>
+              <input
+                id="preferredCategories"
+                name="preferredCategories"
+                type="text"
+                className={styles.formInput}
+                value={preferredCategories}
+                onChange={(e) => setPreferredCategories(e.target.value)}
+                placeholder="Ví dụ: Công nghệ & Hội thảo, Kinh doanh & Khởi nghiệp, Âm nhạc..."
+                disabled={pending}
+              />
+            </div>
+            <p className={styles.fieldHelperText}>
+              Nhập các thể loại bạn quan tâm, phân cách bằng dấu phẩy để AI định hình gợi ý.
+            </p>
           </div>
 
           {/* Mật khẩu & Bảo mật */}

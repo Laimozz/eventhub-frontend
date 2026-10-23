@@ -10,6 +10,8 @@ export interface UserDetailDto {
   dateOfBirth?: string | null;
   gender?: string | null;
   avatarUrl?: string | null;
+  city?: string | null;
+  preferredCategories?: string | null;
 }
 
 export interface UpdateUserDetailDto {
@@ -18,4 +20,6 @@ export interface UpdateUserDetailDto {
   phone: string;
   dateOfBirth?: string | null;
   gender?: string | null;
+  city?: string | null;
+  preferredCategories?: string | null;
 }

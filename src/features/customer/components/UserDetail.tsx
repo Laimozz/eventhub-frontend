@@ -109,6 +109,16 @@ export function UserDetail({ user }: UserDetailProps) {
             <span className={styles.tileLabel}>Vai trò tài khoản</span>
             <p className={`${styles.tileValue} ${styles.primary}`}>{roleDisplay}</p>
           </div>
+
+          <div className={styles.infoTile}>
+            <span className={styles.tileLabel}>Thành phố sinh sống</span>
+            <p className={`${styles.tileValue} ${styles.primary}`}>{user.city || 'Chưa cập nhật'}</p>
+          </div>
+
+          <div className={styles.infoTile} style={{ gridColumn: '1 / -1' }}>
+            <span className={styles.tileLabel}>Sở thích sự kiện (AI Gợi ý)</span>
+            <p className={styles.tileValue}>{user.preferredCategories || 'Tất cả các thể loại'}</p>
+          </div>
         </div>
       </div>
     </div>
