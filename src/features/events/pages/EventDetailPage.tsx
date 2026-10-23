@@ -65,6 +65,6 @@ export function EventDetailPage() {
         </div><aside className={styles.mainColumn}><section className={styles.panel}><h2><Users size={20} />Khách mời & Nghệ sĩ</h2>{event.guests.length ? <div className={styles.guests}>{event.guests.map(guest => <article key={guest.id}>{guest.imageUrl ? <img src={guest.imageUrl} alt={guest.name} /> : <span className={styles.guestPlaceholder}><Users size={23} /></span>}<div><strong>{guest.name}</strong><span>{guest.role}</span>{guest.description && <p>{guest.description}</p>}</div></article>)}</div> : <p className={styles.muted}>Chưa có khách mời.</p>}</section><section className={styles.panel}><h2>Thông tin hồ sơ</h2><div className={styles.recordInfo}><p>Mã sự kiện <strong>#{event.id}</strong></p><p>Ngày tạo <strong>{eventDate(event.createdAt)}</strong></p><p>Trạng thái <strong>{status.label}</strong></p></div><p className={styles.muted}>Các thay đổi thông tin cần được Admin duyệt lại trước khi mở bán.</p></section></aside></div>
       </>
     )}
-    {canceling && <CancelEventDialog event={event} onClose={() => setCanceling(false)} onCanceled={result => { setEvent(result); setCanceling(false); setNotice('Đã gửi yêu cầu hủy sự kiện. Vui lòng chờ Admin xét duyệt.') }} />}
+    {canceling && <CancelEventDialog event={event} onClose={() => setCanceling(false)} onCanceled={result => { setEvent(result); setCanceling(false); setNotice('Đã hủy sự kiện. Admin sẽ xử lý các khoản hoàn tiền.') }} />}
   </div>
 }

@@ -23,7 +23,7 @@ React + Vite + TypeScript. Chỉ triển khai trong phạm vi yêu cầu; không
 - `src/pages/`: page cấp ứng dụng không thuộc một tính năng cụ thể.
 - `src/components/ui/`: chỉ bổ sung khi được yêu cầu; hiện JSX được viết trực tiếp trong page auth.
 - `src/components/common/`: hiện chưa có component dùng chung.
-- Hiện không dùng layout riêng; header, nền, footer nằm trong từng page auth.
+- Các page auth giữ header/nền/footer riêng; Admin và Organizer sử dụng layout chung theo phân hệ. Khi thêm trang, kiểm tra router và tái sử dụng layout hiện có.
 - `src/hooks/`, `src/types/`, `src/utils/`: code dùng chung giữa các tính năng.
 - `src/lib/`: cấu hình thư viện hoặc HTTP client khi triển khai.
 - `src/config/`, `src/constants/`: cấu hình và hằng số dùng chung.

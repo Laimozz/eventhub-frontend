@@ -1,6 +1,13 @@
 import { expect, test } from '@playwright/test'
 import type { Page } from '@playwright/test'
 
+test.beforeEach(async ({ page }) => {
+  await page.route('**/api/notifications/unread-count', route => route.fulfill({ json: 0 }))
+  await page.route('**/api/public/events**', route => route.fulfill({ json: { content: [], totalPages: 0 } }))
+  await page.route('**/api/categories', route => route.fulfill({ json: [] }))
+  await page.addInitScript(() => { window.EventSource = class extends EventTarget { readyState = 1; close() { this.readyState = 2 } } as unknown as typeof EventSource })
+})
+
 const user = {
   id: 1,
   email: 'member@example.test',
@@ -19,7 +26,7 @@ type ClientModule = {
   }
 }
 
-// The current home has no business API. Exercise the actual Axios client through
+// Mock unrelated home APIs to isolate authentication refresh. Exercise the actual Axios client through
 // Vite's module URL and mock a protected endpoint, without adding a test UI.
 async function requestProtected(page: Page, count = 1) {
   return page.evaluate(async (count) => {
@@ -76,13 +83,13 @@ test('concurrent and late 401 responses share one refresh and replay original re
     }
   })
   await page.goto('/')
-  await expect(page.getByRole('button', { name: 'Đăng xuất', exact: true })).toBeVisible()
+  await expect(page.getByRole('button', { name: 'Menu tài khoản', exact: true })).toBeVisible()
   expect(await requestProtected(page, 3)).toEqual(
     [0, 1, 2].map((index) => ({ ok: true, data: { index }, status: 200 })),
   )
   expect(refreshCalls).toBe(2) // One bootstrap refresh, one recovery refresh.
   expect([...attempts.values()]).toEqual([2, 2, 2])
-  await expect(page).toHaveURL('/')
+  await expect(page).toHaveURL('/customer')
 })
 
 test('expired refresh clears the session, redirects to login, and permits a new login', async ({
@@ -102,7 +109,7 @@ test('expired refresh clears the session, redirects to login, and permits a new 
     return route.fulfill({ status: 401, json: {} })
   })
   await page.goto('/')
-  await expect(page.getByRole('button', { name: 'Đăng xuất', exact: true })).toBeVisible()
+  await expect(page.getByRole('button', { name: 'Menu tài khoản', exact: true })).toBeVisible()
   const results = await requestProtected(page, 3)
   expect(results.every((result) => !result.ok && result.status === 401)).toBe(true)
   expect(refreshCalls).toBe(2)
@@ -113,7 +120,7 @@ test('expired refresh clears the session, redirects to login, and permits a new 
   await page.getByLabel('Email', { exact: false }).fill(user.email)
   await page.locator('input[name="password"]').fill('Test-password-123')
   await page.getByRole('button', { name: 'Đăng nhập', exact: true }).click()
-  await expect(page).toHaveURL('/')
+  await expect(page).toHaveURL('/customer')
   await page.route('**/api/auth/refresh', (route) => route.fulfill({ status: 200, json: user }))
   let newAttempts = 0
   await page.route('**/api/test/protected', (route) => {
@@ -136,7 +143,7 @@ test('401 after retry ends the session without a refresh loop', async ({ page })
     return route.fulfill({ status: 401, json: {} })
   })
   await page.goto('/')
-  await expect(page.getByRole('button', { name: 'Đăng xuất', exact: true })).toBeVisible()
+  await expect(page.getByRole('button', { name: 'Menu tài khoản', exact: true })).toBeVisible()
   expect((await requestProtected(page))[0].status).toBe(401)
   await expect(page).toHaveURL('/login')
   expect(refreshCalls).toBe(2)
@@ -151,10 +158,10 @@ test('403 is not treated as token expiry', async ({ page }) => {
   })
   await page.route('**/api/test/protected', (route) => route.fulfill({ status: 403, json: {} }))
   await page.goto('/')
-  await expect(page.getByRole('button', { name: 'Đăng xuất', exact: true })).toBeVisible()
+  await expect(page.getByRole('button', { name: 'Menu tài khoản', exact: true })).toBeVisible()
   expect((await requestProtected(page))[0].status).toBe(403)
   expect(refreshCalls).toBe(1)
-  await expect(page).toHaveURL('/')
+  await expect(page).toHaveURL('/customer')
 })
 
 for (const failure of ['network', 'server']) {
@@ -172,9 +179,9 @@ for (const failure of ['network', 'server']) {
       route.fulfill({ status: refreshCalls >= 3 ? 200 : 401, json: {} }),
     )
     await page.goto('/')
-    await expect(page.getByRole('button', { name: 'Đăng xuất', exact: true })).toBeVisible()
+    await expect(page.getByRole('button', { name: 'Menu tài khoản', exact: true })).toBeVisible()
     expect((await requestProtected(page))[0].ok).toBe(false)
-    await expect(page).toHaveURL('/')
+    await expect(page).toHaveURL('/customer')
     expect((await requestProtected(page))[0].ok).toBe(true)
     expect(refreshCalls).toBe(3)
   })

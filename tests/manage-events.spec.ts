@@ -44,7 +44,7 @@ async function setup(page: Page, role = 'ORGANIZER') {
   })
   await page.route('**/api/events/99', route => route.fulfill({ json: current }))
   await page.route('**/api/events/99/cancel', route => {
-    current = { ...current, status: 'PENDING_CANCELLATION', cancelReason: route.request().postDataJSON().reason,
+    current = { ...current, status: 'CANCELED', canceledAt: '2026-10-22T10:00:00', cancelReason: route.request().postDataJSON().reason,
       canEdit: false, canCancel: false, ticketTypes: current.ticketTypes.map(ticket => ({ ...ticket, status: 'INACTIVE' })) }
     return route.fulfill({ json: current })
   })
@@ -147,15 +147,15 @@ test('edit adds and removes tickets and guests with indexed uploads and protects
   await expect(page).toHaveURL('/organizer/events/99')
 })
 
-test('cancel validates reason, submits once, shows pending cancellation and hides further actions', async ({ page }) => {
+test('cancel validates reason, cancels immediately and hides further actions', async ({ page }) => {
   await setup(page)
   await page.goto('/organizer/events/99')
   await page.getByRole('button', { name: 'Hủy sự kiện', exact: true }).click()
-  await page.getByRole('button', { name: 'Gửi yêu cầu hủy' }).click()
+  await page.getByRole('button', { name: 'Xác nhận hủy', exact: true }).click()
   await expect(page.getByRole('alert')).toContainText('Vui lòng nhập lý do')
   await page.getByLabel('Lý do hủy').fill('Địa điểm không còn khả dụng')
-  await page.getByRole('button', { name: 'Gửi yêu cầu hủy' }).click()
-  await expect(page.getByText('Yêu cầu hủy đang chờ Admin xét duyệt')).toBeVisible()
+  await page.getByRole('button', { name: 'Xác nhận hủy', exact: true }).click()
+  await expect(page.getByText('Đã hủy sự kiện. Admin sẽ xử lý các khoản hoàn tiền.')).toBeVisible()
   await expect(page.getByRole('button', { name: 'Hủy sự kiện', exact: true })).toHaveCount(0)
   await expect(page.getByRole('link', { name: 'Chỉnh sửa thông tin' })).toHaveCount(0)
   await expect(page.getByText('Lý do: Địa điểm không còn khả dụng')).toBeVisible()
@@ -203,7 +203,7 @@ test('edit errors keep form available and completed events reject direct edit li
 test('customer cannot access organizer management and missing details provide navigation', async ({ page }) => {
   await setup(page, 'CUSTOMER')
   await page.goto('/organizer/events/99/edit/details')
-  await expect(page).toHaveURL('/')
+  await expect(page).toHaveURL('/customer')
   await setup(page)
   await page.route('**/api/events/99', route => route.fulfill({ status: 404, json: {} }))
   await page.goto('/organizer/events/99')

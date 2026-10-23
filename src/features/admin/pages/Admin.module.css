@@ -30,3 +30,4 @@
 .adminUserDetails strong { display:block; max-width:180px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
 @media(max-width:480px) { .adminUserDetails { display:none; } }
 .adminUserBadge:hover strong { color:#087f50; }
+.sidebar,.sidebarOpen { overflow-y:auto; }

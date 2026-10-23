@@ -21,12 +21,12 @@ export function CancelEventDialog({ event, onClose, onCanceled }: {
     catch (cause) { setError(eventError(cause)) }
     finally { sending.current = false; setPending(false) }
   }
-  return <EditorDialog title="Yêu cầu hủy sự kiện" subtitle={event.name} onClose={onClose} busy={pending}>
+  return <EditorDialog title="Xác nhận hủy sự kiện" subtitle={event.name} onClose={onClose} busy={pending}>
     <form onSubmit={e => { e.preventDefault(); void submit() }}>
-      <div className={styles.dialogBody}><p className={styles.infoNote}><ShieldCheck size={17} />Yêu cầu sẽ được gửi Admin xét duyệt. Sự kiện chuyển sang Chờ hủy và các loại vé tạm ngừng bán.</p>
+      <div className={styles.dialogBody}><p className={styles.infoNote}><ShieldCheck size={17} />Sự kiện sẽ được hủy ngay và dừng bán vé. Admin sẽ xử lý hoàn tiền cho các giao dịch đã thanh toán. Chỉ được hủy trước giờ bắt đầu.</p>
         <Field id="cancel-reason" label="Lý do hủy" required><textarea id="cancel-reason" rows={4} maxLength={255} value={reason} autoFocus disabled={pending} onChange={e => { setReason(e.target.value); setError('') }} placeholder="Nhập lý do cần hủy sự kiện…" /></Field>
         {error && <p role="alert" className={styles.errorBanner}>{error}</p>}
-      </div><div className={styles.dialogFooter}><button type="button" className={styles.secondary} onClick={onClose} disabled={pending}>Giữ sự kiện</button><button className={styles.primary} disabled={pending}>{pending && <LoaderCircle className={styles.spin} size={16} />}{pending ? 'Đang gửi…' : 'Gửi yêu cầu hủy'}</button></div>
+      </div><div className={styles.dialogFooter}><button type="button" className={styles.secondary} onClick={onClose} disabled={pending}>Giữ sự kiện</button><button className={styles.primary} disabled={pending}>{pending && <LoaderCircle className={styles.spin} size={16} />}{pending ? 'Đang gửi…' : 'Xác nhận hủy'}</button></div>
     </form>
   </EditorDialog>
 }
