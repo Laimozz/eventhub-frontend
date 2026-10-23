@@ -31,7 +31,12 @@ export function LoginPage() {
     try {
       await signIn({ email: email.trim().toLowerCase(), password })
       const returnPath = location.state?.from
-      navigate(typeof returnPath === 'string' && returnPath.startsWith('/customer/') ? returnPath : '/', { replace: true })
+      navigate(
+        typeof returnPath === 'string' && (returnPath.startsWith('/customer/') || returnPath.startsWith('/staff'))
+          ? returnPath
+          : '/',
+        { replace: true }
+      )
     } catch (cause) {
       setError(authErrorMessage(cause))
     } finally {

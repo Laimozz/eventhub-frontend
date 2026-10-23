@@ -17,7 +17,7 @@ function CustomerMemberRoute() {
   const { user } = useAuth()
   const location = useLocation()
   if (!user) return <Navigate to="/login" replace state={{ from: location.pathname + location.search }} />
-  return user.role === 'CUSTOMER' ? <Outlet /> : <Navigate to="/" replace />
+  return (user.role === 'CUSTOMER' || user.role === 'STAFF') ? <Outlet /> : <Navigate to="/" replace />
 }
 
 export function CustomerRoutes() {

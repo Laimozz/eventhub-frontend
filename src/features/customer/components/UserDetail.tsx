@@ -110,6 +110,8 @@ export function UserDetail({ user }: UserDetailProps) {
             <p className={`${styles.tileValue} ${styles.primary}`}>{roleDisplay}</p>
           </div>
 
+          {/* TẠM ẨN CHO BUỔI BÁO CÁO - Xem hướng dẫn bật lại tại turn_onoff_ai.txt */}
+          {/*
           <div className={styles.infoTile}>
             <span className={styles.tileLabel}>Thành phố sinh sống</span>
             <p className={`${styles.tileValue} ${styles.primary}`}>{user.city || 'Chưa cập nhật'}</p>
@@ -119,6 +121,7 @@ export function UserDetail({ user }: UserDetailProps) {
             <span className={styles.tileLabel}>Sở thích sự kiện (AI Gợi ý)</span>
             <p className={styles.tileValue}>{user.preferredCategories || 'Tất cả các thể loại'}</p>
           </div>
+          */}
         </div>
       </div>
     </div>

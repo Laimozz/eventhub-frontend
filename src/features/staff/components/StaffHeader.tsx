@@ -50,6 +50,15 @@ export function StaffHeader() {
         </div>
 
         <nav className={styles.navLinks} aria-label="Staff Navigation">
+          <Link
+            to="/customer"
+            className={styles.navLink}
+            title="Đến giao diện Khách hàng (khám phá sự kiện)"
+          >
+            <span className="material-symbols-outlined text-[18px]">storefront</span>
+            <span>Giao diện Khách hàng</span>
+          </Link>
+
           <NavLink
             to="/staff"
             end
@@ -153,6 +162,15 @@ export function StaffHeader() {
                 >
                   <span className="material-symbols-outlined text-[18px] text-primary">key</span>
                   <span>Đổi mật khẩu</span>
+                </Link>
+
+                <Link
+                  to="/customer"
+                  className={styles.dropdownItem}
+                  onClick={() => setMenuOpen(false)}
+                >
+                  <span className="material-symbols-outlined text-[18px] text-primary">storefront</span>
+                  <span>Về giao diện Khách hàng</span>
                 </Link>
 
                 <div className={styles.divider} />

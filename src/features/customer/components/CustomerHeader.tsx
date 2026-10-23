@@ -54,10 +54,28 @@ export function CustomerHeader({ user: propUser, onSelectMode }: CustomerHeaderP
   }
 
   const initial = user?.fullName?.trim() ? user.fullName.trim().charAt(0).toUpperCase() : 'U';
+  const isStaff = user?.role === 'STAFF' || authUser?.role === 'STAFF';
 
   return (
     <>
       <header className={styles.siteHeader}>
+        {isStaff && (
+          <div className={styles.staffNotificationBar}>
+            <div className={styles.staffNotificationContent}>
+              <div className={styles.staffNotificationInfo}>
+                <span className={styles.staffBadge}>STAFF</span>
+                <span className={styles.staffNotificationText}>
+                  Tài khoản <strong>Nhân viên</strong> — Bạn đang ở giao diện Khách hàng
+                </span>
+              </div>
+              <Link to="/staff" className={styles.staffSwitchBtn}>
+                <span className="material-symbols-outlined text-[16px]">badge</span>
+                <span>Bảng làm việc Staff</span>
+                <span className="material-symbols-outlined text-[14px]">arrow_forward</span>
+              </Link>
+            </div>
+          </div>
+        )}
         <div className={styles.headerInner}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '24px' }}>
             <Link to="/" className={styles.logoLink}>
@@ -97,6 +115,12 @@ export function CustomerHeader({ user: propUser, onSelectMode }: CustomerHeaderP
           <div className={styles.headerActions}>
             {user ? (
               <>
+                {isStaff && (
+                  <Link to="/staff" className={styles.staffHeaderBtn} title="Chuyển sang Bảng làm việc Staff">
+                    <span className="material-symbols-outlined text-[18px]">badge</span>
+                    <span>Kênh Staff</span>
+                  </Link>
+                )}
                 <Link to="/customer/ve-cua-toi" className={styles.ticketBtn}>
                   <span className="material-symbols-outlined">confirmation_number</span>
                   <span>Vé của tôi</span>
@@ -161,7 +185,26 @@ export function CustomerHeader({ user: propUser, onSelectMode }: CustomerHeaderP
                       <div className={styles.dropdownUserHeader}>
                         <p className={styles.dropdownName}>{user?.fullName}</p>
                         <p className={styles.dropdownEmail}>{user?.email}</p>
+                        {isStaff && (
+                          <div className={styles.staffRoleIndicator}>
+                            <span className="material-symbols-outlined text-[14px]">verified_user</span>
+                            <span>Tài khoản Nhân viên</span>
+                          </div>
+                        )}
                       </div>
+                      {isStaff && (
+                        <>
+                          <Link
+                            to="/staff"
+                            className={`${styles.dropdownItem} ${styles.staffDropdownItem}`}
+                            onClick={() => setUserMenuOpen(false)}
+                          >
+                            <span className="material-symbols-outlined text-[18px]">badge</span>
+                            <span>Bảng làm việc Staff</span>
+                          </Link>
+                          <div style={{ height: '1px', background: '#eceef0', margin: '4px 0' }} />
+                        </>
+                      )}
                       <button
                         type="button"
                         className={styles.dropdownItem}

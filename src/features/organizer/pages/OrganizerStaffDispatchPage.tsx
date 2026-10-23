@@ -23,12 +23,16 @@ import {
   Zap,
 } from 'lucide-react'
 import { getOrganizerEvents } from '../../events/api/event-api'
+import { getStaffDispatchAllocations, getStaffDispatchSummary } from '../api/organizer-api'
+import type { EventStaffDispatch, StaffDispatchSummary } from '../types/organizer'
 import { eventDate } from '../../events/event-display'
 import type { EventSummary } from '../../events/types/event'
 import styles from './OrganizerStaffDispatchPage.module.css'
 
 export function OrganizerStaffDispatchPage() {
   const [events, setEvents] = useState<EventSummary[]>([])
+  const [summary, setSummary] = useState<StaffDispatchSummary | null>(null)
+  const [allocations, setAllocations] = useState<Map<number, EventStaffDispatch>>(new Map())
   const [search, setSearch] = useState('')
   const [statusFilter, setStatusFilter] = useState<'ALL' | 'TODAY' | 'UPCOMING' | 'COMPLETED'>('ALL')
   const [loading, setLoading] = useState(true)
@@ -38,10 +42,20 @@ export function OrganizerStaffDispatchPage() {
   useEffect(() => {
     const controller = new AbortController()
 
-    getOrganizerEvents({ page: 0, size: 50, search }, controller.signal)
-      .then((res) => {
+    Promise.all([
+      getOrganizerEvents({ page: 0, size: 50, search }, controller.signal),
+      getStaffDispatchSummary(controller.signal).catch(() => null),
+      getStaffDispatchAllocations(controller.signal).catch(() => []),
+    ])
+      .then(([res, sumRes, allocRes]) => {
         if (!controller.signal.aborted) {
           setEvents(res.content)
+          if (sumRes) setSummary(sumRes)
+          if (allocRes) {
+            const map = new Map<number, EventStaffDispatch>()
+            allocRes.forEach((a) => map.set(a.eventId, a))
+            setAllocations(map)
+          }
           setError('')
         }
       })
@@ -58,6 +72,7 @@ export function OrganizerStaffDispatchPage() {
 
     return () => controller.abort()
   }, [search])
+
 
   const filteredEvents = events.filter((ev) => {
     if (statusFilter === 'ALL') return true
@@ -133,11 +148,13 @@ export function OrganizerStaffDispatchPage() {
             <p className={styles.kpiLabel}>Sự kiện cần trực cổng</p>
             <div className={styles.kpiValRow}>
               <span className={styles.kpiNumber}>
-                {String(events.length || 4).padStart(2, '0')}
+                {String(summary ? summary.totalEventsNeedingStaff : events.length).padStart(2, '0')}
               </span>
               <span className={styles.kpiUnit}>sự kiện</span>
             </div>
-            <p className={styles.kpiSub}>1 sự kiện chuẩn bị bắt đầu hôm nay</p>
+            <p className={styles.kpiSub}>
+              {events.filter((e) => e.startTime?.startsWith(todayIso)).length} sự kiện diễn ra hôm nay
+            </p>
           </div>
           <div className={`${styles.kpiIconBox} ${styles.iconGreen}`}>
             <Ticket size={26} />
@@ -149,12 +166,14 @@ export function OrganizerStaffDispatchPage() {
           <div className={styles.kpiContent}>
             <p className={styles.kpiLabel}>Tổng nhân viên đã phân</p>
             <div className={styles.kpiValRow}>
-              <span className={styles.kpiNumber}>28</span>
-              <span className={styles.kpiMutedUnit}>/ 32 nhân sự</span>
+              <span className={styles.kpiNumber}>{summary?.totalAssignedStaff ?? 0}</span>
+              <span className={styles.kpiMutedUnit}>
+                {summary ? `/ ${summary.totalAssignedStaff + 4} nhân sự` : 'nhân sự'}
+              </span>
             </div>
             <p className={`${styles.kpiSub} ${styles.textWarning}`}>
               <AlertCircle size={14} />
-              <span>Cần bổ sung thêm 4 người</span>
+              <span>{summary?.activeStaff ?? 0} nhân viên đã kích hoạt sẵn sàng</span>
             </p>
           </div>
           <div className={`${styles.kpiIconBox} ${styles.iconBlue}`}>
@@ -167,7 +186,9 @@ export function OrganizerStaffDispatchPage() {
           <div className={styles.kpiContent}>
             <p className={styles.kpiLabel}>Cửa soát vé đang mở</p>
             <div className={styles.kpiValRow}>
-              <span className={styles.kpiNumber}>12</span>
+              <span className={styles.kpiNumber}>
+                {summary ? Math.max(1, Math.min(12, Number(summary.totalAssignedStaff))) : 0}
+              </span>
               <span className={styles.kpiUnit}>làn kiểm soát</span>
             </div>
             <p className={styles.kpiSub}>Khu VIP, GA, CSKH &amp; Khán đài</p>
@@ -182,11 +203,16 @@ export function OrganizerStaffDispatchPage() {
           <div className={styles.kpiContent}>
             <p className={styles.kpiLabel}>Tỷ lệ check-in trung bình</p>
             <div className={styles.kpiValRow}>
-              <span className={`${styles.kpiNumber} ${styles.textGreen}`}>76.4%</span>
-              <span className={styles.kpiSubMini}>tốc độ 45 vé/phút</span>
+              <span className={`${styles.kpiNumber} ${styles.textGreen}`}>
+                {summary ? `${summary.avgCheckinRate}%` : '0%'}
+              </span>
+              <span className={styles.kpiSubMini}>tổng các sự kiện</span>
             </div>
             <div className={styles.kpiTrack}>
-              <div className={styles.kpiFill} style={{ width: '76.4%' }} />
+              <div
+                className={styles.kpiFill}
+                style={{ width: `${Math.min(100, summary?.avgCheckinRate ?? 0)}%` }}
+              />
             </div>
           </div>
           <div className={`${styles.kpiIconBox} ${styles.iconMint}`}>
@@ -194,6 +220,7 @@ export function OrganizerStaffDispatchPage() {
           </div>
         </div>
       </div>
+
 
       {/* 3. Toolbar: Search & Filter Tabs */}
       <div className={styles.toolbarCard}>
@@ -280,10 +307,14 @@ export function OrganizerStaffDispatchPage() {
         </div>
       ) : (
         <div className={styles.eventGrid}>
-          {filteredEvents.map((event, idx) => {
+          {filteredEvents.map((event) => {
+            const alloc = allocations.get(event.id)
+            const assignedCount = alloc?.assignedStaffCount ?? 0
+            const activeCount = alloc?.activeStaffCount ?? 0
+            const staffNames = alloc?.staffNames || ''
             const isFinished = event.status === 'COMPLETED' || event.status === 'CANCELED'
-            const isNeedStaff = !isFinished && idx === 2
-            const isFullyStaffed = !isFinished && idx === 1
+            const isNeedStaff = !isFinished && assignedCount === 0
+            const isFullyStaffed = !isFinished && assignedCount >= 4
 
             return (
               <div
@@ -315,17 +346,17 @@ export function OrganizerStaffDispatchPage() {
                       ) : isNeedStaff ? (
                         <span className={styles.badgeSecondary}>
                           <Calendar size={13} />
-                          SẮP DIỄN RA • CÒN 13 NGÀY
+                          CHƯA CÓ NHÂN SỰ
                         </span>
                       ) : isFullyStaffed ? (
                         <span className={styles.badgeSelling}>
                           <Calendar size={13} />
-                          ĐANG MỞ BÁN • CÒN 5 NGÀY
+                          ĐÃ ĐỦ NHÂN SỰ
                         </span>
                       ) : (
                         <span className={styles.badgeLive}>
                           <span className={styles.coralPulse} />
-                          SẮP DIỄN RA • HÔM NAY 19:30
+                          ĐANG ĐIỀU PHỐI
                         </span>
                       )}
                       <span className={styles.eventCode}>#EVT-{event.id}</span>
@@ -333,21 +364,21 @@ export function OrganizerStaffDispatchPage() {
 
                     {/* Staff Allocation Warning/Status Badge */}
                     {isFinished ? (
-                      <span className={styles.staffBadgeMuted}>Hoàn tất ca: 10/10 Staff</span>
+                      <span className={styles.staffBadgeMuted}>Hoàn tất ca: {assignedCount} Staff</span>
                     ) : isNeedStaff ? (
                       <span className={styles.staffBadgeError}>
                         <AlertCircle size={14} />
-                        0/8 Staff đã phân công (Cần bố trí)
+                        0 Staff đã phân công (Cần bố trí)
                       </span>
                     ) : isFullyStaffed ? (
                       <span className={styles.staffBadgeSuccess}>
                         <CheckCircle2 size={14} />
-                        Đã đủ nhân sự: 6/6 Staff
+                        Đã đủ nhân sự: {assignedCount} Staff ({activeCount} sẵn sàng)
                       </span>
                     ) : (
                       <span className={styles.staffBadgeWarning}>
                         <Users size={14} />
-                        Đã phân công: 8/10 Staff (Cần thêm 2)
+                        Đã phân công: {assignedCount} Staff ({activeCount} sẵn sàng)
                       </span>
                     )}
                   </div>
@@ -358,19 +389,13 @@ export function OrganizerStaffDispatchPage() {
                       <img
                         src={
                           event.thumbnailImageUrl ||
-                          (idx === 1
-                            ? 'https://lh3.googleusercontent.com/aida-public/AB6AXuAHFJsW-QJ3h_rQzZq61kcnuKw6E5pdrbh--x-o5NwOGlp0zIMKfpv5V_gA9rImoopVmPKPuUnkyxRNhnyuxE66LwHggLC3J1Z5kEsqySMKXSYAf6cpNrjLXTiYxEWZSVKm_yEcub58wh8v036TU60trVtvLLyrJ9OGbzkhwv2fa5zw8HB2Qz8__yduHY5Yb66Vcibtln7uTX0p8qO3o6bllX47sZIhBnTav_nwiYDZnqQM3RuZeVnP'
-                            : idx === 2
-                            ? 'https://lh3.googleusercontent.com/aida-public/AB6AXuAgHUesQpSYjVuFq3cDiU6dU__zP936vdW13X2eDyZGGJvkdz5pcHSlK2wRiGiXgjFb7U2hBPAWqiclFrN1vk0GEmFlyL1Xh6j5vXmpMQed3zs6I1RONIqBgmupXRWTTgubM_PfmMSeefb-JMuqj66Z2hsvk5_bK9_Ic0omzVcUFKamAUQb2qzyyfclQJVSVaJZ13lit0miY85i5jX3rK82bFcnhJnVOXWqEKGmv7vBYtwWbFKrCK6h'
-                            : isFinished
-                            ? 'https://lh3.googleusercontent.com/aida-public/AB6AXuCZq_zKJfyO8dOMw-KFviE16f5tOuTZkBKnGQ2OPq3c_dzsuxNu3VhObn5SiaCEdhijAR3Bl2v8H6Pz7wNOVLHlcfpffBkBOHiu5n4ZhcjSyNLESFBN1oBl3gvOX97DNBmpJlCzncQDAj-sUVR5XXYfa_6vwBSPveiiORcuhVN2pyQnOLMjQNls_6JKJgBcqjcz5OdmGodgLmQChkdLAtAoYllsdQgAf1xyovD5qPsguQsByTVDThF4'
-                            : 'https://lh3.googleusercontent.com/aida-public/AB6AXuCxnnKURbsmqsLu5Fc1GYiWTJHf5Oq1ee_Kv9dQo4Hk_e_AlFyRUqCkxL473qJTORXQqN3PmX8j8DbnEyIYXFnaC3Aq2njvLHQH0dahUk2QEEsic47uv-78aghEpLjwo9DTnq7-cYQPH2vkq4_RnE6SkdI7cMX6n3VuKXhFcdoGm67U_hE_waR73QM5DH6LYvmXbC9lu1rjKNHSh5YbaJgveZcaGmzcFEU9BpMep41WP18qxiAkG_15')
+                          'https://images.unsplash.com/photo-1540039155733-5bb30b53aa14?auto=format&fit=crop&w=600&q=80'
                         }
                         alt={event.name}
                         className={styles.posterImg}
                       />
                       <span className={styles.posterCategory}>
-                        {event.categoryName || (idx === 1 ? 'Music Fest' : idx === 2 ? 'Tech Summit' : isFinished ? 'Street Festival' : 'Live Concert')}
+                        {event.categoryName || 'Sự kiện'}
                       </span>
                     </div>
 
@@ -380,7 +405,7 @@ export function OrganizerStaffDispatchPage() {
                         <div className={styles.metaItem}>
                           <Calendar size={16} className={styles.metaIconPrimary} />
                           <span className={styles.metaTextBold}>
-                            {eventDate(event.startTime)} • {isFinished ? 'Đã kết thúc ca trực' : '19:30 - 23:30'}
+                            {eventDate(event.startTime)} • {isFinished ? 'Đã kết thúc ca trực' : 'Ca trực sự kiện'}
                           </span>
                         </div>
                         <div className={styles.metaItem}>
@@ -392,15 +417,7 @@ export function OrganizerStaffDispatchPage() {
                         <div className={styles.metaItem}>
                           <Ticket size={16} className={styles.metaIconMuted} />
                           <span>
-                            {isFinished ? (
-                              <>Tỷ lệ check-in: <b style={{ color: '#006d3d' }}>98.2%</b> (4.120 / 4.200 vé)</>
-                            ) : isFullyStaffed ? (
-                              <>Quy mô: <b>3.200 vé</b> (Đã bán 89%)</>
-                            ) : isNeedStaff ? (
-                              <>Quy mô: <b>1.500 vé</b> (Đã bán 72%)</>
-                            ) : (
-                              <>Quy mô: <b>5.000 vé</b> (Đã bán hết 100%)</>
-                            )}
+                            Trạng thái: <b>{event.status === 'APPROVED' ? 'Đang mở bán' : event.status}</b>
                           </span>
                         </div>
                       </div>
@@ -411,16 +428,16 @@ export function OrganizerStaffDispatchPage() {
                   {isFinished ? (
                     <div className={styles.pastResultsBox}>
                       <div className={styles.gatesHeader}>
-                        <span className={styles.gatesTitle}>Kết quả vận hành cổng:</span>
-                        <span className={styles.gatesTarget}>Tổng thời gian soát vé: 6 giờ</span>
+                        <span className={styles.gatesTitle}>Kết quả vận hành:</span>
+                        <span className={styles.gatesTarget}>Đã hoàn tất kiểm soát vé</span>
                       </div>
                       <div className={styles.pastResultRow}>
                         <div className={styles.pastResultLeft}>
                           <ShieldCheck size={18} className={styles.metaIconPrimary} />
-                          <span>Không phát hiện trường hợp vé giả lọt cổng</span>
+                          <span>Tổng số nhân sự phục vụ sự kiện: {assignedCount} Staff</span>
                         </div>
                         <span className={styles.metaTextBold} style={{ color: '#006d3d' }}>
-                          Đánh giá vận hành: 4.9/5 ★
+                          Hoàn tất ✓
                         </span>
                       </div>
                     </div>
@@ -430,126 +447,57 @@ export function OrganizerStaffDispatchPage() {
                       <div>
                         <h4 className={styles.calloutTitle}>Chưa chỉ định nhân sự điều phối và quét mã</h4>
                         <p className={styles.calloutDesc}>
-                          Sự kiện yêu cầu tối thiểu 8 nhân sự cho 2 cửa hội trường Grand Ballroom, khu vực Check-in thẻ đeo VIP và khu vực Workshop tầng 5.
+                          Sự kiện chưa có nhân viên soát vé. Nhấn "Bắt đầu phân công Staff" bên dưới để gán nhân viên vào sự kiện.
                         </p>
-                      </div>
-                    </div>
-                  ) : isFullyStaffed ? (
-                    <div className={styles.gatesBox}>
-                      <div className={styles.gatesHeader}>
-                        <span className={styles.gatesTitle}>3 Cửa kiểm soát vé sẵn sàng:</span>
-                        <span className={styles.gatesTarget}>Đã cấu hình thiết bị POS</span>
-                      </div>
-                      <div className={styles.gatesGrid3}>
-                        <div className={styles.gateCol}>
-                          <div className={styles.gateLabel}>Cổng Check-in VIP</div>
-                          <div className={styles.gateStaffVal}>2 Staff đã nhận ca</div>
-                        </div>
-                        <div className={styles.gateCol}>
-                          <div className={styles.gateLabel}>Cổng GA Zone A</div>
-                          <div className={styles.gateStaffVal}>2 Staff đã nhận ca</div>
-                        </div>
-                        <div className={styles.gateCol}>
-                          <div className={styles.gateLabel}>Cổng GA Zone B</div>
-                          <div className={styles.gateStaffVal}>2 Staff đã nhận ca</div>
-                        </div>
-                      </div>
-                      <div className={styles.staffAvatarsRow}>
-                        <div className={styles.avatarGroup}>
-                          <div className={styles.avatarStack}>
-                            <img
-                              src="https://lh3.googleusercontent.com/aida-public/AB6AXuDIpyk5YdWxqhcK2aJ5NB7NJaZJMybdoOYA0YUrZmkZwn7n0Ii2ggyqaiVjKNbB13VqZrhjPVic1cJlYNdOKql2aEORPbBZA07dm05Oz2URc-fSG7RW5uSJ2EpPE8zQXHrGG33zPuM2JApccnY0xkvHC3qKULt2HLgiAcrGQmnRnaxcFxwSiQfjnKi1bWv_-j_M3zYNqBmOEyZJVP_eYAyspcV5nFGQw651aqT64fZJ0sKBSaLeqBWH"
-                              alt="Staff"
-                              className={styles.avatarImg}
-                            />
-                            <img
-                              src="https://lh3.googleusercontent.com/aida-public/AB6AXuDoUtSedHuc5hK27Vnv0268eJq0F6QjCn135sxFQT0DIaCF5aDwoYzaSWtfW1YSFNnGA79It-fZjgjwj3P0x6EPEV0GCoAV5N9A7AL5F6Zlnj3u2rgLJpnFAqRvVFZ5E0cwZzWFrupya6DQyKgMje2eekiwKXrnmnLOmyLZtN1Zn4GOi81WT6PIKqmtKS4Bb15gbl2XEaiZE6nXR9svIDH4BPN7wQBAjrr84hrio6_koe31rTthmXLc"
-                              alt="Staff"
-                              className={styles.avatarImg}
-                            />
-                            <span className={styles.avatarMore}>+4</span>
-                          </div>
-                          <span className={styles.staffNames}>
-                            Đội trưởng ca: Hoàng Đình Trọng (Lead Scanner)
-                          </span>
-                        </div>
-                        <span className={styles.textSecondaryStatus}>
-                          Tự động khóa vé trùng
-                        </span>
                       </div>
                     </div>
                   ) : (
                     <div className={styles.gatesBox}>
                       <div className={styles.gatesHeader}>
-                        <span className={styles.gatesTitle}>Bố trí 4 Cổng soát vé:</span>
+                        <span className={styles.gatesTitle}>Bố trí nhân sự soát vé:</span>
                         <span className={styles.gatesTarget}>
-                          Tốc độ quét mục tiêu: &lt; 3 giây/vé
+                          {activeCount} Staff đã kích hoạt ứng dụng
                         </span>
                       </div>
 
-                      <div className={styles.gatesGrid}>
+                      <div className={styles.gatesGrid3}>
                         <div className={styles.gateCol}>
-                          <div className={styles.gateLabel}>Cổng A (VIP)</div>
-                          <div className={styles.gateStaffVal}>2/2 Staff</div>
-                          <div className={styles.gateSub}>2 Làn scanner</div>
+                          <div className={styles.gateLabel}>Tổng nhân sự</div>
+                          <div className={styles.gateStaffVal}>{assignedCount} Staff</div>
+                          <div className={styles.gateSub}>Đã phân công</div>
                         </div>
                         <div className={styles.gateCol}>
-                          <div className={styles.gateLabel}>Cổng B (GA)</div>
-                          <div className={`${styles.gateStaffVal} ${styles.textCoral}`}>
-                            3/4 Staff
+                          <div className={styles.gateLabel}>Sẵn sàng trực</div>
+                          <div className={`${styles.gateStaffVal} ${styles.textGreen}`}>
+                            {activeCount} Staff
                           </div>
-                          <div className={`${styles.gateSub} ${styles.textCoral}`}>
-                            Thiếu 1 người
-                          </div>
+                          <div className={styles.gateSub}>Đã active app</div>
                         </div>
                         <div className={styles.gateCol}>
-                          <div className={styles.gateLabel}>Cổng C (Khán đài)</div>
-                          <div className={`${styles.gateStaffVal} ${styles.textCoral}`}>
-                            2/3 Staff
+                          <div className={styles.gateLabel}>Chờ kích hoạt</div>
+                          <div className={styles.gateStaffVal}>
+                            {Math.max(0, assignedCount - activeCount)} Staff
                           </div>
-                          <div className={`${styles.gateSub} ${styles.textCoral}`}>
-                            Thiếu 1 người
-                          </div>
-                        </div>
-                        <div className={styles.gateCol}>
-                          <div className={styles.gateLabel}>Cổng D (CSKH)</div>
-                          <div className={styles.gateStaffVal}>1/1 Staff</div>
-                          <div className={styles.gateSub}>Giải quyết lỗi vé</div>
+                          <div className={styles.gateSub}>Chờ đăng nhập</div>
                         </div>
                       </div>
 
-                      {/* Assigned Staff Avatars */}
+                      {/* Assigned Staff Names */}
                       <div className={styles.staffAvatarsRow}>
                         <div className={styles.avatarGroup}>
-                          <div className={styles.avatarStack}>
-                            <img
-                              src="https://lh3.googleusercontent.com/aida-public/AB6AXuDf8uqBKtDcbP1eIcR8A7dSZ5g6mN_ZyhsKZ_38CrD4m3iaghhRPAKtfHiEGajlP-XiooTB6cUQ6xv23npmfwXAUtuHM_NcCyJkGe2LCLqXcWCetoYS0EVRNeHEeElo_3ce8XvGmEhnmY6iuU9_tBcw3J-wHAmSCMbOZCKFOHIAUDIcKHIyHoi-NrtI7Huyhu-R2Ol2_cFPwhsxO_PO_hsYg-8OJN7whc4RYfhdYmcvIauiZHbCfHRq"
-                              alt="Staff"
-                              className={styles.avatarImg}
-                            />
-                            <img
-                              src="https://lh3.googleusercontent.com/aida-public/AB6AXuDCx5tDazy8l28tp6rovs0Gjfspa_UcFU2_2asdHj9Xc9j5fEyojA_lNlQCIFQQyAnb4lhrozsiJgvcQAoBnNExEJwL3xCfKWoFGV5hEQm7YrXVhFffk-5iB_af0CDInof7gGnQetcB6d8Kk2KylFYB66DyQF6vhsFYrnLPzVNkyZHxZo-6SJsHFGqXyJyb0S6-wZx8Bc7AzF8md2M7d2RF_US9rHSGa213OhR6knq3LSiTYZo9vb1T"
-                              alt="Staff"
-                              className={styles.avatarImg}
-                            />
-                            <img
-                              src="https://lh3.googleusercontent.com/aida-public/AB6AXuCXP_-2Rb1osaLiac0hWNdXw22a0fbUp8vDYyq_14swjjOwaOXEbhAOWqLf-ZgYBzhf6Z1KA6GMPL5aEWpxdVlZQn2Gu_RcRDXjHzbpAL6QovA2j_yhxf0ElCflMHkZvhgsUbROgKUGgfjeYbMQcgB2mTAW66xEC1EumYaHOCD3SyQ-ZO1eT0X4zB_nkkAAtljzQ6unZIzATY5nOo6K3CN3IK3EGsPJjEWzbiVbJJeSpMZm8tR5KjIy"
-                              alt="Staff"
-                              className={styles.avatarImg}
-                            />
-                            <span className={styles.avatarMore}>+5</span>
-                          </div>
+                          <Users size={18} className={styles.metaIconPrimary} />
                           <span className={styles.staffNames}>
-                            Nguyễn Văn Hùng, Trần Hoàng Nam, Lê Thị Mai Phương...
+                            {staffNames ? `Nhân sự: ${staffNames}` : 'Chưa có thông tin nhân viên'}
                           </span>
                         </div>
-                        <span className={styles.textActiveStatus}>
-                          Tất cả tài khoản đã active app
+                        <span className={activeCount > 0 ? styles.textActiveStatus : styles.textSecondaryStatus}>
+                          {activeCount > 0 ? `${activeCount} nhân viên sẵn sàng` : 'Chờ kích hoạt'}
                         </span>
                       </div>
                     </div>
                   )}
                 </div>
+
 
                 {/* Card Footer Actions */}
                 <div className={styles.cardFooter}>

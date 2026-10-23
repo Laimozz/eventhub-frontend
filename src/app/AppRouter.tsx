@@ -38,7 +38,12 @@ function GuestRoute() {
   const { user } = useAuth()
   const location = useLocation()
   const from = location.state?.from
-  const destination = user?.role === 'CUSTOMER' && typeof from === 'string' && from.startsWith('/customer/') ? from : '/'
+  const destination =
+    (user?.role === 'CUSTOMER' || user?.role === 'STAFF') &&
+    typeof from === 'string' &&
+    (from.startsWith('/customer/') || from.startsWith('/staff'))
+      ? from
+      : '/'
   return user ? <Navigate to={destination} replace /> : <Outlet />
 }
 
@@ -66,8 +71,7 @@ function LandingPage() {
   const { user } = useAuth()
   if (user?.role === 'ADMIN') return <Navigate to="/admin/events/pending" replace />
   if (user?.role === 'ORGANIZER') return <Navigate to="/organizer" replace />
-  if (user?.role === 'STAFF') return <Navigate to="/staff" replace />
-  // Role CUSTOMER hoặc người dùng chưa rõ role thì về cổng customer
+  // Role STAFF, CUSTOMER hoặc người dùng chưa đăng nhập đều về cổng customer
   return <Navigate to="/customer" replace />
 }
 

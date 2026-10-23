@@ -21,8 +21,20 @@ import { useAuth } from '../../auth/hooks/useAuth'
 import { getOrganizerEvents } from '../../events/api/event-api'
 import { eventDate, eventStatuses } from '../../events/event-display'
 import type { EventSummary } from '../../events/types/event'
-import { getOrganizerRevenue, getOrganizerWallet } from '../api/organizer-api'
-import type { OrganizerRevenueSummary, OrganizerWallet } from '../types/organizer'
+import {
+  getOrganizerRevenue,
+  getOrganizerWallet,
+  getOrganizerMonthlyStats,
+  getOrganizerEventPerformance,
+  getOrganizerCheckinAlert,
+} from '../api/organizer-api'
+import type {
+  OrganizerRevenueSummary,
+  OrganizerWallet,
+  MonthlyStatsItem,
+  EventPerformanceItem,
+  CheckinAlertItem,
+} from '../types/organizer'
 import styles from './OrganizerDashboard.module.css'
 
 export function OrganizerDashboard() {
@@ -34,6 +46,9 @@ export function OrganizerDashboard() {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
   const [timeFilter, setTimeFilter] = useState<'6m' | 'year' | 'all'>('6m')
+  const [monthlyStats, setMonthlyStats] = useState<MonthlyStatsItem[]>([])
+  const [eventPerformances, setEventPerformances] = useState<EventPerformanceItem[]>([])
+  const [checkinAlert, setCheckinAlert] = useState<CheckinAlertItem | null>(null)
 
   useEffect(() => {
     const controller = new AbortController()
@@ -42,10 +57,13 @@ export function OrganizerDashboard() {
       try {
         setLoading(true)
         setError('')
-        const [walletRes, revenueRes, eventsRes] = await Promise.all([
+        const [walletRes, revenueRes, eventsRes, monthlyRes, perfRes, alertRes] = await Promise.all([
           getOrganizerWallet(controller.signal).catch(() => null),
           getOrganizerRevenue(controller.signal).catch(() => null),
           getOrganizerEvents({ page: 0, size: 50, search: '' }, controller.signal).catch(() => null),
+          getOrganizerMonthlyStats(timeFilter, controller.signal).catch(() => []),
+          getOrganizerEventPerformance(5, controller.signal).catch(() => []),
+          getOrganizerCheckinAlert(controller.signal).catch(() => null),
         ])
 
         if (controller.signal.aborted) return
@@ -55,6 +73,15 @@ export function OrganizerDashboard() {
         if (eventsRes) {
           setTotalEvents(eventsRes.totalElements)
           setEventsList(eventsRes.content)
+        }
+        if (monthlyRes) {
+          setMonthlyStats(monthlyRes)
+        }
+        if (perfRes) {
+          setEventPerformances(perfRes)
+        }
+        if (alertRes) {
+          setCheckinAlert(alertRes)
         }
       } catch {
         if (!controller.signal.aborted) {
@@ -70,6 +97,18 @@ export function OrganizerDashboard() {
     fetchData()
     return () => controller.abort()
   }, [])
+
+  useEffect(() => {
+    let isMounted = true
+    getOrganizerMonthlyStats(timeFilter)
+      .then((data) => {
+        if (isMounted) setMonthlyStats(data)
+      })
+      .catch(() => {})
+    return () => {
+      isMounted = false
+    }
+  }, [timeFilter])
 
   const [currentTimeStr] = useState(() =>
     new Intl.DateTimeFormat('vi-VN', {
@@ -88,6 +127,49 @@ export function OrganizerDashboard() {
   const featuredRevenueItem = featuredEvent
     ? (revenue?.events ?? []).find((e) => e.eventId === featuredEvent.id)
     : null
+
+  const defaultMonthLabels = ['T05/26', 'T06/26', 'T07/26', 'T08/26', 'T09/26', 'T10/26']
+  const displayMonths: MonthlyStatsItem[] = monthlyStats.length > 0 ? monthlyStats : defaultMonthLabels.map((lbl, idx) => ({
+    monthKey: `2026-0${idx + 5}`,
+    monthLabel: lbl,
+    totalOrders: 0,
+    grossRevenue: 0,
+    netRevenue: 0,
+    formattedGrossRevenue: '0 đ',
+    formattedNetRevenue: '0 đ',
+  }))
+
+  const maxRevenueVal = Math.max(...displayMonths.map((m) => m.grossRevenue), 1)
+  const chartPoints = displayMonths.map((m, idx) => {
+    const x = displayMonths.length > 1 ? Math.round((idx / (displayMonths.length - 1)) * 680 + 10) : 350
+    const ratio = m.grossRevenue / maxRevenueVal
+    const y = Math.round(180 - ratio * 150)
+    return { x, y, ...m }
+  })
+  const pathD = chartPoints.map((p, i) => (i === 0 ? `M ${p.x},${p.y}` : `L ${p.x},${p.y}`)).join(' ')
+  const areaD = chartPoints.length > 0 ? `${pathD} L ${chartPoints[chartPoints.length - 1].x},200 L ${chartPoints[0].x},200 Z` : ''
+
+  const peakMonth = monthlyStats.length > 0
+    ? monthlyStats.reduce((max, curr) => (curr.grossRevenue > max.grossRevenue ? curr : max), monthlyStats[0])
+    : null
+
+  const filterGrossRevenue = monthlyStats.reduce((sum, m) => sum + m.grossRevenue, 0)
+  const filterTotalOrders = monthlyStats.reduce((sum, m) => sum + m.totalOrders, 0)
+
+  // Dynamic revenue and orders based on selected time filter (6m vs year vs all)
+  const currentTotalRevenue = monthlyStats.length > 0 ? filterGrossRevenue : (revenue?.totalRevenue ?? 0)
+  const formattedRevenueNum = currentTotalRevenue > 0
+    ? currentTotalRevenue.toLocaleString('vi-VN')
+    : (revenue?.formattedTotalRevenue || '0').replace(/\s*đ$/, '')
+
+  const currentSoldTickets = timeFilter === 'all'
+    ? (revenue?.totalTicketsSold && revenue.totalTicketsSold > 0 ? revenue.totalTicketsSold : filterTotalOrders)
+    : filterTotalOrders
+
+  const maxOrders = Math.max(...displayMonths.map((m) => m.totalOrders), 10)
+  const avgOrders = displayMonths.length > 0
+    ? Math.round(displayMonths.reduce((sum, m) => sum + m.totalOrders, 0) / displayMonths.length)
+    : 0
 
   return (
     <div className={styles.page}>
@@ -229,13 +311,24 @@ export function OrganizerDashboard() {
                         <span className={styles.progressTitle}>
                           Tiến độ bán vé:{' '}
                           <strong>
-                            {(featuredRevenueItem?.soldTickets ?? featuredRevenueItem?.totalTicketsSold ?? 4600).toLocaleString('vi-VN')} / 5.000 vé
+                            {(featuredRevenueItem?.soldTickets ?? featuredRevenueItem?.totalTicketsSold ?? 0).toLocaleString('vi-VN')} / {(featuredRevenueItem?.totalTickets ?? 5000).toLocaleString('vi-VN')} vé
                           </strong>
                         </span>
-                        <span className={styles.progressPercentGreen}>92.0% Lấp đầy khán đài</span>
+                        <span className={styles.progressPercentGreen}>
+                          {featuredRevenueItem && featuredRevenueItem.totalTickets > 0
+                            ? `${((featuredRevenueItem.soldTickets / featuredRevenueItem.totalTickets) * 100).toFixed(1)}% Lấp đầy khán đài`
+                            : '0% Lấp đầy khán đài'}
+                        </span>
                       </div>
                       <div className={styles.progressBarTrack}>
-                        <div className={styles.progressBarFillPrimary} style={{ width: '92%' }} />
+                        <div
+                          className={styles.progressBarFillPrimary}
+                          style={{
+                            width: `${featuredRevenueItem && featuredRevenueItem.totalTickets > 0
+                              ? Math.min(100, Math.round((featuredRevenueItem.soldTickets / featuredRevenueItem.totalTickets) * 100))
+                              : 0}%`
+                          }}
+                        />
                       </div>
                     </div>
 
@@ -244,13 +337,15 @@ export function OrganizerDashboard() {
                         <span className={styles.progressTitle}>
                           Doanh thu tạm tính:{' '}
                           <strong>
-                            {featuredRevenueItem?.formattedRevenue || '3.850.000.000 đ'}
+                            {featuredRevenueItem?.formattedRevenue || '0 đ'}
                           </strong>
                         </span>
-                        <span className={styles.progressPercentCyan}>Đạt 93.6% chỉ tiêu 4,1 tỷ</span>
+                        <span className={styles.progressPercentCyan}>
+                          {featuredRevenueItem && featuredRevenueItem.revenue > 0 ? 'Đã ghi nhận vào ví' : 'Chưa phát sinh doanh thu'}
+                        </span>
                       </div>
                       <div className={styles.progressBarTrack}>
-                        <div className={styles.progressBarFillSecondary} style={{ width: '93.6%' }} />
+                        <div className={styles.progressBarFillSecondary} style={{ width: featuredRevenueItem && featuredRevenueItem.revenue > 0 ? '85%' : '0%' }} />
                       </div>
                     </div>
                   </div>
@@ -314,7 +409,7 @@ export function OrganizerDashboard() {
                 </div>
                 <div className={styles.kpiCardMain}>
                   <div className={styles.kpiBigNumber}>
-                    {(revenue?.totalTicketsSold ?? 18450).toLocaleString('vi-VN')}{' '}
+                    {currentSoldTickets.toLocaleString('vi-VN')}{' '}
                     <span className={styles.kpiUnit}>vé</span>
                   </div>
                   <div className={styles.kpiMiniRow}>
@@ -322,7 +417,7 @@ export function OrganizerDashboard() {
                       <TrendingUp size={14} /> +24.5%
                     </span>
                     <span className={styles.kpiSubtext}>
-                      Lấp đầy: <strong className={styles.textGreen}>88.5%</strong>
+                      {timeFilter === '6m' ? 'Kỳ 6 tháng qua' : timeFilter === 'year' ? 'Lũy kế năm 2026' : 'Toàn thời gian'}
                     </span>
                   </div>
                   <div className={styles.kpiMiniTrack}>
@@ -341,14 +436,16 @@ export function OrganizerDashboard() {
                 </div>
                 <div className={styles.kpiCardMain}>
                   <div className={styles.kpiBigNumber}>
-                    {revenue?.formattedTotalRevenue || '4.820.000.000'}{' '}
+                    {formattedRevenueNum}{' '}
                     <span className={styles.kpiUnit}>đ</span>
                   </div>
                   <div className={styles.kpiMiniRow}>
                     <span className={styles.kpiTrendBadge}>
                       <TrendingUp size={14} /> +18.2%
                     </span>
-                    <span className={styles.kpiSubtext}>tăng trưởng</span>
+                    <span className={styles.kpiSubtext}>
+                      {timeFilter === '6m' ? 'Kỳ 6 tháng gần nhất' : timeFilter === 'year' ? 'Lũy kế năm 2026' : 'Toàn thời gian'}
+                    </span>
                   </div>
                 </div>
               </div>
@@ -363,7 +460,7 @@ export function OrganizerDashboard() {
                 </div>
                 <div className={styles.kpiCardMain}>
                   <div className={`${styles.kpiBigNumber} ${styles.textPrimaryGreen}`}>
-                    {wallet?.formattedAvailableBalance || '1.450.000.000'}{' '}
+                    {(wallet?.formattedAvailableBalance || '0 đ').replace(/\s*đ$/, '')}{' '}
                     <span className={styles.kpiUnit}>đ</span>
                   </div>
                   <div className={styles.kpiWithdrawRow}>
@@ -390,7 +487,7 @@ export function OrganizerDashboard() {
                 </div>
                 <div className={styles.kpiCardMain}>
                   <div className={styles.kpiBigNumber}>
-                    {wallet?.formattedPendingBalance || '520.000.000'}{' '}
+                    {(wallet?.formattedPendingBalance || '0 đ').replace(/\s*đ$/, '')}{' '}
                     <span className={styles.kpiUnit}>đ</span>
                   </div>
                   <p className={styles.kpiNoteText}>
@@ -410,7 +507,7 @@ export function OrganizerDashboard() {
                 </div>
                 <div className={styles.kpiCardMain}>
                   <div className={styles.kpiBigNumber}>
-                    {wallet?.formattedWithdrawalPendingBalance || '300.000.000'}{' '}
+                    {(wallet?.formattedWithdrawalPendingBalance || '0 đ').replace(/\s*đ$/, '')}{' '}
                     <span className={styles.kpiUnit}>đ</span>
                   </div>
                   <p className={styles.kpiNoteText}>
@@ -418,7 +515,7 @@ export function OrganizerDashboard() {
                     <span>
                       {(wallet?.withdrawalPendingBalance ?? 0) > 0
                         ? '1 lệnh rút tiền đang xử lý'
-                        : '1 lệnh VCB đang xử lý (#WD-9941)'}
+                        : 'Không có lệnh chờ xử lý'}
                     </span>
                   </p>
                 </div>
@@ -434,7 +531,7 @@ export function OrganizerDashboard() {
                 </div>
                 <div className={styles.kpiCardMain}>
                   <div className={styles.kpiBigNumber}>
-                    {wallet?.formattedTotalWithdrawn || '2.550.000.000'}{' '}
+                    {(wallet?.formattedTotalWithdrawn || '0 đ').replace(/\s*đ$/, '')}{' '}
                     <span className={styles.kpiUnit}>đ</span>
                   </div>
                   <p className={`${styles.kpiNoteText} ${styles.textGreen}`}>
@@ -472,13 +569,13 @@ export function OrganizerDashboard() {
                 <div className={styles.highlightLeft}>
                   <CheckCircle2 size={18} color="#006d3d" />
                   <span>
-                    Đỉnh điểm tháng 04/2025 đạt:{' '}
+                    Đỉnh điểm tháng {peakMonth ? peakMonth.monthLabel : 'hiện tại'} đạt:{' '}
                     <strong>
-                      {revenue?.formattedTotalRevenue || '1.850.000.000 VNĐ'}
+                      {peakMonth ? peakMonth.formattedGrossRevenue : (revenue?.formattedTotalRevenue || '0 đ')}
                     </strong>
                   </span>
                 </div>
-                <span className={styles.highlightTag}>• Tăng trưởng liên tục</span>
+                <span className={styles.highlightTag}>• Tăng trưởng thực tế</span>
               </div>
 
               {/* SVG Area & Line Chart */}
@@ -510,37 +607,49 @@ export function OrganizerDashboard() {
                   />
 
                   {/* Main Gradient Area Fill */}
-                  <path
-                    d="M 0,175 L 0,175 C 70,165 100,150 140,140 C 210,125 250,135 280,105 C 350,75 390,90 420,65 C 490,40 530,60 560,45 C 630,20 660,10 700,8 L 700,200 L 0,200 Z"
-                    fill="url(#dashboardRevenueGrad)"
-                  />
+                  {areaD && (
+                    <path
+                      d={areaD}
+                      fill="url(#dashboardRevenueGrad)"
+                    />
+                  )}
 
                   {/* Emerald High-Voltage Line */}
-                  <path
-                    d="M 0,175 C 70,165 100,150 140,140 C 210,125 250,135 280,105 C 350,75 390,90 420,65 C 490,40 530,60 560,45 C 630,20 660,10 700,8"
-                    fill="none"
-                    stroke="#2dc275"
-                    strokeLinecap="round"
-                    strokeWidth="3.5"
-                  />
+                  {pathD && (
+                    <path
+                      d={pathD}
+                      fill="none"
+                      stroke="#2dc275"
+                      strokeLinecap="round"
+                      strokeWidth="3.5"
+                    />
+                  )}
 
                   {/* Interactive Node Points */}
-                  <circle cx="140" cy="140" fill="#ffffff" r="4" stroke="#2dc275" strokeWidth="3" />
-                  <circle cx="280" cy="105" fill="#ffffff" r="4" stroke="#2dc275" strokeWidth="3" />
-                  <circle cx="420" cy="65" fill="#ffffff" r="4" stroke="#2dc275" strokeWidth="3" />
-                  <circle cx="560" cy="45" fill="#ffffff" r="4" stroke="#2dc275" strokeWidth="3" />
-                  <circle cx="700" cy="8" fill="#2dc275" r="6" stroke="#ffffff" strokeWidth="3" />
+                  {chartPoints.map((pt, idx) => (
+                    <circle
+                      key={pt.monthKey}
+                      cx={pt.x}
+                      cy={pt.y}
+                      fill={idx === chartPoints.length - 1 ? '#2dc275' : '#ffffff'}
+                      r={idx === chartPoints.length - 1 ? 6 : 4}
+                      stroke={idx === chartPoints.length - 1 ? '#ffffff' : '#2dc275'}
+                      strokeWidth={3}
+                    />
+                  ))}
                 </svg>
               </div>
 
               {/* Month Labels Axis */}
               <div className={styles.chartAxis}>
-                <div>T11/2024</div>
-                <div>T12/2024</div>
-                <div>T01/2025</div>
-                <div>T02/2025</div>
-                <div>T03/2025</div>
-                <div className={styles.currentMonthLabel}>T04/2025 (Nay)</div>
+                {displayMonths.map((item, idx) => (
+                  <div
+                    key={item.monthKey}
+                    className={idx === displayMonths.length - 1 ? styles.currentMonthLabel : undefined}
+                  >
+                    {item.monthLabel} {idx === displayMonths.length - 1 ? '(Nay)' : ''}
+                  </div>
+                ))}
               </div>
             </div>
 
@@ -555,67 +664,59 @@ export function OrganizerDashboard() {
               </div>
 
               <div className={styles.perfList}>
-                {/* Event 1 */}
-                <div className={styles.perfItem}>
-                  <div className={styles.perfItemTop}>
-                    <span className={styles.perfItemName}>
-                      {featuredEvent?.name || 'Anh Trai Say Hi Concert'}
-                    </span>
-                    <span className={styles.perfItemRate}>92%</span>
+                {eventPerformances.length > 0 ? (
+                  eventPerformances.map((perf) => {
+                    const fillClass =
+                      perf.fillRatePercent >= 90
+                        ? styles.perfFillGreen
+                        : perf.fillRatePercent >= 70
+                        ? styles.perfFillPrimary
+                        : styles.perfFillBlue
+                    return (
+                      <div key={perf.eventId} className={styles.perfItem}>
+                        <div className={styles.perfItemTop}>
+                          <span className={styles.perfItemName}>{perf.eventName}</span>
+                          <span className={styles.perfItemRate}>{perf.fillRatePercent}%</span>
+                        </div>
+                        <div className={styles.perfTrack}>
+                          <div className={fillClass} style={{ width: `${Math.min(100, perf.fillRatePercent)}%` }} />
+                        </div>
+                        <div className={styles.perfItemBottom}>
+                          <span>
+                            {perf.soldTickets.toLocaleString('vi-VN')} / {perf.totalTickets.toLocaleString('vi-VN')} vé
+                          </span>
+                          <span className={perf.fillRatePercent >= 100 ? styles.textGreenBold : styles.textGreen}>
+                            {perf.fillRatePercent >= 100
+                              ? 'SOLD OUT'
+                              : perf.fillRatePercent >= 90
+                              ? 'Sắp cháy vé'
+                              : perf.fillRatePercent >= 70
+                              ? 'Bán chạy'
+                              : `${perf.remainingTickets.toLocaleString('vi-VN')} vé còn`}
+                          </span>
+                        </div>
+                      </div>
+                    )
+                  })
+                ) : featuredEvent ? (
+                  <div className={styles.perfItem}>
+                    <div className={styles.perfItemTop}>
+                      <span className={styles.perfItemName}>{featuredEvent.name}</span>
+                      <span className={styles.perfItemRate}>100%</span>
+                    </div>
+                    <div className={styles.perfTrack}>
+                      <div className={styles.perfFillGreen} style={{ width: '100%' }} />
+                    </div>
+                    <div className={styles.perfItemBottom}>
+                      <span>Đang mở bán vé trên hệ thống</span>
+                      <span className={styles.textGreen}>Hoạt động</span>
+                    </div>
                   </div>
-                  <div className={styles.perfTrack}>
-                    <div className={styles.perfFillGreen} style={{ width: '92%' }} />
+                ) : (
+                  <div style={{ padding: '24px 0', textAlign: 'center', color: '#71787e' }}>
+                    Chưa có sự kiện nào mở bán vé.
                   </div>
-                  <div className={styles.perfItemBottom}>
-                    <span>4.600 / 5.000 vé</span>
-                    <span className={styles.textGreen}>Sắp cháy vé</span>
-                  </div>
-                </div>
-
-                {/* Event 2 */}
-                <div className={styles.perfItem}>
-                  <div className={styles.perfItemTop}>
-                    <span className={styles.perfItemName}>Rock On Stage Fest 2025</span>
-                    <span className={styles.perfItemRate}>100%</span>
-                  </div>
-                  <div className={styles.perfTrack}>
-                    <div className={styles.perfFillPrimary} style={{ width: '100%' }} />
-                  </div>
-                  <div className={styles.perfItemBottom}>
-                    <span>3.200 / 3.200 vé</span>
-                    <span className={styles.textGreenBold}>SOLD OUT</span>
-                  </div>
-                </div>
-
-                {/* Event 3 */}
-                <div className={styles.perfItem}>
-                  <div className={styles.perfItemTop}>
-                    <span className={styles.perfItemName}>Vietnam Tech Summit 2025</span>
-                    <span className={styles.perfItemRateBlue}>71%</span>
-                  </div>
-                  <div className={styles.perfTrack}>
-                    <div className={styles.perfFillBlue} style={{ width: '71%' }} />
-                  </div>
-                  <div className={styles.perfItemBottom}>
-                    <span>1.420 / 2.000 vé</span>
-                    <span>Đang bán tốt</span>
-                  </div>
-                </div>
-
-                {/* Event 4 */}
-                <div className={styles.perfItem}>
-                  <div className={styles.perfItemTop}>
-                    <span className={styles.perfItemName}>Luminous Sound Night</span>
-                    <span className={styles.perfItemRateMuted}>60%</span>
-                  </div>
-                  <div className={styles.perfTrack}>
-                    <div className={styles.perfFillTeal} style={{ width: '60%' }} />
-                  </div>
-                  <div className={styles.perfItemBottom}>
-                    <span>1.200 / 2.000 vé</span>
-                    <span>Còn 800 vé</span>
-                  </div>
-                </div>
+                )}
               </div>
 
               <div className={styles.perfFooter}>
@@ -640,41 +741,29 @@ export function OrganizerDashboard() {
               </div>
 
               <div className={styles.barsContainer}>
-                <div className={styles.barCol}>
-                  <span className={styles.barVal}>1.820</span>
-                  <div className={styles.barPillar} style={{ height: '48px' }} />
-                  <span className={styles.barLabel}>T11/24</span>
-                </div>
-                <div className={styles.barCol}>
-                  <span className={styles.barVal}>2.450</span>
-                  <div className={styles.barPillar} style={{ height: '72px' }} />
-                  <span className={styles.barLabel}>T12/24</span>
-                </div>
-                <div className={styles.barCol}>
-                  <span className={styles.barVal}>2.100</span>
-                  <div className={styles.barPillar} style={{ height: '62px' }} />
-                  <span className={styles.barLabel}>T01/25</span>
-                </div>
-                <div className={styles.barCol}>
-                  <span className={styles.barVal}>3.200</span>
-                  <div className={styles.barPillar} style={{ height: '98px' }} />
-                  <span className={styles.barLabel}>T02/25</span>
-                </div>
-                <div className={styles.barCol}>
-                  <span className={styles.barVal}>3.880</span>
-                  <div className={styles.barPillar} style={{ height: '120px' }} />
-                  <span className={styles.barLabel}>T03/25</span>
-                </div>
-                <div className={`${styles.barCol} ${styles.barColActive}`}>
-                  <span className={styles.barValActive}>5.000</span>
-                  <div className={styles.barPillarActive} style={{ height: '165px' }} />
-                  <span className={styles.barLabelActive}>T04/25</span>
-                </div>
+                {displayMonths.map((b, idx) => {
+                  const heightPx = Math.max(20, Math.round((b.totalOrders / maxOrders) * 160))
+                  const isActive = idx === displayMonths.length - 1
+                  return (
+                    <div key={b.monthKey} className={`${styles.barCol} ${isActive ? styles.barColActive : ''}`}>
+                      <span className={isActive ? styles.barValActive : styles.barVal}>
+                        {b.totalOrders.toLocaleString('vi-VN')}
+                      </span>
+                      <div
+                        className={isActive ? styles.barPillarActive : styles.barPillar}
+                        style={{ height: `${heightPx}px` }}
+                      />
+                      <span className={isActive ? styles.barLabelActive : styles.barLabel}>
+                        {b.monthLabel}
+                      </span>
+                    </div>
+                  )
+                })}
               </div>
 
               <div className={styles.volumeFooter}>
-                <span>Trung bình tháng: <strong>3.075 vé</strong></span>
-                <span className={styles.textGreen}>Tốc độ phân phối đạt đỉnh ↑</span>
+                <span>Trung bình tháng: <strong>{avgOrders.toLocaleString('vi-VN')} đơn</strong></span>
+                <span className={styles.textGreen}>Tốc độ phân phối thực tế ↑</span>
               </div>
             </div>
 
@@ -733,20 +822,28 @@ export function OrganizerDashboard() {
                 <div className={styles.taskItemAlert}>
                   <div className={styles.taskAlertHeader}>
                     <div className={styles.alertTitle}>
-                      <Activity size={17} color="#ba1a1a" />
-                      <span>Cảnh báo vé Cổng A Anh Trai Say Hi</span>
+                      <Activity size={17} color={checkinAlert?.hasAlert ? '#ba1a1a' : '#006d3d'} />
+                      <span>{checkinAlert?.eventName ? `Tiến độ soát vé: ${checkinAlert.eventName}` : 'Giám sát cổng soát vé'}</span>
                     </div>
-                    <span className={styles.alertPercent}>46.8%</span>
+                    <span className={styles.alertPercent}>
+                      {checkinAlert ? `${checkinAlert.checkinRatePercent}%` : '100%'}
+                    </span>
                   </div>
                   <div className={styles.alertTrack}>
-                    <div className={styles.alertFill} style={{ width: '46.8%' }} />
+                    <div
+                      className={styles.alertFill}
+                      style={{
+                        width: `${Math.min(100, checkinAlert?.checkinRatePercent ?? 100)}%`,
+                        backgroundColor: checkinAlert?.hasAlert ? '#ba1a1a' : '#2dc275',
+                      }}
+                    />
                   </div>
                   <div className={styles.alertBottom}>
                     <span>
-                      Đã soát vé: <strong>2.180 / 4.650</strong> khách
+                      Đã soát vé: <strong>{checkinAlert?.checkedInTickets ?? 0} / {checkinAlert?.totalTickets ?? 0}</strong> khách
                     </span>
-                    <span className={styles.textAlertCoral}>
-                      Đạt 46.8% check-in • Cần hỗ trợ cổng
+                    <span className={checkinAlert?.hasAlert ? styles.textAlertCoral : styles.textGreen}>
+                      {checkinAlert?.alertMessage || 'Hệ thống cổng soát vé hoạt động bình thường'}
                     </span>
                   </div>
                 </div>

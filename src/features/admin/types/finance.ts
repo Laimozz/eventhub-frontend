@@ -63,3 +63,43 @@ export interface RefundDetail {
   canRefund: boolean
   unavailableReason: string
 }
+
+export interface AdminMonthlyTrend {
+  monthKey: string
+  monthLabel: string
+  totalTransactions: number
+  grossRevenue: number
+  netRevenue: number
+  formattedGrossRevenue: string
+  formattedNetRevenue: string
+}
+
+export interface AdminStatusBreakdown {
+  status: string
+  statusLabel: string
+  totalEvents: number
+  percentage: number
+}
+
+export interface AdminCategoryRevenue {
+  categoryId: number
+  categoryName: string
+  totalEvents: number
+  totalOrders: number
+  grossRevenue: number
+  formattedGrossRevenue: string
+}
+
+export interface RefundReconciliation {
+  eventId: number
+  eventName: string
+  totalPayments: number
+  totalAmount: number
+  formattedTotalAmount: string
+  refundedCount: number
+  refundedAmount: number
+  formattedRefundedAmount: string
+  pendingRefundCount: number
+  retryNeededCount: number
+}
+

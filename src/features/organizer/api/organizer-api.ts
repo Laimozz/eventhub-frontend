@@ -6,7 +6,13 @@ import type {
   OrganizerWallet,
   WithdrawalPreview,
   WithdrawalRequestItem,
+  MonthlyStatsItem,
+  EventPerformanceItem,
+  CheckinAlertItem,
+  StaffDispatchSummary,
+  EventStaffDispatch,
 } from '../types/organizer'
+
 
 export async function getOrganizerWallet(signal?: AbortSignal): Promise<OrganizerWallet> {
   const response = await httpClient.get<any>('/organizer/wallet', { signal })
@@ -108,4 +114,36 @@ export async function cancelWithdrawal(id: number): Promise<WithdrawalRequestIte
   const response = await httpClient.post<WithdrawalRequestItem>(`/organizer/withdrawals/${id}/cancel`)
   return response.data
 }
+
+export async function getOrganizerMonthlyStats(interval: string = '6m', signal?: AbortSignal): Promise<MonthlyStatsItem[]> {
+  const response = await httpClient.get<MonthlyStatsItem[]>('/organizer/dashboard/monthly-stats', {
+    params: { interval },
+    signal,
+  })
+  return response.data
+}
+
+export async function getOrganizerEventPerformance(limit: number = 5, signal?: AbortSignal): Promise<EventPerformanceItem[]> {
+  const response = await httpClient.get<EventPerformanceItem[]>('/organizer/dashboard/event-performance', {
+    params: { limit },
+    signal,
+  })
+  return response.data
+}
+
+export async function getOrganizerCheckinAlert(signal?: AbortSignal): Promise<CheckinAlertItem> {
+  const response = await httpClient.get<CheckinAlertItem>('/organizer/dashboard/checkin-alert', { signal })
+  return response.data
+}
+
+export async function getStaffDispatchSummary(signal?: AbortSignal): Promise<StaffDispatchSummary> {
+  const response = await httpClient.get<StaffDispatchSummary>('/organizer/dashboard/staff-dispatch/summary', { signal })
+  return response.data
+}
+
+export async function getStaffDispatchAllocations(signal?: AbortSignal): Promise<EventStaffDispatch[]> {
+  const response = await httpClient.get<EventStaffDispatch[]>('/organizer/dashboard/staff-dispatch/allocations', { signal })
+  return response.data
+}
+
 

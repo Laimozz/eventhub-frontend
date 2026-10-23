@@ -1,6 +1,6 @@
 import { httpClient } from '../../../lib/http-client'
 import type { PageResult } from '../types/admin'
-import type { CanceledEvent, Overview, RefundDetail, Withdrawal } from '../types/finance'
+import type { CanceledEvent, Overview, RefundDetail, Withdrawal, AdminMonthlyTrend, AdminStatusBreakdown, AdminCategoryRevenue, RefundReconciliation } from '../types/finance'
 
 export const financeApi = {
   refunds: async (eventId: number | undefined, page: number, signal: AbortSignal) =>
@@ -20,6 +20,14 @@ export const financeApi = {
   },
   refundEvidence: async (paymentId: number) => (await httpClient.get<Blob>(`/admin/refunds/${paymentId}/evidence`, { responseType: 'blob' })).data,
   overview: async (signal: AbortSignal) => (await httpClient.get<Overview>('/admin/statistics', { signal })).data,
+  monthlyStats: async (months: number = 6, signal?: AbortSignal) =>
+    (await httpClient.get<AdminMonthlyTrend[]>('/admin/statistics/monthly', { params: { months }, signal })).data,
+  statusBreakdown: async (signal?: AbortSignal) =>
+    (await httpClient.get<AdminStatusBreakdown[]>('/admin/statistics/status-breakdown', { signal })).data,
+  categoryBreakdown: async (signal?: AbortSignal) =>
+    (await httpClient.get<AdminCategoryRevenue[]>('/admin/statistics/category-breakdown', { signal })).data,
+  refundReconciliation: async (eventId: number, signal?: AbortSignal) =>
+    (await httpClient.get<RefundReconciliation>(`/admin/statistics/refund-reconciliation/${eventId}`, { signal })).data,
   withdrawals: async (page: number, status: string, signal: AbortSignal) =>
     (await httpClient.get<PageResult<Withdrawal>>('/admin/withdrawal-requests', { signal, params: { page, pageSize: 20, status: status || undefined } })).data,
   withdrawal: async (id: number, signal: AbortSignal) =>
@@ -33,6 +41,7 @@ export const financeApi = {
   refundDetail: async (id: number, page: number, signal: AbortSignal) =>
     (await httpClient.get<RefundDetail>(`/admin/refund-events/${id}`, { signal, params: { page, pageSize: 20 } })).data,
 }
+
 export const money = (amount: number | null) => amount === null ? 'Chưa xác định' : new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(amount)
 export const financeDate = (date: string | null) => date ? new Date(`${date}Z`).toLocaleString('vi-VN', { timeZone: 'Asia/Ho_Chi_Minh' }) : '—'
 export const withdrawalStatus = (status: string) => ({ PENDING: 'Chờ duyệt', APPROVED: 'Đã duyệt', REJECTED: 'Bị từ chối', CANCELLED: 'Đã hủy' } as Record<string, string>)[status] ?? status

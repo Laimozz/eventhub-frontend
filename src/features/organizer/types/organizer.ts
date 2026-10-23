@@ -78,3 +78,52 @@ export interface WithdrawalRequestItem {
   formattedAvailableBalanceAfter?: string
 }
 
+export interface MonthlyStatsItem {
+  monthKey: string
+  monthLabel: string
+  totalOrders: number
+  grossRevenue: number
+  netRevenue: number
+  formattedGrossRevenue: string
+  formattedNetRevenue: string
+}
+
+export interface EventPerformanceItem {
+  eventId: number
+  eventName: string
+  eventStatus: string
+  totalTickets: number
+  soldTickets: number
+  remainingTickets: number
+  fillRatePercent: number
+  revenue: number
+  formattedRevenue: string
+}
+
+export interface CheckinAlertItem {
+  eventId: number | null
+  eventName: string
+  totalTickets: number
+  checkedInTickets: number
+  checkinRatePercent: number
+  hasAlert: boolean
+  alertMessage: string
+}
+
+export interface StaffDispatchSummary {
+  totalEventsNeedingStaff: number
+  totalAssignedStaff: number
+  activeStaff: number
+  avgCheckinRate: number
+}
+
+export interface EventStaffDispatch {
+  eventId: number
+  eventName: string
+  eventStatus: string
+  assignedStaffCount: number
+  activeStaffCount: number
+  staffNames: string
+}
+
+

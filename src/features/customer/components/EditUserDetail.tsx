@@ -38,7 +38,9 @@ export function EditUserDetail({
   const [phone, setPhone] = useState(user.phone || '');
   const [birthDate, setBirthDate] = useState(user.dateOfBirth || '');
   const [city, setCity] = useState(user.city || 'TP. Hồ Chí Minh');
+  void setCity;
   const [preferredCategories, setPreferredCategories] = useState(user.preferredCategories || '');
+  void setPreferredCategories;
   const [pending, setPending] = useState(false);
   const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
   const [otpModalOpen, setOtpModalOpen] = useState(false);
@@ -417,7 +419,8 @@ export function EditUserDetail({
             )}
           </div>
 
-          {/* Thành phố sinh sống (Vị trí) */}
+          {/* TẠM ẨN CHO BUỔI BÁO CÁO - Xem hướng dẫn bật lại tại turn_onoff_ai.txt */}
+          {/*
           <div className={styles.fieldGroup}>
             <div className={styles.fieldLabelRow}>
               <label htmlFor="city">Thành phố sinh sống <span className={styles.requiredStar}>*</span></label>
@@ -449,7 +452,6 @@ export function EditUserDetail({
             </p>
           </div>
 
-          {/* Sở thích sự kiện (AI Cá nhân hóa) */}
           <div className={styles.fieldGroup}>
             <div className={styles.fieldLabelRow}>
               <label htmlFor="preferredCategories">Sở thích &amp; Thể loại quan tâm</label>
@@ -472,6 +474,7 @@ export function EditUserDetail({
               Nhập các thể loại bạn quan tâm, phân cách bằng dấu phẩy để AI định hình gợi ý.
             </p>
           </div>
+          */}
 
           {/* Mật khẩu & Bảo mật */}
           <div className={styles.fieldGroup}>
