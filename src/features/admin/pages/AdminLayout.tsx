@@ -1,7 +1,8 @@
 import { useState } from 'react'
-import { NavLink, Outlet } from 'react-router'
+import { Link, NavLink, Outlet } from 'react-router'
 import { Users, Tags, BadgeCheck, Ticket, Menu, LogOut, User, BarChart3, Wallet, RotateCcw } from 'lucide-react'
 import { useAuth } from '../../auth/hooks/useAuth'
+import { getRoleHomePath } from '../../auth/role-home'
 import { errorMessage } from '../api/admin-api'
 import styles from './Admin.module.css'
 import { NotificationBell } from '../../notifications/components/NotificationBell'
@@ -18,7 +19,7 @@ export function AdminLayout() {
   return <div className={styles.shell}>
     {open && <button className={styles.backdrop} aria-label="Đóng menu" onClick={() => setOpen(false)} />}
     <aside className={open ? styles.sidebarOpen : styles.sidebar}>
-      <div className={styles.brand}><Ticket /><div>EventHub<small>ADMIN CONSOLE</small></div></div>
+      <Link to={getRoleHomePath(user?.role)} className={styles.brand} aria-label="EventHub — Trang chủ" onClick={() => setOpen(false)}><Ticket /><div>EventHub<small>ADMIN CONSOLE</small></div></Link>
       <p className={styles.eyebrow}>ĐIỀU HƯỚNG CHÍNH</p>
       <nav aria-label="Menu Admin">{[
         { to: '/admin/statistics', title: 'Thống kê tổng quan', Icon: BarChart3 },

@@ -1,4 +1,4 @@
-import { get } from '../../../lib/http-client'
+import { get, httpClient } from '../../../lib/http-client'
 import type { 
   PublicEventListResponse, 
   PublicEventDetailResponse, 
@@ -14,7 +14,7 @@ export async function getPublicEvents(params: {
   city?: string
   fromDate?: string
   toDate?: string
-}): Promise<PublicEventListResponse> {
+}, signal?: AbortSignal): Promise<PublicEventListResponse> {
   const queryParams = new URLSearchParams()
   if (params.page !== undefined) queryParams.append('page', params.page.toString())
   if (params.size !== undefined) queryParams.append('size', params.size.toString())
@@ -27,7 +27,7 @@ export async function getPublicEvents(params: {
   const queryString = queryParams.toString()
   const endpoint = `/public/events${queryString ? `?${queryString}` : ''}`
   
-  return get<PublicEventListResponse>(endpoint)
+  return (await httpClient.get<PublicEventListResponse>(endpoint, { signal })).data
 }
 
 export async function getPublicEventDetail(eventId: number): Promise<PublicEventDetailResponse> {

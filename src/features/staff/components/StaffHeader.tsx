@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { Link, NavLink, useNavigate } from 'react-router'
 import { useAuth } from '../../auth/hooks/useAuth'
+import { getRoleHomePath } from '../../auth/role-home'
 import styles from './StaffHeader.module.css'
 
 export function StaffHeader() {
@@ -32,11 +33,11 @@ export function StaffHeader() {
     <header className={styles.header}>
       <div className={styles.inner}>
         <div className={styles.left}>
-          <Link to="/staff" className={styles.brand}>
+          <Link to={getRoleHomePath(user?.role)} className={styles.brand} aria-label="EventHub — Trang chủ">
             <span className={styles.brandBadge}>
               <span className="material-symbols-outlined text-[20px]">badge</span>
             </span>
-            <span>TicketBox</span>
+            <span>EventHub</span>
             <span className={styles.roleTag}>Staff</span>
           </Link>
 

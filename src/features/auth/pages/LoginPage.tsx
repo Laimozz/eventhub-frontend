@@ -47,7 +47,7 @@ export function LoginPage() {
   return (
     <div className={styles.layout}>
       <header className={styles.header}>
-        <Link to="/login" aria-label="EventHub — Đăng nhập">
+        <Link to="/customer" aria-label="EventHub — Trang chủ">
           <span className={styles.brand} aria-label="EventHub">
             <span className={styles.mark}>
               <Ticket aria-hidden="true" size={21} />
@@ -67,11 +67,11 @@ export function LoginPage() {
       <main className={styles.main}>
         <section className={styles.card} aria-labelledby="auth-title">
           <div className={styles.heading}>
-            <span className={styles.compact} aria-label="EventHub">
+            <Link to="/customer" className={styles.compact} aria-label="EventHub — Trang chủ">
               <span className={styles.mark}>
                 <Ticket aria-hidden="true" size={28} />
               </span>
-            </span>
+            </Link>
             <h1 id="auth-title">Đăng nhập</h1>
             <p>Chào mừng bạn trở lại với EventHub!</p>
           </div>
