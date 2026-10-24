@@ -6,25 +6,41 @@ import { EventCard } from '../components/EventCard'
 import { CustomerHeader } from '../components/CustomerHeader'
 import styles from './ExplorePage.module.css'
 
+type Filters = { city: string; categoryId: number | 'all'; timeFilter: string; fromDate: string; toDate: string }
+const pageSize = 12
+
+function readFilters(params: URLSearchParams): Filters {
+  const category = Number(params.get('categoryId'))
+  return {
+    city: params.get('city') || 'all',
+    categoryId: Number.isSafeInteger(category) && category > 0 ? category : 'all',
+    timeFilter: ['today', 'this_week', 'this_month', 'custom'].includes(params.get('time') || '') ? params.get('time')! : 'all',
+    fromDate: params.get('fromDate') || '',
+    toDate: params.get('toDate') || '',
+  }
+}
+
 export function ExplorePage() {
   const [searchParams, setSearchParams] = useSearchParams()
-  
-  // Data states
+  const queryKey = searchParams.toString()
+  const applied = readFilters(searchParams)
+  const requestedPage = Number(searchParams.get('page'))
+  const page = Number.isSafeInteger(requestedPage) && requestedPage >= 0 ? requestedPage : 0
   const [events, setEvents] = useState<PublicEventSummaryResponse[]>([])
   const [categories, setCategories] = useState<CategoryResponse[]>([])
   const [loading, setLoading] = useState(true)
   const [totalElements, setTotalElements] = useState(0)
-
-  // Filter states (initialized from URL if available)
-  const [city, setCity] = useState(searchParams.get('city') || 'all')
-  const [categoryId, setCategoryId] = useState<number | 'all'>(
-    searchParams.has('categoryId') ? Number(searchParams.get('categoryId')) : 'all'
-  )
-  const [timeFilter, setTimeFilter] = useState(searchParams.get('time') || 'all') // all, today, this_week, this_month, custom
-  const [fromDate, setFromDate] = useState(searchParams.get('fromDate') || '')
-  const [toDate, setToDate] = useState(searchParams.get('toDate') || '')
-  
-  // Extract search term from URL
+  const [totalPages, setTotalPages] = useState(0)
+  const [error, setError] = useState('')
+  const [revision, setRevision] = useState(0)
+  const [draft, setDraft] = useState(() => ({ ...applied, queryKey }))
+  // URL changes (including Back/Forward) replace the filter draft without copying state in an effect.
+  const filters = draft.queryKey === queryKey ? draft : { ...applied, queryKey }
+  const { city, categoryId, timeFilter, fromDate, toDate } = filters
+  function changeFilters(patch: Partial<Filters>) { setDraft({ ...filters, ...patch }) }
+  const setCity = (value: string) => changeFilters({ city: value })
+  const setCategoryId = (value: number | 'all') => changeFilters({ categoryId: value })
+  const setTimeFilter = (value: string) => changeFilters({ timeFilter: value })
   const searchString = searchParams.get('search') || undefined
 
   // On mount, load categories
@@ -34,25 +50,26 @@ export function ExplorePage() {
 
   // Derived dates based on timeFilter (UTC)
   const effectiveDates = useMemo(() => {
-    // Helper function to get ISO string without 'Z' for Spring LocalDateTime
     const toLocalIso = (date: Date) => date.toISOString().replace('Z', '')
 
-    if (timeFilter === 'custom') {
+    if (applied.timeFilter === 'custom') {
+      const from = new Date(`${applied.fromDate}T00:00:00+07:00`)
+      const to = new Date(`${applied.toDate}T23:59:59.999+07:00`)
       return {
-        from: fromDate ? toLocalIso(new Date(fromDate)) : undefined,
-        to: toDate ? toLocalIso(new Date(toDate)) : undefined
+        from: Number.isNaN(from.getTime()) ? undefined : toLocalIso(from),
+        to: Number.isNaN(to.getTime()) ? undefined : toLocalIso(to),
       }
     }
     
-    if (timeFilter === 'all') return { from: undefined, to: undefined }
+    if (applied.timeFilter === 'all') return { from: undefined, to: undefined }
 
     const now = new Date()
-    if (timeFilter === 'today') {
+    if (applied.timeFilter === 'today') {
       const start = new Date(now.setHours(0, 0, 0, 0))
       const end = new Date(now.setHours(23, 59, 59, 999))
       return { from: toLocalIso(start), to: toLocalIso(end) }
     }
-    if (timeFilter === 'this_week') {
+    if (applied.timeFilter === 'this_week') {
       const first = now.getDate() - now.getDay() // Sunday
       const start = new Date(now.setDate(first))
       start.setHours(0,0,0,0)
@@ -61,37 +78,53 @@ export function ExplorePage() {
       end.setHours(23,59,59,999)
       return { from: toLocalIso(start), to: toLocalIso(end) }
     }
-    if (timeFilter === 'this_month') {
+    if (applied.timeFilter === 'this_month') {
       const start = new Date(now.getFullYear(), now.getMonth(), 1)
       const end = new Date(now.getFullYear(), now.getMonth() + 1, 0, 23, 59, 59, 999)
       return { from: toLocalIso(start), to: toLocalIso(end) }
     }
     return { from: undefined, to: undefined }
-  }, [timeFilter, fromDate, toDate])
+  }, [applied.timeFilter, applied.fromDate, applied.toDate])
 
   // Fetch events when filters change
   useEffect(() => {
+    const controller = new AbortController()
     async function fetchEvents() {
       setLoading(true)
+      setError('')
       try {
         const response = await getPublicEvents({
-          size: 12, // Default size for explore page
-          categoryId: categoryId === 'all' ? undefined : categoryId,
-          city: city === 'all' ? undefined : city,
+          page,
+          size: pageSize,
+          categoryId: applied.categoryId === 'all' ? undefined : applied.categoryId,
+          city: applied.city === 'all' ? undefined : applied.city,
           fromDate: effectiveDates.from,
           toDate: effectiveDates.to,
           search: searchString
-        })
+        }, controller.signal)
+        if (controller.signal.aborted) return
+        const lastPage = Math.max(0, response.totalPages - 1)
+        if (page > lastPage) {
+          setSearchParams(previous => {
+            const next = new URLSearchParams(previous)
+            if (lastPage) next.set('page', String(lastPage))
+            else next.delete('page')
+            return next
+          }, { replace: true })
+          return
+        }
         setEvents(response.content)
         setTotalElements(response.totalElements)
-      } catch (error) {
-        console.error('Lỗi khi tải danh sách sự kiện:', error)
+        setTotalPages(response.totalPages)
+      } catch {
+        if (!controller.signal.aborted) setError('Không thể tải danh sách sự kiện. Vui lòng thử lại.')
       } finally {
-        setLoading(false)
+        if (!controller.signal.aborted) setLoading(false)
       }
     }
-    fetchEvents()
-  }, [categoryId, city, effectiveDates, searchString])
+    void fetchEvents()
+    return () => controller.abort()
+  }, [applied.categoryId, applied.city, effectiveDates, searchString, page, revision, setSearchParams])
 
   // Sync to URL when applying filters
   const applyFilters = () => {
@@ -110,27 +143,29 @@ export function ExplorePage() {
   }
 
   const resetFilters = () => {
-    setCity('all')
-    setCategoryId('all')
-    setTimeFilter('all')
-    setFromDate('')
-    setToDate('')
     const params = new URLSearchParams()
     if (searchString) params.set('search', searchString)
+    setDraft({ city: 'all', categoryId: 'all', timeFilter: 'all', fromDate: '', toDate: '', queryKey: params.toString() })
     setSearchParams(params)
   }
 
-  const removeCityFilter = () => {
-    setCity('all')
-    applyFilters()
+  function removeFilter(key: string) {
+    const next = new URLSearchParams(searchParams)
+    next.delete(key)
+    next.delete('page')
+    setSearchParams(next)
   }
 
-  const removeCategoryFilter = () => {
-    setCategoryId('all')
-    applyFilters()
+  function changePage(nextPage: number) {
+    if (nextPage < 0 || nextPage >= totalPages || loading) return
+    const next = new URLSearchParams(searchParams)
+    if (nextPage) next.set('page', String(nextPage))
+    else next.delete('page')
+    setSearchParams(next)
+    window.scrollTo({ top: 0, behavior: 'smooth' })
   }
 
-  const categoryName = categoryId !== 'all' ? categories.find(c => c.id === categoryId)?.name : null
+  const categoryName = applied.categoryId !== 'all' ? categories.find(c => c.id === applied.categoryId)?.name : null
 
   return (
     <div className={styles.page}>
@@ -182,11 +217,11 @@ export function ExplorePage() {
                     <div className={styles.dateInputs}>
                       <div>
                         <label>Từ ngày</label>
-                        <input type="date" value={fromDate} onChange={e => { setFromDate(e.target.value); setTimeFilter('custom'); }} />
+                        <input type="date" value={fromDate} onChange={e => changeFilters({ fromDate: e.target.value, timeFilter: 'custom' })} />
                       </div>
                       <div>
                         <label>Đến ngày</label>
-                        <input type="date" value={toDate} onChange={e => { setToDate(e.target.value); setTimeFilter('custom'); }} />
+                        <input type="date" value={toDate} onChange={e => changeFilters({ toDate: e.target.value, timeFilter: 'custom' })} />
                       </div>
                     </div>
                   </div>
@@ -240,11 +275,11 @@ export function ExplorePage() {
                 {/* Nút tác vụ */}
                 <div className={styles.filterActions}>
                   <button className={styles.applyBtn} onClick={applyFilters}>
-                    <span className="material-symbols-outlined">check</span>
+                    <span className="material-symbols-outlined" aria-hidden="true">check</span>
                     Áp dụng bộ lọc
                   </button>
                   <button className={styles.clearBtn} onClick={resetFilters}>
-                    <span className="material-symbols-outlined">close</span>
+                    <span className="material-symbols-outlined" aria-hidden="true">close</span>
                     Xóa bộ lọc
                   </button>
                 </div>
@@ -271,36 +306,34 @@ export function ExplorePage() {
               </div>
               
               <div className={styles.activeFilters}>
-                {categoryId !== 'all' || city !== 'all' || searchString ? <span>Đang chọn:</span> : null}
+                {applied.categoryId !== 'all' || applied.city !== 'all' || searchString ? <span>Đang chọn:</span> : null}
                 {searchString && (
                   <div className={styles.chip}>
                     <span className="material-symbols-outlined">search</span>
                     Từ khóa: {searchString}
-                    <button onClick={() => {
-                      const params = new URLSearchParams(searchParams)
-                      params.delete('search')
-                      setSearchParams(params)
-                    }}><span className="material-symbols-outlined">close</span></button>
+                    <button aria-label="Xóa từ khóa" onClick={() => removeFilter('search')}><span className="material-symbols-outlined">close</span></button>
                   </div>
                 )}
-                {categoryId !== 'all' && categoryName && (
+                {applied.categoryId !== 'all' && categoryName && (
                   <div className={styles.chip}>
                     <span className="material-symbols-outlined">music_note</span>
                     {categoryName}
-                    <button onClick={removeCategoryFilter}><span className="material-symbols-outlined">close</span></button>
+                    <button aria-label="Xóa bộ lọc thể loại" onClick={() => removeFilter('categoryId')}><span className="material-symbols-outlined">close</span></button>
                   </div>
                 )}
-                {city !== 'all' && (
+                {applied.city !== 'all' && (
                   <div className={styles.chip}>
                     <span className="material-symbols-outlined">location_on</span>
-                    {city}
-                    <button onClick={removeCityFilter}><span className="material-symbols-outlined">close</span></button>
+                    {applied.city}
+                    <button aria-label="Xóa bộ lọc thành phố" onClick={() => removeFilter('city')}><span className="material-symbols-outlined">close</span></button>
                   </div>
                 )}
               </div>
 
               {loading ? (
                 <div className={styles.loading}>Đang tải danh sách sự kiện...</div>
+              ) : error ? (
+                <div className={styles.empty} role="alert"><p>{error}</p><button className={styles.applyBtn} onClick={() => setRevision(value => value + 1)}>Thử lại</button></div>
               ) : events.length > 0 ? (
                 <div className={styles.grid}>
                   {events.map(event => (
@@ -313,6 +346,11 @@ export function ExplorePage() {
                   <p>Vui lòng thử lại với bộ lọc khác.</p>
                 </div>
               )}
+              {!error && totalPages > 1 && <nav className={styles.pagination} aria-label="Phân trang sự kiện">
+                <button disabled={loading || page === 0} onClick={() => changePage(page - 1)}>Trang trước</button>
+                <span role="status">Trang {page + 1} / {totalPages}</span>
+                <button disabled={loading || page + 1 >= totalPages} onClick={() => changePage(page + 1)}>Trang sau</button>
+              </nav>}
             </section>
           </div>
         </div>

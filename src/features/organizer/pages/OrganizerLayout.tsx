@@ -18,6 +18,7 @@ import {
 } from 'lucide-react'
 import { NotificationBell } from '../../notifications/components/NotificationBell'
 import { useAuth } from '../../auth/hooks/useAuth'
+import { getRoleHomePath } from '../../auth/role-home'
 import { authErrorMessage } from '../../auth/api/auth-errors'
 import styles from './OrganizerLayout.module.css'
 
@@ -78,11 +79,11 @@ export function OrganizerLayout() {
       <aside className={`${styles.sidebar} ${menuOpen ? styles.open : ''}`}>
         <div className={styles.sidebarTop}>
           <div className={styles.brandContainer}>
-            <Link className={styles.brand} to="/organizer" onClick={() => setMenuOpen(false)}>
+            <Link className={styles.brand} to={getRoleHomePath(user?.role)} aria-label="EventHub — Trang chủ" onClick={() => setMenuOpen(false)}>
               <div className={styles.brandLogoWrap}>
                 <Ticket size={24} className={styles.brandIcon} />
               </div>
-              <strong className={styles.brandName}>TicketBo</strong>
+              <strong className={styles.brandName}>EventHub</strong>
             </Link>
             <span className={styles.portalTag}>ORGANIZER PORTAL</span>
           </div>

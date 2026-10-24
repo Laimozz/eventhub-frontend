@@ -70,11 +70,11 @@ export function RegisterPage() {
       <main className={`${styles.main} ${styles.registration}`}>
         <section className={`${styles.card} ${styles.wide}`} aria-labelledby="auth-title">
           <div className={styles.heading}>
-            <span className={styles.compact} aria-label="EventHub">
+            <Link to="/customer" className={styles.compact} aria-label="EventHub — Trang chủ">
               <span className={styles.mark}>
                 <Ticket aria-hidden="true" size={28} />
               </span>
-            </span>
+            </Link>
             <h1 id="auth-title">Đăng ký tài khoản</h1>
             <p>Tạo tài khoản để săn vé sự kiện hot và nhận đặc quyền thành viên</p>
           </div>

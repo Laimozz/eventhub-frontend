@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { Link, useNavigate, useSearchParams } from 'react-router';
 import { useAuth } from '../../auth/hooks/useAuth';
+import { getRoleHomePath } from '../../auth/role-home';
 import type { UserDetailDto } from '../types/user';
 import styles from './CustomerHeader.module.css';
 import { NotificationBell } from '../../notifications/components/NotificationBell';
@@ -78,7 +79,7 @@ export function CustomerHeader({ user: propUser, onSelectMode }: CustomerHeaderP
         )}
         <div className={styles.headerInner}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '24px' }}>
-            <Link to="/" className={styles.logoLink}>
+            <Link to={getRoleHomePath(authUser?.role)} className={styles.logoLink} aria-label="EventHub — Trang chủ">
               <span className={styles.logoBadge}>
                 <span className="material-symbols-outlined text-[22px]">confirmation_number</span>
               </span>
@@ -101,6 +102,7 @@ export function CustomerHeader({ user: propUser, onSelectMode }: CustomerHeaderP
                 if (e.key === 'Enter') {
                   const val = e.currentTarget.value.trim()
                   const params = new URLSearchParams(searchParams)
+                  params.delete('page')
                   if (val) {
                     params.set('search', val)
                   } else {

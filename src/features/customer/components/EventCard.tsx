@@ -1,5 +1,7 @@
 import { Link } from 'react-router'
 import type { PublicEventSummaryResponse } from '../types/event'
+import { utcDate } from '../booking-display'
+import { customerEventState } from '../event-sales'
 // import { useAuth } from '../../auth/hooks/useAuth'
 // import { recordEventInteraction } from '../api/event-api'
 import styles from './EventCard.module.css'
@@ -23,22 +25,26 @@ export function EventCard({ event }: EventCardProps) {
     */
   }
 
-  const startDate = new Date(event.startTime)
-  const day = startDate.getDate().toString().padStart(2, '0')
-  const month = `Th${startDate.getMonth() + 1}`
-  const dayOfWeek = startDate.toLocaleDateString('vi-VN', { weekday: 'short' }).replace('Th ', 'T')
+  const state = customerEventState(event)
+  const startDate = utcDate(event.startTime)
+  const timeZone = 'Asia/Ho_Chi_Minh'
+  const day = startDate.toLocaleDateString('vi-VN', { day: '2-digit', timeZone })
+  const month = `Th${startDate.toLocaleDateString('vi-VN', { month: 'numeric', timeZone })}`
+  const dayOfWeek = startDate.toLocaleDateString('vi-VN', { weekday: 'short', timeZone }).replace('Th ', 'T')
   const dateBadgeText = `${month} - ${dayOfWeek}`
   
   const formattedTime = startDate.toLocaleTimeString('vi-VN', {
     hour: '2-digit',
-    minute: '2-digit'
+    minute: '2-digit',
+    timeZone,
   })
   
   const formattedFullDate = startDate.toLocaleDateString('vi-VN', {
     weekday: 'long',
     day: '2-digit',
     month: '2-digit',
-    year: 'numeric'
+    year: 'numeric',
+    timeZone,
   })
 
   // Format to e.g. "19:00 - Thứ 7, 12/04/2025"
@@ -93,10 +99,9 @@ export function EventCard({ event }: EventCardProps) {
             </span>
           )}
 
-          {/* Urgency Tag (Optional - hardcoded demo state) */}
           <div className={styles.urgencyBadge}>
-            <span className={styles.pulseDot}></span>
-            <span>Đang mở bán</span>
+            {state.canBook && <span className={styles.pulseDot}></span>}
+            <span>{state.badgeLabel}</span>
           </div>
         </div>
         
@@ -125,7 +130,7 @@ export function EventCard({ event }: EventCardProps) {
           <span className={styles.priceValue}>{formattedPrice}</span>
         </div>
         <Link to={`/customer/events/${event.id}`} onClick={handleCardClick} className={styles.actionBtn}>
-          <span>Mua vé</span>
+          <span>{state.canBook ? 'Mua vé' : 'Xem chi tiết'}</span>
           <span className="material-symbols-outlined text-[14px]">arrow_forward</span>
         </Link>
       </div>

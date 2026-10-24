@@ -1,3 +1,17 @@
+export type PublicEventStatus = 'APPROVED' | 'ONGOING' | 'COMPLETED' | 'CANCELED'
+export type TicketSalesStatus = 'NOT_ON_SALE' | 'ON_SALE' | 'SOLD_OUT' | 'SALES_ENDED' | 'UNAVAILABLE'
+
+export interface PublicTicketType {
+  id: number
+  name: string
+  description: string | null
+  price: number
+  remainingQuantity: number
+  saleStartTime: string
+  saleEndTime: string
+  salesStatus: TicketSalesStatus
+}
+
 export interface PublicEventSummaryResponse {
   id: number
   name: string
@@ -6,6 +20,8 @@ export interface PublicEventSummaryResponse {
   endTime: string
   city: string
   startingPrice: number | null
+  status: PublicEventStatus
+  salesStatus: TicketSalesStatus
   categoryName?: string
   recLogId?: number | null
   similarityScore?: number | null
@@ -36,6 +52,9 @@ export interface PublicEventDetailResponse {
   }
   startingPrice: number | null
   suggestedEvents: PublicEventSummaryResponse[]
+  status: PublicEventStatus
+  salesStatus: TicketSalesStatus
+  ticketTypes: PublicTicketType[]
   lineup?: string[]
   floorMapSvg?: string
 }

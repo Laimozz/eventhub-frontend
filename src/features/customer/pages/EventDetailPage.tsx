@@ -2,6 +2,8 @@ import { useEffect, useState } from 'react'
 import { useParams, Link, useNavigate } from 'react-router'
 import { getPublicEventDetail } from '../api/event-api'
 import type { PublicEventDetailResponse } from '../types/event'
+import { utcDate } from '../booking-display'
+import { customerEventState, ticketSalesLabels } from '../event-sales'
 // import { useAuth } from '../../auth/hooks/useAuth'
 import { EventCard } from '../components/EventCard'
 import { CustomerHeader } from '../components/CustomerHeader'
@@ -13,6 +15,7 @@ export function EventDetailPage() {
   // const { user } = useAuth()
   const [event, setEvent] = useState<PublicEventDetailResponse | null>(null)
   const [loading, setLoading] = useState(true)
+  const [error, setError] = useState('')
 
   // Tạm thời comment ghi nhận dwell time vì hệ thống AI đang bảo trì sửa chữa
   /*
@@ -34,19 +37,23 @@ export function EventDetailPage() {
   */
 
   useEffect(() => {
+    let active = true
     async function fetchEvent() {
       if (!eventId) return
       setLoading(true)
+      setError('')
+      setEvent(null)
       try {
         const data = await getPublicEventDetail(Number(eventId))
-        setEvent(data)
-      } catch (error) {
-        console.error('Lỗi khi tải chi tiết sự kiện:', error)
+        if (active) setEvent(data)
+      } catch {
+        if (active) setError('Không thể tải thông tin sự kiện. Vui lòng thử lại sau.')
       } finally {
-        setLoading(false)
+        if (active) setLoading(false)
       }
     }
-    fetchEvent()
+    void fetchEvent()
+    return () => { active = false }
   }, [eventId])
 
   if (loading) {
@@ -61,37 +68,40 @@ export function EventDetailPage() {
   if (!event) {
     return (
       <div className={styles.loadingWrapper}>
-        <p>Không tìm thấy sự kiện.</p>
+        <p role="alert">{error || 'Không tìm thấy sự kiện.'}</p>
         <Link to="/" className={styles.buyButton} style={{ width: 'auto', padding: '0 24px' }}>Về trang chủ</Link>
       </div>
     )
   }
 
-  const startDate = new Date(event.startTime)
-  const endDate = new Date(event.endTime)
+  const state = customerEventState(event)
+  const ticketTypes = event.ticketTypes || []
+  const startDate = utcDate(event.startTime)
+  const endDate = utcDate(event.endTime)
+  const timeZone = 'Asia/Ho_Chi_Minh'
 
-  const monthText = `Tháng ${startDate.getMonth() + 1}`
-  const dayText = startDate.getDate().toString().padStart(2, '0')
-  const yearText = startDate.getFullYear().toString()
+  const monthText = `Tháng ${startDate.toLocaleDateString('vi-VN', { month: 'numeric', timeZone })}`
+  const dayText = startDate.toLocaleDateString('vi-VN', { day: '2-digit', timeZone })
+  const yearText = startDate.toLocaleDateString('vi-VN', { year: 'numeric', timeZone })
 
   const formattedStartTime = startDate.toLocaleTimeString('vi-VN', {
     hour: '2-digit',
-    minute: '2-digit'
+    minute: '2-digit', timeZone
   }) + ' • ' + startDate.toLocaleDateString('vi-VN', {
     weekday: 'short',
     day: '2-digit',
     month: '2-digit',
-    year: 'numeric'
+    year: 'numeric', timeZone
   })
 
   const formattedEndTime = endDate.toLocaleTimeString('vi-VN', {
     hour: '2-digit',
-    minute: '2-digit'
+    minute: '2-digit', timeZone
   }) + ' • ' + endDate.toLocaleDateString('vi-VN', {
     weekday: 'short',
     day: '2-digit',
     month: '2-digit',
-    year: 'numeric'
+    year: 'numeric', timeZone
   })
 
   const formattedPrice = event.startingPrice 
@@ -99,7 +109,7 @@ export function EventDetailPage() {
     : 'Miễn phí'
 
   const handleBookTicket = () => {
-    navigate(`/customer/events/${event.id}/book`)
+    if (state.canBook) navigate(`/customer/events/${event.id}/book`)
   }
 
   return (
@@ -142,7 +152,7 @@ export function EventDetailPage() {
                 {/* Status Badge */}
                 <div className={styles.statusBadge}>
                   <span className={styles.statusBadgeInner}>
-                    <span className={styles.pulseDot}></span> Đang mở bán
+                    {state.eventLabel}
                   </span>
                 </div>
               </div>
@@ -223,42 +233,8 @@ export function EventDetailPage() {
                   Giới thiệu sự kiện
                 </h2>
                 <div className={styles.descriptionText}>
-                  {event.description ? <p>{event.description}</p> : <p>Sự kiện hứa hẹn mang đến những trải nghiệm âm nhạc và nghệ thuật tuyệt vời nhất. Thông tin chi tiết đang được cập nhật thêm.</p>}
+                  <p>{event.description}</p>
                 </div>
-                
-                {/* Fast Specs Badges Bento Grid */}
-                <div className={styles.bentoGrid}>
-                  <div className={styles.bentoItem}>
-                    <span className="material-symbols-outlined text-[24px] text-[#006d3d]">graphic_eq</span>
-                    <span className={styles.bentoTitle}>Âm thanh chuẩn Arena</span>
-                    <span className={styles.bentoDesc}>Hệ thống L-Acoustics & Visual 3D đỉnh cao</span>
-                  </div>
-                  <div className={styles.bentoItem}>
-                    <span className="material-symbols-outlined text-[24px] text-[#006591]">card_giftcard</span>
-                    <span className={styles.bentoTitle}>Quà tặng Check-in</span>
-                    <span className={styles.bentoDesc}>Vòng tay LED đồng bộ + Lightstick VIP</span>
-                  </div>
-                  <div className={styles.bentoItem}>
-                    <span className="material-symbols-outlined text-[24px] text-[#006c49]">verified_user</span>
-                    <span className={styles.bentoTitle}>Quy chuẩn 16+</span>
-                    <span className={styles.bentoDesc}>Không gian văn minh, kiểm soát an ninh tối đa</span>
-                  </div>
-                </div>
-
-                {/* Line-up nghệ sĩ teaser */}
-                {event.lineup && event.lineup.length > 0 && (
-                  <div className={styles.lineupSection}>
-                    <h3 className={styles.lineupHeader}>
-                      <span className="material-symbols-outlined text-[#006d3d] text-[18px]">groups</span>
-                      Dàn nghệ sĩ & Khách mời tham gia
-                    </h3>
-                    <div className={styles.lineupList}>
-                      {event.lineup.map((artist, index) => (
-                        <span key={index} className={styles.lineupItem}>{artist}</span>
-                      ))}
-                    </div>
-                  </div>
-                )}
               </div>
 
               {/* Sơ đồ tham khảo (Floor Map) */}
@@ -287,22 +263,9 @@ export function EventDetailPage() {
                   
                   {/* Floor Legend */}
                   <div className={styles.legendContainer}>
-                    <div className={styles.legendItem}>
-                      <span className={styles.colorBoxVIP}></span>
-                      <span>VIP Fanzone (1.200k)</span>
-                    </div>
-                    <div className={styles.legendItem}>
-                      <span className={styles.colorBoxA}></span>
-                      <span>Khán Đài A (650k)</span>
-                    </div>
-                    <div className={styles.legendItem}>
-                      <span className={styles.colorBoxGA}></span>
-                      <span>Early Bird GA (350k)</span>
-                    </div>
-                    <div className={styles.legendItemGray}>
-                      <span className="material-symbols-outlined text-[16px]">meeting_room</span>
-                      <span>Cổng soát vé A & B</span>
-                    </div>
+                    {ticketTypes.map(type => <div key={type.id} className={styles.legendItem}>
+                      <span>{type.name} ({new Intl.NumberFormat('vi-VN').format(type.price)} VNĐ)</span>
+                    </div>)}
                   </div>
                 </div>
               )}
@@ -319,45 +282,32 @@ export function EventDetailPage() {
                     <span className={styles.bookingSubtitle}>Đứng & ngồi tự do theo phân khu</span>
                   </div>
                   <span className={styles.statusBadgeSmall}>
-                    <span className={styles.pulseDotAlt}></span> Đang mở bán
+                    {state.canBook && <span className={styles.pulseDotAlt}></span>}{state.salesLabel}
                   </span>
                 </div>
 
                 {/* TICKET CARDS LIST */}
                 <div className={styles.ticketList}>
-                  <div className={styles.ticketCard}>
+                  {ticketTypes.map(type => <div key={type.id} className={styles.ticketCard}>
                     <div className={styles.ticketCardHeader}>
                       <div className={styles.ticketCardInfo}>
                         <div className={styles.ticketCardTitleWrapper}>
-                          <span className={styles.ticketTagVIP}>VIP</span>
-                          <h4 className={styles.ticketName}>VIP Fanzone</h4>
+                          <h4 className={styles.ticketName}>{type.name}</h4>
                         </div>
-                        <span className={styles.ticketPrice}>{formattedPrice}</span>
+                        <span className={styles.ticketPrice}>{type.price === 0 ? 'Miễn phí' : `${new Intl.NumberFormat('vi-VN').format(type.price)} VNĐ`}</span>
                       </div>
-                      <span className={styles.ticketRemaining}>Còn vé</span>
+                      <span className={styles.ticketRemaining}>{type.salesStatus === 'ON_SALE' && state.canBook ? `Còn ${type.remainingQuantity} vé` : state.salesLabel === 'Đã đóng bán' ? state.salesLabel : ticketSalesLabels[type.salesStatus]}</span>
                     </div>
-                    <p className={styles.ticketDesc}>Vị trí đẹp nhất, check-in ưu tiên riêng biệt, tặng kèm phần quà đặc biệt.</p>
-                  </div>
-                  
-                  <div className={styles.ticketCard}>
-                    <div className={styles.ticketCardHeader}>
-                      <div className={styles.ticketCardInfo}>
-                        <div className={styles.ticketCardTitleWrapper}>
-                          <span className={styles.ticketTagGA}>GA</span>
-                          <h4 className={styles.ticketName}>Vé Tiêu Chuẩn</h4>
-                        </div>
-                        <span className={styles.ticketPrice}>Theo hạng vé</span>
-                      </div>
-                      <span className={styles.ticketRemaining}>Còn vé</span>
-                    </div>
-                    <p className={styles.ticketDesc}>Khu vực vé đứng/ngồi phổ thông, tầm nhìn toàn cảnh sân khấu.</p>
-                  </div>
+                    {type.description && <p className={styles.ticketDesc}>{type.description}</p>}
+                    {type.salesStatus === 'NOT_ON_SALE' && <p className={styles.ticketDesc}>Mở bán: {utcDate(type.saleStartTime).toLocaleString('vi-VN', { timeZone })}</p>}
+                  </div>)}
+                  {ticketTypes.length === 0 && <p className={styles.ticketDesc}>Chưa có thông tin loại vé.</p>}
                 </div>
 
                 {/* Main Purchase Action Button */}
-                <button className={styles.buyButton} onClick={handleBookTicket} type="button">
-                  <span>Đặt vé ngay</span>
-                  <span className="material-symbols-outlined text-[20px]">arrow_forward</span>
+                <button className={styles.buyButton} onClick={handleBookTicket} type="button" disabled={!state.canBook}>
+                  <span>{state.actionLabel}</span>
+                  <span className="material-symbols-outlined text-[20px]" aria-hidden="true">arrow_forward</span>
                 </button>
 
                 {/* Security Badges & Guarantees */}
@@ -373,17 +323,6 @@ export function EventDetailPage() {
                 </div>
               </div>
 
-              {/* Hotline support card */}
-              <div className={styles.supportBox}>
-                <div className={styles.supportBoxInner}>
-                  <span className="material-symbols-outlined text-[#006d3d] text-[24px]">headset_mic</span>
-                  <div className={styles.supportText}>
-                    <span className={styles.supportTitle}>Hỗ trợ đặt vé sự kiện</span>
-                    <span className={styles.supportDesc}>Hotline 1900 6408 (Nhánh 1)</span>
-                  </div>
-                </div>
-                <span className="material-symbols-outlined text-[#6d7b6f]">chevron_right</span>
-              </div>
             </aside>
           </div>
         </div>

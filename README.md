@@ -1,6 +1,14 @@
 # EventHub Frontend — Tài Liệu Kiến Trúc & Hướng Dẫn Phát Triển
 
-Dự án Frontend được xây dựng bằng **React 19 + Vite + TypeScript**, áp dụng kiến trúc **Feature-driven (hướng phân hệ và tính năng)** kết hợp với phân quyền người dùng **RBAC (Role-Based Access Control)** và cơ chế bảo mật xác thực qua **HttpOnly Cookie**. Đã triển khai đăng ký, đăng nhập; thông tin cá nhân và đổi mật khẩu; Organizer tạo sự kiện theo ba bước, xem danh sách/chi tiết, sửa và gửi yêu cầu hủy, kết nối API của `eventhub-backend`.
+Dự án Frontend được xây dựng bằng **React 19 + Vite + TypeScript**, áp dụng kiến trúc **Feature-driven (hướng phân hệ và tính năng)** kết hợp với phân quyền người dùng **RBAC (Role-Based Access Control)** và cơ chế bảo mật xác thực qua **HttpOnly Cookie**. Đã triển khai đăng ký, đăng nhập; thông tin cá nhân và đổi mật khẩu; Organizer tạo sự kiện theo ba bước, xem danh sách/chi tiết, sửa và hủy trước giờ bắt đầu, kết nối API của `eventhub-backend`.
+
+## Khám phá và trạng thái bán vé
+
+- `/customer/explore` có 12 sự kiện mỗi trang. `page` bắt đầu từ 0 trên URL, giữ các bộ lọc khi chuyển trang và hỗ trợ Back/Forward; áp dụng/xóa bộ lọc hoặc tìm kiếm mới sẽ về trang đầu.
+- Thẻ và chi tiết sự kiện dùng `status` cùng `salesStatus` từ API. Phân biệt sự kiện sắp diễn ra/đang diễn ra/đã kết thúc với vé chưa mở bán/đang mở bán/hết vé/đã đóng bán/tạm ngừng bán. Danh sách loại vé, giá và số còn lại lấy từ dữ liệu thật; chỉ mở nút đặt vé khi được bán.
+- Thời gian public hiển thị theo GMT+7. Logo EventHub dẫn về trang chính theo role đang đăng nhập: Organizer `/organizer`, Admin `/admin` (chuyển tới `/admin/events/pending`), Staff `/staff`, Customer và khách chưa đăng nhập `/customer`; áp dụng cả khi đang xem trang Customer bằng role khác.
+- Hủy sự kiện dừng bán/phát hành, vô hiệu vé chưa dùng và giải phóng booking đang giữ; thao tác hủy chưa tạo hồ sơ hoàn tiền.
+- Kiểm thử các luồng này: `$env:PLAYWRIGHT_CHANNEL='msedge'; npm.cmd run test:e2e -- tests/public-events.spec.ts`.
 
 ## Tài chính Admin UC37–UC42
 
@@ -61,7 +69,7 @@ npm run dev
 | `/organizer/events/new/category` | Bước 2: danh mục từ DB và khách mời (tùy chọn). |
 | `/organizer/events/new/tickets` | Bước 3: thêm/sửa/xóa/nhân bản loại vé, kiểm tra hồ sơ và gửi duyệt. |
 | `/organizer/events` | Danh sách từ API: tìm theo tên, lọc trạng thái và phân trang. |
-| `/organizer/events/:eventId` | Chi tiết, địa điểm, ảnh, khách mời, số vé phát hành/đã bán/giữ chỗ/còn lại; sửa hoặc yêu cầu hủy khi được phép; tab Quản lý nhân viên soát vé (UC 21 & UC 22). |
+| `/organizer/events/:eventId` | Chi tiết, địa điểm, ảnh, khách mời, số vé phát hành/đã bán/giữ chỗ/còn lại; sửa hoặc hủy trước giờ bắt đầu khi được phép; tab Quản lý nhân viên soát vé (UC 21 & UC 22). |
 | `/organizer/events/:eventId/edit/:step` | Dùng lại form tạo với `details`, `category`, `tickets`; tải hồ sơ hiện tại, sửa và gửi duyệt lại. |
 | `/organizer/staffs` | Phân công & điều phối nhân viên soát vé cho các sự kiện (UC 21 & UC 22). |
 | `/organizer/wallet` | Doanh thu & quản lý số dư ví, tạo yêu cầu rút tiền, xem lịch sử và hủy yêu cầu (UC 24, 25, 26, 27). |
@@ -115,7 +123,7 @@ Dự án tổ chức mã nguồn theo từng **phân hệ người dùng / tính
 
 ---
 
-### Xem, sửa và yêu cầu hủy sự kiện
+### Xem, sửa và hủy sự kiện
 
 - Sidebar “Sự kiện của tôi” mở danh sách riêng qua `GET /api/events/mine`. Bộ lọc, tên tìm kiếm và trang nằm trong URL để tải lại hoặc Back/Forward; có trạng thái đang tải, lỗi/thử lại và danh sách rỗng. Các thẻ tổng số/trạng thái dùng dữ liệu API. Bố cục nền sáng, thẻ trắng, điểm nhấn xanh theo mẫu; chỉ hiển thị các phần có dữ liệu backend.
 - Chi tiết lấy `GET /api/events/:id`, hiển thị hồ sơ và loại vé/khách mời thật. Số vé đã bán loại trừ số giữ chỗ. API chỉ trả sự kiện thuộc tài khoản; FE không nhận Organizer ID từ URL để thay đổi quyền sở hữu.
