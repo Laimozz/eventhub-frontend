@@ -1,11 +1,12 @@
 import { useEffect, useRef, useState } from 'react';
-import { Link, useNavigate, useSearchParams } from 'react-router';
+import { Link, useNavigate } from 'react-router';
 import { useAuth } from '../../auth/hooks/useAuth';
 import { getRoleHomePath } from '../../auth/role-home';
 import type { UserDetailDto } from '../types/user';
 import styles from './CustomerHeader.module.css';
 import { NotificationBell } from '../../notifications/components/NotificationBell';
 import { authErrorMessage } from '../../auth/api/auth-errors';
+import { SearchAutocomplete } from './SearchAutocomplete';
 
 interface CustomerHeaderProps {
   user?: UserDetailDto | null;
@@ -15,7 +16,6 @@ interface CustomerHeaderProps {
 export function CustomerHeader({ user: propUser, onSelectMode }: CustomerHeaderProps = {}) {
   const { signOut, user: authUser } = useAuth();
   const navigate = useNavigate();
-  const [searchParams] = useSearchParams();
 
   const user = propUser !== undefined ? propUser : (authUser as UserDetailDto | null);
 
@@ -91,28 +91,7 @@ export function CustomerHeader({ user: propUser, onSelectMode }: CustomerHeaderP
             </nav>
           </div>
 
-          <div className={styles.headerSearch}>
-            <span className={`material-symbols-outlined ${styles.searchIcon}`}>search</span>
-            <input
-              type="text"
-              placeholder="Tìm kiếm sự kiện, nghệ sĩ, địa điểm..."
-              className={styles.searchInput}
-              defaultValue={searchParams.get('search') || ''}
-              onKeyDown={(e) => {
-                if (e.key === 'Enter') {
-                  const val = e.currentTarget.value.trim()
-                  const params = new URLSearchParams(searchParams)
-                  params.delete('page')
-                  if (val) {
-                    params.set('search', val)
-                  } else {
-                    params.delete('search')
-                  }
-                  navigate(`/customer/explore?${params.toString()}`)
-                }
-              }}
-            />
-          </div>
+          <SearchAutocomplete />
 
           <div className={styles.headerActions}>
             {user ? (

@@ -289,6 +289,76 @@ export function OrganizerWalletPage() {
 
   const eventList = revenue?.events ?? revenue?.eventRevenues ?? []
 
+  // UC 24 & 26: Export financial statement to CSV using real data
+  function handleExportFinancialReport() {
+    if (!wallet && eventList.length === 0 && withdrawals.length === 0) {
+      showToast('Chưa có dữ liệu tài chính để xuất báo cáo.')
+      return
+    }
+
+    const lines: string[] = []
+    lines.push('BÁO CÁO TÀI CHÍNH & LỊCH SỬ RÚT TIỀN - EVENTHUB')
+    lines.push(`Ban tổ chức:,"${(user?.fullName || user?.email || 'Organizer').replace(/"/g, '""')}"`)
+    lines.push(`Thời gian xuất báo cáo:,"${new Date().toLocaleString('vi-VN')}"`)
+    lines.push('')
+    lines.push('TỔNG QUAN VÍ DOANH NGHIỆP')
+    lines.push(`Số dư khả dụng:,"${wallet?.formattedAvailableBalance || '0 đ'}"`)
+    lines.push(`Số dư chờ xác nhận:,"${wallet?.formattedPendingBalance || '0 đ'}"`)
+    lines.push(`Số dư đang chờ rút:,"${wallet?.formattedWithdrawalPendingBalance || '0 đ'}"`)
+    lines.push(`Tổng tiền đã rút:,"${wallet?.formattedTotalWithdrawn || '0 đ'}"`)
+    lines.push('')
+
+    lines.push('CHI TIẾT DOANH THU THEO TỪNG SỰ KIỆN')
+    lines.push('Mã sự kiện,Tên sự kiện,Số vé đã bán,Tổng doanh thu (VNĐ),Phí sàn 5% (VNĐ),Thực nhận 95% (VNĐ)')
+    if (eventList.length === 0) {
+      lines.push('Chưa có sự kiện nào phát sinh doanh thu,,,,,,')
+    } else {
+      eventList.forEach((evt) => {
+        const gross = Number(evt.revenue ?? evt.totalRevenue ?? 0)
+        const sold = Number(evt.soldTickets ?? evt.totalTicketsSold ?? 0)
+        const fee = Math.round(gross * 0.05)
+        const net = gross - fee
+        lines.push(
+          `"#EVT-${evt.eventId}","${(evt.eventName || '').replace(/"/g, '""')}",${sold},${gross},${fee},${net}`
+        )
+      })
+    }
+    lines.push('')
+
+    lines.push('CHI TIẾT LỊCH SỬ YÊU CẦU RÚT TIỀN')
+    lines.push('Mã yêu cầu,Thời gian tạo,Số tiền (VNĐ),Ngân hàng,Số tài khoản,Trạng thái,Mã giao dịch đối soát,Lý do từ chối,Thời gian xử lý')
+    const withdrawList = allWithdrawals.length > 0 ? allWithdrawals : withdrawals
+    if (withdrawList.length === 0) {
+      lines.push('Chưa có yêu cầu rút tiền nào,,,,,,,,')
+    } else {
+      withdrawList.forEach((w) => {
+        const statusMap: Record<string, string> = {
+          PENDING: 'Chờ duyệt',
+          APPROVED: 'Đã duyệt & Chi',
+          REJECTED: 'Bị từ chối',
+          CANCELLED: 'Đã hủy',
+          CANCELED: 'Đã hủy',
+        }
+        const st = statusMap[w.status?.toUpperCase()] || w.status || 'Chờ duyệt'
+        lines.push(
+          `"#WTH-${w.id}","${w.requestedAt || '—'}",${w.amount},"${(w.bankName || '').replace(/"/g, '""')}","\t${w.accountNumber || ''}","${st}","${w.transactionCode || '—'}","${(w.rejectReason || '').replace(/"/g, '""')}","${w.processedAt || '—'}"`
+        )
+      })
+    }
+
+    const csvContent = '\uFEFF' + lines.join('\r\n')
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' })
+    const url = URL.createObjectURL(blob)
+    const a = document.createElement('a')
+    a.href = url
+    a.download = `Bao_cao_tai_chinh_EventHub_${new Date().toISOString().slice(0, 10)}.csv`
+    document.body.appendChild(a)
+    a.click()
+    document.body.removeChild(a)
+    URL.revokeObjectURL(url)
+    showToast('Xuất báo cáo tài chính thành công!')
+  }
+
   // Filter withdrawals by search query
   const filteredWithdrawals = withdrawals.filter((item) => {
     if (!searchQuery.trim()) return true
@@ -338,7 +408,7 @@ export function OrganizerWalletPage() {
           <button
             type="button"
             className={styles.btnExportExcel}
-            onClick={() => showToast('Đang tạo báo cáo tài chính... Báo cáo đang được tải về máy.')}
+            onClick={handleExportFinancialReport}
           >
             <Download size={18} />
             <span>Xuất báo cáo tài chính</span>
@@ -671,7 +741,7 @@ export function OrganizerWalletPage() {
                     {selectedWithdrawal.formattedAmount}
                   </div>
                   <div style={{ fontSize: '11px', color: '#718079', marginTop: '4px' }}>
-                    Phí rút tiền cố định: 0 đ (Miễn phí qua ngân hàng liên kết)
+                    Phí rút tiền: 0 đ (Miễn phí qua hệ thống liên ngân hàng Napas 24/7)
                   </div>
                 </div>
 
@@ -746,7 +816,9 @@ export function OrganizerWalletPage() {
                       <div className={styles.stepTextTitle}>Chuyển khoản liên ngân hàng Napas 24/7</div>
                       <div className={styles.stepTextDesc}>
                         {selectedWithdrawal.status === 'APPROVED'
-                          ? `Mã giao dịch: ${selectedWithdrawal.transactionCode || 'Napas-Auto'}`
+                          ? selectedWithdrawal.transactionCode
+                            ? `Mã giao dịch: ${selectedWithdrawal.transactionCode}`
+                            : 'Đã duyệt chi qua Napas 24/7 (Đang cập nhật mã GD)'
                           : 'Thực hiện tự động sau khi được phê duyệt'}
                       </div>
                     </div>
@@ -771,16 +843,16 @@ export function OrganizerWalletPage() {
                   <div className={styles.beneficiaryRow}>
                     <span className={styles.beneficiaryLabel}>Chủ tài khoản:</span>
                     <span className={styles.beneficiaryVal}>
-                      {user?.fullName || 'BAN TỔ CHỨC'}
+                      {user?.fullName || 'Chưa cập nhật'}
                     </span>
                   </div>
                   <div className={styles.beneficiaryRow}>
-                    <span className={styles.beneficiaryLabel}>Mã đối soát tự động:</span>
+                    <span className={styles.beneficiaryLabel}>Mã giao dịch / đối soát:</span>
                     <span
                       className={styles.beneficiaryVal}
                       style={{ fontFamily: 'monospace', color: '#006d3d' }}
                     >
-                      {selectedWithdrawal.transactionCode || `TXN-WTH-${selectedWithdrawal.id}`}
+                      {selectedWithdrawal.transactionCode || 'Chưa phát sinh'}
                     </span>
                   </div>
                   {selectedWithdrawal.rejectReason && (
@@ -872,7 +944,7 @@ export function OrganizerWalletPage() {
                   {selectedWithdrawal.formattedAmount}
                 </div>
                 <div style={{ fontSize: '11px', color: '#718079', marginTop: '4px' }}>
-                  Phí rút tiền cố định: 0 đ (Miễn phí qua ngân hàng liên kết)
+                  Phí rút tiền: 0 đ (Miễn phí qua hệ thống liên ngân hàng Napas 24/7)
                 </div>
               </div>
 
@@ -947,7 +1019,9 @@ export function OrganizerWalletPage() {
                     <div className={styles.stepTextTitle}>Chuyển khoản liên ngân hàng Napas 24/7</div>
                     <div className={styles.stepTextDesc}>
                       {selectedWithdrawal.status === 'APPROVED'
-                        ? `Mã giao dịch: ${selectedWithdrawal.transactionCode || 'Napas-Auto'}`
+                        ? selectedWithdrawal.transactionCode
+                          ? `Mã giao dịch: ${selectedWithdrawal.transactionCode}`
+                          : 'Đã duyệt chi qua Napas 24/7 (Đang cập nhật mã GD)'
                         : 'Thực hiện tự động sau khi được phê duyệt'}
                     </div>
                   </div>
@@ -972,16 +1046,16 @@ export function OrganizerWalletPage() {
                 <div className={styles.beneficiaryRow}>
                   <span className={styles.beneficiaryLabel}>Chủ tài khoản:</span>
                   <span className={styles.beneficiaryVal}>
-                    {user?.fullName || 'BAN TỔ CHỨC'}
+                    {user?.fullName || 'Chưa cập nhật'}
                   </span>
                 </div>
                 <div className={styles.beneficiaryRow}>
-                  <span className={styles.beneficiaryLabel}>Mã đối soát tự động:</span>
+                  <span className={styles.beneficiaryLabel}>Mã giao dịch / đối soát:</span>
                   <span
                     className={styles.beneficiaryVal}
                     style={{ fontFamily: 'monospace', color: '#006d3d' }}
                   >
-                    {selectedWithdrawal.transactionCode || `TXN-WTH-${selectedWithdrawal.id}`}
+                    {selectedWithdrawal.transactionCode || 'Chưa phát sinh'}
                   </span>
                 </div>
                 {selectedWithdrawal.rejectReason && (
@@ -1112,7 +1186,7 @@ export function OrganizerWalletPage() {
                     onChange={(e) => setWithdrawAmount(e.target.value)}
                   />
                   <small style={{ fontSize: '11px', color: '#718079' }}>
-                    Tối thiểu: 100.000 đ.
+                    Số tiền rút phải lớn hơn 0 đ và không vượt quá số dư khả dụng thực tế.
                   </small>
                 </div>
 

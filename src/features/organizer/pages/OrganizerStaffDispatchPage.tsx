@@ -3,24 +3,16 @@ import { Link } from 'react-router'
 import {
   AlertCircle,
   ArrowRight,
-  BookOpen,
   Calendar,
   CheckCircle2,
   ChevronRight,
-  DoorOpen,
-  Download,
-  HelpCircle,
   Home,
   MapPin,
-  Monitor,
   QrCode,
   Search,
   ShieldCheck,
-  Smartphone,
   Ticket,
   Users,
-  WifiOff,
-  Zap,
 } from 'lucide-react'
 import { getOrganizerEvents } from '../../events/api/event-api'
 import { getStaffDispatchAllocations, getStaffDispatchSummary } from '../api/organizer-api'
@@ -73,7 +65,6 @@ export function OrganizerStaffDispatchPage() {
     return () => controller.abort()
   }, [search])
 
-
   const filteredEvents = events.filter((ev) => {
     if (statusFilter === 'ALL') return true
     if (statusFilter === 'TODAY') {
@@ -109,33 +100,10 @@ export function OrganizerStaffDispatchPage() {
           <div>
             <div className={styles.titleBadgeRow}>
               <h1 className={styles.pageTitle}>Phân công &amp; Điều phối nhân viên soát vé</h1>
-              <span className={styles.liveSyncBadge}>
-                <span className={styles.pulseDot} />
-                Live Scanner Sync
-              </span>
             </div>
             <p className={styles.pageSubtitle}>
-              Chọn sự kiện để phân bổ nhân sự trực cổng, cấp tài khoản quyền quét cho máy POS/App TicketBox Staff và giám sát tiến độ check-in theo thời gian thực.
+              Theo dõi tình hình phân bổ nhân viên soát vé cho từng sự kiện và thực hiện phân công nhân sự.
             </p>
-          </div>
-
-          <div className={styles.topActions}>
-            <button
-              type="button"
-              className={styles.btnTopAction}
-              onClick={() => alert('Đang xuất danh sách ca trực nhân sự...')}
-            >
-              <Download size={18} />
-              <span>Xuất danh sách ca trực</span>
-            </button>
-            <button
-              type="button"
-              className={styles.btnTopSecondary}
-              onClick={() => alert('Mở bảng cấu hình cổng và thiết bị POS.')}
-            >
-              <Monitor size={18} />
-              <span>Cài đặt máy POS</span>
-            </button>
           </div>
         </div>
       </div>
@@ -167,9 +135,7 @@ export function OrganizerStaffDispatchPage() {
             <p className={styles.kpiLabel}>Tổng nhân viên đã phân</p>
             <div className={styles.kpiValRow}>
               <span className={styles.kpiNumber}>{summary?.totalAssignedStaff ?? 0}</span>
-              <span className={styles.kpiMutedUnit}>
-                {summary ? `/ ${summary.totalAssignedStaff + 4} nhân sự` : 'nhân sự'}
-              </span>
+              <span className={styles.kpiUnit}>nhân sự</span>
             </div>
             <p className={`${styles.kpiSub} ${styles.textWarning}`}>
               <AlertCircle size={14} />
@@ -184,17 +150,15 @@ export function OrganizerStaffDispatchPage() {
         {/* Metric 3 */}
         <div className={styles.kpiCard}>
           <div className={styles.kpiContent}>
-            <p className={styles.kpiLabel}>Cửa soát vé đang mở</p>
+            <p className={styles.kpiLabel}>Nhân viên đang kích hoạt</p>
             <div className={styles.kpiValRow}>
-              <span className={styles.kpiNumber}>
-                {summary ? Math.max(1, Math.min(12, Number(summary.totalAssignedStaff))) : 0}
-              </span>
-              <span className={styles.kpiUnit}>làn kiểm soát</span>
+              <span className={styles.kpiNumber}>{summary?.activeStaff ?? 0}</span>
+              <span className={styles.kpiUnit}>nhân sự</span>
             </div>
-            <p className={styles.kpiSub}>Khu VIP, GA, CSKH &amp; Khán đài</p>
+            <p className={styles.kpiSub}>Sẵn sàng làm nhiệm vụ quét vé</p>
           </div>
           <div className={`${styles.kpiIconBox} ${styles.iconTeal}`}>
-            <DoorOpen size={26} />
+            <CheckCircle2 size={26} />
           </div>
         </div>
 
@@ -221,7 +185,6 @@ export function OrganizerStaffDispatchPage() {
         </div>
       </div>
 
-
       {/* 3. Toolbar: Search & Filter Tabs */}
       <div className={styles.toolbarCard}>
         <div className={styles.toolbarFlex}>
@@ -237,7 +200,7 @@ export function OrganizerStaffDispatchPage() {
             />
           </div>
 
-          {/* Filters & Actions */}
+          {/* Filters */}
           <div className={styles.filterActions}>
             <div className={styles.tabPillGroup}>
               <button
@@ -252,40 +215,23 @@ export function OrganizerStaffDispatchPage() {
                 className={statusFilter === 'TODAY' ? styles.tabBtnActive : styles.tabBtn}
                 onClick={() => setStatusFilter('TODAY')}
               >
-                Hôm nay (1)
+                Hôm nay ({events.filter((e) => e.startTime?.startsWith(todayIso)).length})
               </button>
               <button
                 type="button"
                 className={statusFilter === 'UPCOMING' ? styles.tabBtnActive : styles.tabBtn}
                 onClick={() => setStatusFilter('UPCOMING')}
               >
-                Sắp diễn ra ({events.filter((e) => e.status === 'APPROVED').length || 2})
+                Sắp diễn ra ({events.filter((e) => e.status === 'APPROVED' || e.status === 'PENDING_APPROVAL').length})
               </button>
               <button
                 type="button"
                 className={statusFilter === 'COMPLETED' ? styles.tabBtnActive : styles.tabBtn}
                 onClick={() => setStatusFilter('COMPLETED')}
               >
-                Đã xong (1)
+                Đã xong ({events.filter((e) => e.status === 'COMPLETED' || e.status === 'CANCELED').length})
               </button>
             </div>
-
-            <button
-              type="button"
-              className={styles.btnStatusSelect}
-              onClick={() => alert('Lọc trạng thái phân công nhân sự')}
-            >
-              <Users size={16} />
-              <span>Tình trạng: <b>Tất cả trạng thái</b></span>
-            </button>
-
-            <a
-              href="#guide-banner"
-              className={styles.linkDoc}
-            >
-              <BookOpen size={16} />
-              <span className={styles.docText}>Tài liệu Staff App</span>
-            </a>
           </div>
         </div>
       </div>
@@ -314,7 +260,6 @@ export function OrganizerStaffDispatchPage() {
             const staffNames = alloc?.staffNames || ''
             const isFinished = event.status === 'COMPLETED' || event.status === 'CANCELED'
             const isNeedStaff = !isFinished && assignedCount === 0
-            const isFullyStaffed = !isFinished && assignedCount >= 4
 
             return (
               <div
@@ -328,9 +273,7 @@ export function OrganizerStaffDispatchPage() {
                       ? styles.topLineGray
                       : isNeedStaff
                       ? styles.topLineCoral
-                      : isFullyStaffed
-                      ? styles.topLinePrimary
-                      : styles.topLineGradient
+                      : styles.topLinePrimary
                   }
                 />
 
@@ -348,21 +291,16 @@ export function OrganizerStaffDispatchPage() {
                           <Calendar size={13} />
                           CHƯA CÓ NHÂN SỰ
                         </span>
-                      ) : isFullyStaffed ? (
-                        <span className={styles.badgeSelling}>
-                          <Calendar size={13} />
-                          ĐÃ ĐỦ NHÂN SỰ
-                        </span>
                       ) : (
-                        <span className={styles.badgeLive}>
-                          <span className={styles.coralPulse} />
-                          ĐANG ĐIỀU PHỐI
+                        <span className={styles.badgeSelling}>
+                          <CheckCircle2 size={13} />
+                          ĐÃ PHÂN CÔNG
                         </span>
                       )}
                       <span className={styles.eventCode}>#EVT-{event.id}</span>
                     </div>
 
-                    {/* Staff Allocation Warning/Status Badge */}
+                    {/* Staff Allocation Status Badge */}
                     {isFinished ? (
                       <span className={styles.staffBadgeMuted}>Hoàn tất ca: {assignedCount} Staff</span>
                     ) : isNeedStaff ? (
@@ -370,14 +308,9 @@ export function OrganizerStaffDispatchPage() {
                         <AlertCircle size={14} />
                         0 Staff đã phân công (Cần bố trí)
                       </span>
-                    ) : isFullyStaffed ? (
+                    ) : (
                       <span className={styles.staffBadgeSuccess}>
                         <CheckCircle2 size={14} />
-                        Đã đủ nhân sự: {assignedCount} Staff ({activeCount} sẵn sàng)
-                      </span>
-                    ) : (
-                      <span className={styles.staffBadgeWarning}>
-                        <Users size={14} />
                         Đã phân công: {assignedCount} Staff ({activeCount} sẵn sàng)
                       </span>
                     )}
@@ -424,7 +357,7 @@ export function OrganizerStaffDispatchPage() {
                     </div>
                   </div>
 
-                  {/* Gates & Staffing Distribution breakdown */}
+                  {/* Staffing breakdown */}
                   {isFinished ? (
                     <div className={styles.pastResultsBox}>
                       <div className={styles.gatesHeader}>
@@ -440,12 +373,17 @@ export function OrganizerStaffDispatchPage() {
                           Hoàn tất ✓
                         </span>
                       </div>
+                      {staffNames && (
+                        <div className={styles.staffAvatarsRow} style={{ marginTop: '8px' }}>
+                          <span className={styles.staffNames}>Nhân sự: {staffNames}</span>
+                        </div>
+                      )}
                     </div>
                   ) : isNeedStaff ? (
                     <div className={styles.calloutAlert}>
                       <AlertCircle size={20} className={styles.calloutIcon} />
                       <div>
-                        <h4 className={styles.calloutTitle}>Chưa chỉ định nhân sự điều phối và quét mã</h4>
+                        <h4 className={styles.calloutTitle}>Chưa chỉ định nhân sự soát vé</h4>
                         <p className={styles.calloutDesc}>
                           Sự kiện chưa có nhân viên soát vé. Nhấn "Bắt đầu phân công Staff" bên dưới để gán nhân viên vào sự kiện.
                         </p>
@@ -471,7 +409,7 @@ export function OrganizerStaffDispatchPage() {
                           <div className={`${styles.gateStaffVal} ${styles.textGreen}`}>
                             {activeCount} Staff
                           </div>
-                          <div className={styles.gateSub}>Đã active app</div>
+                          <div className={styles.gateSub}>Đang hoạt động</div>
                         </div>
                         <div className={styles.gateCol}>
                           <div className={styles.gateLabel}>Chờ kích hoạt</div>
@@ -498,28 +436,26 @@ export function OrganizerStaffDispatchPage() {
                   )}
                 </div>
 
-
                 {/* Card Footer Actions */}
                 <div className={styles.cardFooter}>
                   {isFinished ? (
                     <>
                       <span className={styles.footerLeftText}>
-                        Ca trực đã đóng hồ sơ kiểm toán
+                        Ca trực đã kết thúc
                       </span>
-                      <button
-                        type="button"
-                        className={styles.btnReportView}
-                        onClick={() => alert(`Xem báo cáo soát vé sự kiện: ${event.name}`)}
+                      <Link
+                        to={`/organizer/events/${event.id}?tab=staffs`}
+                        className={styles.btnManageStaff}
                       >
-                        <BookOpen size={18} />
-                        <span>Xem báo cáo soát vé</span>
-                      </button>
+                        <span>Xem nhân sự sự kiện</span>
+                        <ArrowRight size={18} />
+                      </Link>
                     </>
                   ) : isNeedStaff ? (
                     <>
                       <span className={styles.footerLeftText} style={{ color: '#ff4d4d' }}>
                         <AlertCircle size={15} />
-                        <span>Khuyến nghị phân công trước 48h</span>
+                        <span>Khuyến nghị phân công trước sự kiện</span>
                       </span>
                       <Link
                         to={`/organizer/events/${event.id}?tab=staffs`}
@@ -529,34 +465,11 @@ export function OrganizerStaffDispatchPage() {
                         <ArrowRight size={18} />
                       </Link>
                     </>
-                  ) : isFullyStaffed ? (
-                    <>
-                      <button
-                        type="button"
-                        className={styles.btnGateDiagram}
-                        onClick={() => alert(`Xem quy định soát vé cho sự kiện: ${event.name}`)}
-                      >
-                        <ShieldCheck size={18} />
-                        <span>Quy định soát vé</span>
-                      </button>
-                      <Link
-                        to={`/organizer/events/${event.id}?tab=staffs`}
-                        className={styles.btnManageStaff}
-                      >
-                        <span>Quản lý &amp; Phân công Staff</span>
-                        <ArrowRight size={18} />
-                      </Link>
-                    </>
                   ) : (
                     <>
-                      <button
-                        type="button"
-                        className={styles.btnGateDiagram}
-                        onClick={() => alert(`Sơ đồ 4 cổng vào cho sự kiện: ${event.name}`)}
-                      >
-                        <DoorOpen size={18} />
-                        <span>Sơ đồ cổng</span>
-                      </button>
+                      <span className={styles.footerLeftText}>
+                        {activeCount} / {assignedCount} nhân viên đang hoạt động
+                      </span>
                       <Link
                         to={`/organizer/events/${event.id}?tab=staffs`}
                         className={styles.btnManageStaff}
@@ -572,59 +485,6 @@ export function OrganizerStaffDispatchPage() {
           })}
         </div>
       )}
-
-      {/* 5. Onboarding & Staff App Workflow Guide Banner */}
-      <div id="guide-banner" className={styles.guideBanner}>
-        <div className={styles.guideLeft}>
-          <div className={styles.guideIconBox}>
-            <Smartphone size={32} />
-          </div>
-          <div className={styles.guideContent}>
-            <div className={styles.guideTitleRow}>
-              <h3 className={styles.guideTitle}>
-                Quy trình 3 bước chuẩn bị nhân viên soát vé tại cổng
-              </h3>
-              <span className={styles.guideBadge}>Cẩm nang BTC</span>
-            </div>
-            <p className={styles.guideDesc}>
-              1. Chọn sự kiện cần trực → 2. Nhập email/SĐT nhân sự và gán cổng (VIP/GA) → 3. Cấp mã PIN quét nhanh qua ứng dụng <b>TicketBox Staff Check-in Pro</b> trên iOS &amp; Android.
-            </p>
-            <div className={styles.guidePillRow}>
-              <span className={styles.guidePill}>
-                <WifiOff size={15} />
-                <span>Hỗ trợ quét Offline khi mất mạng</span>
-              </span>
-              <span className={styles.guidePill}>
-                <Zap size={15} />
-                <span>Đồng bộ dữ liệu tức thì</span>
-              </span>
-              <span className={styles.guidePill}>
-                <ShieldCheck size={15} />
-                <span>Mã hóa chống làm giả vé</span>
-              </span>
-            </div>
-          </div>
-        </div>
-
-        <div className={styles.guideActions}>
-          <button
-            type="button"
-            className={styles.btnDownloadApp}
-            onClick={() => alert('Đang chuyển hướng tải ứng dụng TicketBox Staff App...')}
-          >
-            <Smartphone size={18} />
-            <span>Tải TicketBox Staff App</span>
-          </button>
-          <button
-            type="button"
-            className={styles.btnHelpDoc}
-            onClick={() => alert('Mở tài liệu hướng dẫn vận hành thiết bị POS.')}
-          >
-            <HelpCircle size={18} />
-            <span>Xem HDSD máy POS</span>
-          </button>
-        </div>
-      </div>
     </div>
   )
 }

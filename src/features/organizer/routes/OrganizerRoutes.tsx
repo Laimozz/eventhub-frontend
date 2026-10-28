@@ -5,6 +5,8 @@ import { CreateEventPage } from '../../events/pages/CreateEventPage'
 import { OrganizerEventsPage } from '../../events/pages/OrganizerEventsPage'
 import { EventDetailPage } from '../../events/pages/EventDetailPage'
 import { EditEventPage } from '../../events/pages/EditEventPage'
+import { OrganizerReportsPage } from '../pages/OrganizerReportsPage'
+import { OrganizerBookingsPage } from '../pages/OrganizerBookingsPage'
 
 export function OrganizerRoutes() {
   return (
@@ -17,6 +19,8 @@ export function OrganizerRoutes() {
         <Route path="events/:eventId" element={<EventDetailPage />} />
         <Route path="events/:eventId/edit" element={<Navigate to="details" replace />} />
         <Route path="events/:eventId/edit/:step" element={<EditEventPage />} />
+        <Route path="bookings" element={<OrganizerBookingsPage />} />
+        <Route path="reports" element={<OrganizerReportsPage />} />
         <Route path="*" element={<Navigate to="" replace />} />
       </Route>
     </Routes>

@@ -119,10 +119,14 @@ export function OrganizerLayout() {
               <span>Sự kiện của tôi</span>
             </NavLink>
 
-            <button disabled title="Chức năng sẽ được triển khai sau" className={styles.disabledLink}>
+            <NavLink
+              to="/organizer/bookings"
+              className={({ isActive }) => (isActive ? styles.active : '')}
+              onClick={() => setMenuOpen(false)}
+            >
               <Receipt size={19} />
               <span>Quản lý Booking</span>
-            </button>
+            </NavLink>
 
             <NavLink
               to="/organizer/staffs"
@@ -133,10 +137,14 @@ export function OrganizerLayout() {
               <span>Nhân viên soát vé</span>
             </NavLink>
 
-            <button disabled title="Chức năng sẽ được triển khai sau" className={styles.disabledLink}>
+            <NavLink
+              to="/organizer/reports"
+              className={({ isActive }) => (isActive ? styles.active : '')}
+              onClick={() => setMenuOpen(false)}
+            >
               <ChartColumn size={19} />
               <span>Báo cáo thống kê</span>
-            </button>
+            </NavLink>
 
             <NavLink
               to="/organizer/wallet"

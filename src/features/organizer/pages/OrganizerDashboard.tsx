@@ -311,7 +311,7 @@ export function OrganizerDashboard() {
                         <span className={styles.progressTitle}>
                           Tiến độ bán vé:{' '}
                           <strong>
-                            {(featuredRevenueItem?.soldTickets ?? featuredRevenueItem?.totalTicketsSold ?? 0).toLocaleString('vi-VN')} / {(featuredRevenueItem?.totalTickets ?? 5000).toLocaleString('vi-VN')} vé
+                            {(featuredRevenueItem?.soldTickets ?? featuredRevenueItem?.totalTicketsSold ?? 0).toLocaleString('vi-VN')} / {(featuredRevenueItem?.totalTickets ?? 0).toLocaleString('vi-VN')} vé
                           </strong>
                         </span>
                         <span className={styles.progressPercentGreen}>
@@ -345,7 +345,14 @@ export function OrganizerDashboard() {
                         </span>
                       </div>
                       <div className={styles.progressBarTrack}>
-                        <div className={styles.progressBarFillSecondary} style={{ width: featuredRevenueItem && featuredRevenueItem.revenue > 0 ? '85%' : '0%' }} />
+                        <div
+                          className={styles.progressBarFillSecondary}
+                          style={{
+                            width: `${featuredRevenueItem && featuredRevenueItem.totalTickets > 0
+                              ? Math.min(100, Math.round((featuredRevenueItem.soldTickets / featuredRevenueItem.totalTickets) * 100))
+                              : (featuredRevenueItem && featuredRevenueItem.revenue > 0 ? 100 : 0)}%`
+                          }}
+                        />
                       </div>
                     </div>
                   </div>

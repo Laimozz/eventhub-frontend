@@ -1,10 +1,7 @@
 import { useEffect, useState } from 'react'
 import {
-  Download,
-  Filter,
   Lock,
   Mail,
-  QrCode,
   Search,
   Trash2,
   Unlock,
@@ -38,7 +35,6 @@ export function EventStaffSection({ eventId, eventName }: Props) {
   // Add Staff Modal State
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [emailInput, setEmailInput] = useState('')
-  const [gateAssigned, setGateAssigned] = useState('Cổng A (Làn VIP Fanzone)')
   const [modalLoading, setModalLoading] = useState(false)
   const [modalError, setModalError] = useState('')
 
@@ -74,7 +70,7 @@ export function EventStaffSection({ eventId, eventName }: Props) {
   async function handleAddStaff(e: React.FormEvent) {
     e.preventDefault()
     if (!emailInput.trim()) {
-      setModalError('Vui lòng nhập email tài khoản TicketBox của nhân viên.')
+      setModalError('Vui lòng nhập email tài khoản của nhân viên.')
       return
     }
 
@@ -85,7 +81,7 @@ export function EventStaffSection({ eventId, eventName }: Props) {
       setStaffs((prev) => [newStaff, ...prev])
       setIsModalOpen(false)
       setEmailInput('')
-      setNotice(`Đã phân công thành công nhân viên ${newStaff.fullName || newStaff.email} vào ${gateAssigned}.`)
+      setNotice(`Đã phân công thành công nhân viên ${newStaff.fullName || newStaff.email}.`)
       setTimeout(() => setNotice(''), 4000)
     } catch (cause) {
       if (cause instanceof ApiError && cause.data?.message) {
@@ -156,26 +152,21 @@ export function EventStaffSection({ eventId, eventName }: Props) {
       (s.fullName && s.fullName.toLowerCase().includes(search.toLowerCase()))
   )
 
+  const activeStaffCount = staffs.filter((s) => s.status === 'ACTIVE').length
+  const lockedStaffCount = staffs.filter((s) => s.status !== 'ACTIVE').length
+
   return (
     <div className={styles.staffSection}>
       {/* 1. Top Overview Bar & Quick Actions */}
       <div className={styles.topBar}>
         <div>
-          <h2 className={styles.sectionTitle}>Quản trị Đội ngũ &amp; Kiểm soát Cổng</h2>
+          <h2 className={styles.sectionTitle}>Quản trị Đội ngũ Soát vé</h2>
           <p className={styles.sectionSubtitle}>
-            Phân bổ nhân sự, cấp máy POS kiểm tra mã QR vé và giám sát trạng thái ca trực thời gian thực.
+            Phân công và quản lý tài khoản nhân viên soát vé cho sự kiện.
           </p>
         </div>
 
         <div className={styles.topActions}>
-          <button
-            type="button"
-            className={styles.btnExport}
-            onClick={() => alert(`Xuất file danh sách ca trực sự kiện "${eventName}" thành công.`)}
-          >
-            <Download size={18} />
-            <span>Xuất file phân ca</span>
-          </button>
           <button
             type="button"
             className={styles.btnAddStaff}
@@ -194,134 +185,54 @@ export function EventStaffSection({ eventId, eventName }: Props) {
       {notice && <div className={styles.noticeBox}>{notice}</div>}
       {error && <div className={styles.errorBox}>{error}</div>}
 
-      {/* 2. 4 Gate Shift Allocation Summary Cards */}
-      <div className={styles.gateGrid}>
-        {/* Gate A */}
-        <div className={styles.gateCard}>
-          <div className={styles.gateTopRow}>
-            <span className={styles.gateBadgeA}>CỔNG A (VIP &amp; FANZONE)</span>
-            <span className={styles.pulseGreen} />
-          </div>
-          <div className={styles.gateMain}>
-            <div className={styles.gateLeader}>Đỗ Nam Trung</div>
-            <div className={styles.gateRole}>Trưởng ca phụ trách</div>
-          </div>
-          <div className={styles.gateBottomRow}>
-            <span className={styles.gateCount}>
-              <Users size={15} color="#006d3d" />
-              <span>4 nhân sự</span>
-            </span>
-            <span className={styles.gatePosActive}>4 POS Active</span>
-          </div>
-        </div>
-
-        {/* Gate B */}
-        <div className={styles.gateCard}>
-          <div className={styles.gateTopRow}>
-            <span className={styles.gateBadgeB}>CỔNG B (KHÁN ĐÀI GA)</span>
-            <span className={styles.pulseGreen} />
-          </div>
-          <div className={styles.gateMain}>
-            <div className={styles.gateLeader}>Phạm Thùy Linh</div>
-            <div className={styles.gateRole}>Trưởng ca phụ trách</div>
-          </div>
-          <div className={styles.gateBottomRow}>
-            <span className={styles.gateCount}>
-              <Users size={15} color="#006591" />
-              <span>3 nhân sự</span>
-            </span>
-            <span className={styles.gatePosActiveB}>3 POS Active</span>
-          </div>
-        </div>
-
-        {/* Gate C */}
-        <div className={styles.gateCard}>
-          <div className={styles.gateTopRow}>
-            <span className={styles.gateBadgeC}>CỔNG C (KHÁN ĐÀI TẦNG)</span>
-            <span className={styles.pulseGreen} />
-          </div>
-          <div className={styles.gateMain}>
-            <div className={styles.gateLeader}>Lê Hoàng Minh</div>
-            <div className={styles.gateRole}>Trưởng ca phụ trách</div>
-          </div>
-          <div className={styles.gateBottomRow}>
-            <span className={styles.gateCount}>
-              <Users size={15} color="#006c49" />
-              <span>3 nhân sự</span>
-            </span>
-            <span className={styles.gatePosActiveC}>3 POS Active</span>
-          </div>
-        </div>
-
-        {/* Incident / CSKH */}
-        <div className={styles.gateCard}>
-          <div className={styles.gateTopRow}>
-            <span className={styles.gateBadgeD}>BÀN SỰ CỐ &amp; CSKH</span>
-            <span className={styles.pulseCoral} />
-          </div>
-          <div className={styles.gateMain}>
-            <div className={styles.gateLeader}>Trần Diệu Huyền</div>
-            <div className={styles.gateRole}>Xử lý vé lỗi &amp; Thẻ VIP</div>
-          </div>
-          <div className={styles.gateBottomRow}>
-            <span className={styles.gateCount}>
-              <Users size={15} color="#3d4a3f" />
-              <span>2 nhân sự</span>
-            </span>
-            <span className={styles.gatePosActiveD}>Trực tiếp tại sảnh</span>
-          </div>
-        </div>
-      </div>
-
-      {/* 3. Real-time Scan Progress Metric Banner */}
-      <div className={styles.progressBanner}>
-        <div className={styles.progressLeft}>
-          <div className={styles.gaugeBox}>
-            <svg className={styles.gaugeSvg} viewBox="0 0 36 36">
-              <path
-                className={styles.gaugeTrack}
-                d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
-                fill="none"
-                strokeWidth="3.5"
-              />
-              <path
-                className={styles.gaugeFill}
-                d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
-                fill="none"
-                strokeDasharray="72, 100"
-                strokeLinecap="round"
-                strokeWidth="3.5"
-              />
-            </svg>
-          </div>
-          <div>
-            <div className={styles.progressHeadingRow}>
-              <span className={styles.progressTitle}>Tiến độ Soát vé Trực tiếp</span>
-              <span className={styles.speedPill}>Tốc độ: 48 vé/phút</span>
+      {/* 2. Real KPI Summary Cards */}
+      <div className={styles.kpiGrid}>
+        <div className={styles.kpiCard}>
+          <div className={styles.kpiContent}>
+            <p className={styles.kpiLabel}>Tổng nhân viên đã phân công</p>
+            <div className={styles.kpiValRow}>
+              <span className={styles.kpiNumber}>{staffs.length}</span>
+              <span className={styles.kpiUnit}>nhân sự</span>
             </div>
-            <p className={styles.progressDesc}>
-              Đã check-in hợp lệ <strong>3.312</strong> trên tổng số <strong>4.600</strong> vé phát hành. Không phát hiện vé trùng lặp giả mạo.
-            </p>
+            <p className={styles.kpiSub}>Nhân sự được gán vào sự kiện</p>
+          </div>
+          <div className={`${styles.kpiIconBox} ${styles.iconGreen}`}>
+            <Users size={24} />
           </div>
         </div>
 
-        <div className={styles.progressRight}>
-          <div className={styles.gateStat}>
-            <div className={styles.gateStatLabel}>Cổng A (VIP)</div>
-            <div className={`${styles.gateStatVal} ${styles.textPrimaryGreen}`}>88.4%</div>
+        <div className={styles.kpiCard}>
+          <div className={styles.kpiContent}>
+            <p className={styles.kpiLabel}>Nhân viên đang hoạt động</p>
+            <div className={styles.kpiValRow}>
+              <span className={`${styles.kpiNumber} ${styles.textGreen}`}>
+                {activeStaffCount}
+              </span>
+              <span className={styles.kpiUnit}>nhân sự</span>
+            </div>
+            <p className={styles.kpiSub}>Có quyền đăng nhập và quét mã vé</p>
           </div>
-          <div className={styles.gateStat}>
-            <div className={styles.gateStatLabel}>Cổng B (GA)</div>
-            <div className={`${styles.gateStatVal} ${styles.textSecondaryBlue}`}>69.2%</div>
+          <div className={`${styles.kpiIconBox} ${styles.iconMint}`}>
+            <UserCheck size={24} />
           </div>
-          <div className={styles.gateStat}>
-            <div className={styles.gateStatLabel}>Cổng C (Tầng)</div>
-            <div className={styles.gateStatVal}>62.0%</div>
+        </div>
+
+        <div className={styles.kpiCard}>
+          <div className={styles.kpiContent}>
+            <p className={styles.kpiLabel}>Tài khoản tạm khóa</p>
+            <div className={styles.kpiValRow}>
+              <span className={styles.kpiNumber}>{lockedStaffCount}</span>
+              <span className={styles.kpiUnit}>nhân sự</span>
+            </div>
+            <p className={styles.kpiSub}>Tạm ngưng quyền soát vé</p>
+          </div>
+          <div className={`${styles.kpiIconBox} ${styles.iconMuted}`}>
+            <Lock size={24} />
           </div>
         </div>
       </div>
 
-      {/* 4. Staff Member Table */}
+      {/* 3. Staff Member Table */}
       <div className={styles.tableCard}>
         <div className={styles.tableToolbar}>
           <div className={styles.searchBox}>
@@ -329,15 +240,16 @@ export function EventStaffSection({ eventId, eventName }: Props) {
             <input
               type="text"
               className={styles.searchInput}
-              placeholder="Tìm tên nhân viên, email, mã POS..."
+              placeholder="Tìm tên nhân viên, email..."
               value={search}
               onChange={(e) => setSearch(e.target.value)}
             />
           </div>
 
           <div className={styles.filterPill}>
-            <Filter size={16} />
-            <span>Lọc Cổng: Tất cả ({staffs.length} nhân sự)</span>
+            <span>
+              Tổng cộng: {filteredStaffs.length} / {staffs.length} nhân sự
+            </span>
           </div>
         </div>
 
@@ -346,10 +258,10 @@ export function EventStaffSection({ eventId, eventName }: Props) {
             <thead>
               <tr>
                 <th style={{ paddingLeft: '24px' }}>Nhân sự Soát vé</th>
-                <th>Tài khoản TicketBox</th>
-                <th>Vị trí phân công</th>
-                <th>Thiết bị POS / App</th>
-                <th style={{ textAlign: 'center' }}>Trạng thái ca</th>
+                <th>Email</th>
+                <th>Số điện thoại</th>
+                <th>Thời gian phân công</th>
+                <th style={{ textAlign: 'center' }}>Trạng thái</th>
                 <th style={{ textAlign: 'right', paddingRight: '24px' }}>Thao tác</th>
               </tr>
             </thead>
@@ -371,13 +283,13 @@ export function EventStaffSection({ eventId, eventName }: Props) {
               ) : (
                 filteredStaffs.map((staff, idx) => {
                   const isActive = staff.status === 'ACTIVE'
-                  const gateName =
-                    idx % 3 === 0
-                      ? 'Cổng A (Làn VIP Fanzone)'
-                      : idx % 3 === 1
-                      ? 'Cổng B (Làn Khán đài GA)'
-                      : 'Cổng C (Khán đài Tầng)'
-                  const posName = `POS Terminal #${String(idx + 1).padStart(2, '0')}`
+                  const createdDate = staff.createdAt
+                    ? new Date(staff.createdAt).toLocaleDateString('vi-VN', {
+                        day: '2-digit',
+                        month: '2-digit',
+                        year: 'numeric',
+                      })
+                    : '—'
 
                   return (
                     <tr key={staff.staffId || staff.id || idx} className={styles.tableRow}>
@@ -391,7 +303,7 @@ export function EventStaffSection({ eventId, eventName }: Props) {
                               {staff.fullName || staff.email.split('@')[0]}
                             </div>
                             <div className={styles.staffIdBadge}>
-                              ID: #TB-{staff.staffId || staff.id || 88200 + idx} • Phụ trách soát vé
+                              ID nhân sự: #{staff.staffId || staff.id}
                             </div>
                           </div>
                         </div>
@@ -402,29 +314,23 @@ export function EventStaffSection({ eventId, eventName }: Props) {
                       </td>
 
                       <td>
-                        <span className={styles.gatePill}>
-                          <span className={styles.dotGreen} />
-                          {gateName}
-                        </span>
+                        <span className={styles.phoneText}>{staff.phone || 'Chưa cập nhật'}</span>
                       </td>
 
                       <td>
-                        <div className={styles.posTerminalCell}>
-                          <QrCode size={16} color="#006d3d" />
-                          <span>{posName}</span>
-                        </div>
+                        <span className={styles.dateText}>{createdDate}</span>
                       </td>
 
                       <td style={{ textAlign: 'center' }}>
                         {isActive ? (
                           <span className={styles.statusActivePill}>
                             <span className={styles.dotLivePulse} />
-                            Đang trực ({((idx + 1) * 320).toLocaleString('vi-VN')} vé)
+                            Đang hoạt động
                           </span>
                         ) : (
                           <span className={styles.statusLockedPill}>
                             <span className={styles.dotGray} />
-                            Đã khóa ca
+                            Đã khóa
                           </span>
                         )}
                       </td>
@@ -434,7 +340,7 @@ export function EventStaffSection({ eventId, eventName }: Props) {
                           <button
                             type="button"
                             className={isActive ? styles.btnActionLock : styles.btnActionUnlock}
-                            title={isActive ? 'Khóa ca trực của nhân viên này' : 'Mở khóa ca trực'}
+                            title={isActive ? 'Khóa quyền soát vé của nhân viên này' : 'Mở khóa quyền soát vé'}
                             disabled={actionPendingId === staff.staffId}
                             onClick={() => handleToggleStatus(staff)}
                           >
@@ -461,7 +367,7 @@ export function EventStaffSection({ eventId, eventName }: Props) {
         </div>
       </div>
 
-      {/* 5. Modal: Phân công nhân viên mới */}
+      {/* 4. Modal: Phân công nhân viên mới */}
       {isModalOpen && (
         <div className={styles.modalBackdrop}>
           <div className={styles.modalCard}>
@@ -502,31 +408,15 @@ export function EventStaffSection({ eventId, eventName }: Props) {
                   <input
                     type="email"
                     required
-                    placeholder="Ví dụ: staff.nguyen@ticketbox.vn"
+                    placeholder="Ví dụ: staff@gmail.com"
                     value={emailInput}
                     onChange={(e) => setEmailInput(e.target.value)}
                     className={styles.inputControl}
                   />
                 </div>
                 <p className={styles.formHint}>
-                  Nhân viên cần có tài khoản trong hệ thống TicketBox để đăng nhập ứng dụng quét mã.
+                  Nhân viên cần có tài khoản trong hệ thống để đăng nhập ứng dụng quét mã.
                 </p>
-              </div>
-
-              <div className={styles.formGroup}>
-                <label className={styles.formLabel}>
-                  Cổng phân công nhiệm vụ
-                </label>
-                <select
-                  value={gateAssigned}
-                  onChange={(e) => setGateAssigned(e.target.value)}
-                  className={styles.selectControl}
-                >
-                  <option value="Cổng A (Làn VIP Fanzone)">Cổng A (VIP &amp; FANZONE)</option>
-                  <option value="Cổng B (Làn Khán đài GA)">Cổng B (KHÁN ĐÀI GA)</option>
-                  <option value="Cổng C (Khán đài Tầng)">Cổng C (KHÁN ĐÀI TẦNG)</option>
-                  <option value="Bàn sự cố & CSKH">BÀN SỰ CỐ &amp; CSKH</option>
-                </select>
               </div>
 
               <div className={styles.modalActions}>

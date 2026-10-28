@@ -8,6 +8,8 @@ import { OrganizerLayout } from '../features/organizer/pages/OrganizerLayout'
 import { OrganizerDashboard } from '../features/organizer/pages/OrganizerDashboard'
 import { OrganizerStaffDispatchPage } from '../features/organizer/pages/OrganizerStaffDispatchPage'
 import { OrganizerWalletPage } from '../features/organizer/pages/OrganizerWalletPage'
+import { OrganizerReportsPage } from '../features/organizer/pages/OrganizerReportsPage'
+import { OrganizerBookingsPage } from '../features/organizer/pages/OrganizerBookingsPage'
 import { CreateEventPage } from '../features/events/pages/CreateEventPage'
 import { OrganizerEventsPage } from '../features/events/pages/OrganizerEventsPage'
 import { EventDetailPage } from '../features/events/pages/EventDetailPage'
@@ -122,6 +124,8 @@ export function AppRouter() {
             <Route path="events/:eventId/edit" element={<Navigate to="details" replace />} />
             <Route path="events/:eventId/edit/:step" element={<EditEventPage />} />
             <Route path="staffs" element={<OrganizerStaffDispatchPage />} />
+            <Route path="bookings" element={<OrganizerBookingsPage />} />
+            <Route path="reports" element={<OrganizerReportsPage />} />
             <Route path="wallet" element={<OrganizerWalletPage />} />
             <Route path="profile" element={<OrganizerUserDetailPage />} />
           </Route>

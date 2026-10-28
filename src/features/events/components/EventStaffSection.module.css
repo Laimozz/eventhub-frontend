@@ -102,279 +102,109 @@
   font-weight: 600;
 }
 
-/* 2. 4 Gate Shift Allocation Summary Cards */
-.gateGrid {
+/* 2. Real KPI Summary Cards */
+.kpiGrid {
   display: grid;
   grid-template-columns: 1fr;
   gap: 16px;
 }
 
 @media (min-width: 640px) {
-  .gateGrid {
-    grid-template-columns: repeat(2, 1fr);
+  .kpiGrid {
+    grid-template-columns: repeat(3, 1fr);
   }
 }
 
-@media (min-width: 1024px) {
-  .gateGrid {
-    grid-template-columns: repeat(4, 1fr);
-  }
-}
-
-.gateCard {
+.kpiCard {
   padding: 16px 20px;
-  border-radius: 16px;
+  border-radius: 14px;
   background: #ffffff;
-  border: 1px solid #eceef0;
-  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.04);
-  display: flex;
-  flex-direction: column;
-  justify-content: space-between;
-  gap: 12px;
-  transition: box-shadow 0.2s ease, transform 0.2s ease;
-}
-
-.gateCard:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 6px 16px -2px rgba(18, 21, 23, 0.08);
-}
-
-.gateTopRow {
+  border: 1px solid rgba(236, 238, 240, 0.9);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
   display: flex;
   align-items: center;
   justify-content: space-between;
+  box-sizing: border-box;
 }
 
-.gateBadgeA {
-  padding: 4px 10px;
-  border-radius: 8px;
-  background: rgba(45, 194, 117, 0.15);
-  color: #006d3d;
-  font-size: 11px;
-  font-weight: 700;
-}
-
-.gateBadgeB {
-  padding: 4px 10px;
-  border-radius: 8px;
-  background: rgba(57, 184, 253, 0.2);
-  color: #006591;
-  font-size: 11px;
-  font-weight: 700;
-}
-
-.gateBadgeC {
-  padding: 4px 10px;
-  border-radius: 8px;
-  background: rgba(111, 251, 190, 0.5);
-  color: #004c6e;
-  font-size: 11px;
-  font-weight: 700;
-}
-
-.gateBadgeD {
-  padding: 4px 10px;
-  border-radius: 8px;
-  background: #e7e8eb;
-  color: #3d4a3f;
-  font-size: 11px;
-  font-weight: 700;
-}
-
-.pulseGreen {
-  width: 8px;
-  height: 8px;
-  border-radius: 9999px;
-  background: #006d3d;
-  animation: pulse 2s infinite;
-}
-
-.pulseCoral {
-  width: 8px;
-  height: 8px;
-  border-radius: 9999px;
-  background: #ff4d4d;
-  animation: pulse 1.5s infinite;
-}
-
-.gateMain {
+.kpiContent {
   display: flex;
   flex-direction: column;
-  gap: 2px;
+  gap: 4px;
 }
 
-.gateLeader {
-  font-size: 14px;
+.kpiLabel {
+  font-size: 11px;
+  font-weight: 700;
+  color: #3d4a3f;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  margin: 0;
+}
+
+.kpiValRow {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+}
+
+.kpiNumber {
+  font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+  font-size: 24px;
   font-weight: 700;
   color: #191c1e;
+  line-height: 1.2;
 }
 
-.gateRole {
-  font-size: 13px;
-  color: #3d4a3f;
-}
-
-.gateBottomRow {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding-top: 12px;
-  border-top: 1px solid #eceef0;
-  font-size: 11px;
-}
-
-.gateCount {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  font-weight: 600;
-  color: #191c1e;
-}
-
-.gatePosActive {
-  padding: 2px 8px;
-  border-radius: 4px;
-  background: #e7e8eb;
+.textGreen {
   color: #006d3d;
+}
+
+.kpiUnit {
+  font-size: 11px;
   font-weight: 700;
+  color: #006d3d;
 }
 
-.gatePosActiveB {
-  padding: 2px 8px;
-  border-radius: 4px;
-  background: #e7e8eb;
-  color: #006591;
-  font-weight: 700;
+.kpiSub {
+  font-size: 12px;
+  color: #6d7b6f;
+  margin: 0;
 }
 
-.gatePosActiveC {
-  padding: 2px 8px;
-  border-radius: 4px;
-  background: #e7e8eb;
-  color: #006c49;
-  font-weight: 700;
-}
-
-.gatePosActiveD {
-  padding: 2px 8px;
-  border-radius: 4px;
-  background: #e7e8eb;
-  color: #3d4a3f;
-  font-weight: 700;
-}
-
-/* 3. Real-time Scan Progress Metric Banner */
-.progressBanner {
-  padding: 24px;
-  border-radius: 16px;
-  background: #ffffff;
-  border: 1px solid #eceef0;
-  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.04);
-  display: flex;
-  flex-direction: column;
-  gap: 20px;
-}
-
-@media (min-width: 768px) {
-  .progressBanner {
-    flex-direction: row;
-    align-items: center;
-    justify-content: space-between;
-  }
-}
-
-.progressLeft {
-  display: flex;
-  align-items: center;
-  gap: 16px;
-}
-
-.gaugeBox {
-  width: 56px;
-  height: 56px;
-  border-radius: 16px;
-  background: rgba(45, 194, 117, 0.1);
+.kpiIconBox {
+  width: 44px;
+  height: 44px;
+  border-radius: 12px;
   display: flex;
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
 }
 
-.gaugeSvg {
-  width: 40px;
-  height: 40px;
-  transform: rotate(-90deg);
-}
-
-.gaugeTrack {
-  stroke: #e1e2e5;
-}
-
-.gaugeFill {
-  stroke: #2dc275;
-}
-
-.progressHeadingRow {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-
-.progressTitle {
-  font-size: 20px;
-  font-weight: 700;
-  letter-spacing: -0.005em;
-  color: #191c1e;
-}
-
-.speedPill {
-  padding: 2px 10px;
-  border-radius: 9999px;
-  background: rgba(0, 109, 61, 0.1);
+.iconGreen {
+  background: rgba(45, 194, 117, 0.15);
   color: #006d3d;
-  font-size: 11px;
-  font-weight: 700;
 }
 
-.progressDesc {
+.iconMint {
+  background: rgba(111, 251, 190, 0.35);
+  color: #004c6e;
+}
+
+.iconMuted {
+  background: #f2f4f6;
+  color: #6d7b6f;
+}
+
+.phoneText {
   font-size: 13px;
-  line-height: 20px;
-  color: #3d4a3f;
-  margin: 4px 0 0;
-  max-width: 600px;
-}
-
-.progressRight {
-  display: flex;
-  align-items: center;
-  gap: 24px;
-  flex-shrink: 0;
-}
-
-.gateStat {
-  text-align: center;
-}
-
-.gateStatLabel {
-  font-size: 11px;
-  font-weight: 600;
-  color: #3d4a3f;
-  text-transform: uppercase;
-  margin-bottom: 2px;
-}
-
-.gateStatVal {
-  font-size: 20px;
-  font-weight: 700;
   color: #191c1e;
 }
 
-.textPrimaryGreen {
-  color: #006d3d !important;
-}
-
-.textSecondaryBlue {
-  color: #006591 !important;
+.dateText {
+  font-size: 13px;
+  color: #3d4a3f;
 }
 
 /* 4. Staff Member Table */
