@@ -29,7 +29,7 @@ Admin đăng nhập được chuyển tới /admin/events/pending. Feature `src/
 | /admin/events/pending/:eventId | Hồ sơ, ảnh, địa điểm, khách mời, vé; duyệt có xác nhận, từ chối có lý do tối đa 255 ký tự |
 | /admin/notifications, /organizer/notifications, /customer/thong-bao | Thông báo của tài khoản đăng nhập, phân trang, đánh dấu đọc và cập nhật realtime qua SSE |
 
-UI có loading/lỗi/thử lại/rỗng, dialog giữ dữ liệu khi lỗi, chặn gửi lặp. Quyết định gửi version nhận từ chi tiết; 404/409 chặn quyết định tiếp đến khi đọc lại hồ sơ. Trang Organizer bổ sung trạng thái REJECTED và rejectReason; chưa mở sửa/gửi lại REJECTED.
+UI có loading/lỗi/thử lại/rỗng, dialog giữ dữ liệu khi lỗi, chặn gửi lặp. Quyết định gửi version nhận từ chi tiết; 404/409 chặn quyết định tiếp đến khi đọc lại hồ sơ. Organizer có thể chỉnh sửa sự kiện REJECTED trước giờ bắt đầu qua form 3 bước; lý do từ chối hiển thị ở chi tiết và trong form. Chọn “Lưu và gửi duyệt lại” sẽ cập nhật cùng sự kiện về PENDING_APPROVAL, xóa thông tin duyệt/lý do từ chối cũ và gửi thông báo cho Admin. Lỗi gửi giữ nội dung form để thử lại. Kiểm thử luồng này bằng `npm.cmd run test:e2e -- tests/manage-events.spec.ts`.
 
 Chuông thông báo nằm trên top bar cạnh avatar ở cổng Admin, Organizer và Customer, kèm số chưa đọc. `NotificationsProvider` duy trì một kết nối SSE cho mỗi tab đăng nhập thuộc ba vai trò này; REST dùng Axios client chung, SSE gửi cookie với `withCredentials`. Sau sự kiện SSE hoặc reconnect, frontend tải lại danh sách/số chưa đọc từ backend. Kết nối đóng khi đăng xuất/đổi tài khoản. Staff tạm thời không có giao diện, request API hoặc kết nối SSE thông báo. Kiểm thử UI ở `tests/notifications.spec.ts` giả lập API/SSE; backend có kiểm thử PostgreSQL và SSE riêng.
 
