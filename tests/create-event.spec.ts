@@ -62,7 +62,7 @@ test('organizer dashboard and event creation navigation remain responsive', asyn
   await expect(page.getByText('Tổng quan hoạt động và hiệu suất sự kiện của bạn trong thời gian thực.')).toBeVisible()
   await page.screenshot({ path: test.info().outputPath('organizer-dashboard.png'), fullPage: true })
   if (test.info().project.name === 'mobile') await page.getByRole('button', { name: 'Mở menu điều hướng' }).click()
-  await expect(page.getByRole('button', { name: 'Quản lý Booking' })).toBeDisabled()
+  await expect(page.getByRole('link', { name: 'Quản lý Booking', exact: true })).toHaveAttribute('href', '/organizer/bookings')
   await page.getByRole('link', { name: 'Tạo sự kiện mới', exact: true }).first().click()
   await expect(page).toHaveURL('/organizer/events/new/details')
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true)

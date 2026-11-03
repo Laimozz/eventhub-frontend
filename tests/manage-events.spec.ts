@@ -9,7 +9,7 @@ const fixture: EventDetail = {
   id: 99, organizerId: 7, categoryId: 11, categoryName: 'Âm nhạc', name: 'Đêm nhạc Acoustic Thu',
   description: 'Một đêm nhạc đáng nhớ cùng những nghệ sĩ yêu thích.', thumbnailImageUrl: poster, bannerImageUrl: poster,
   imageZoneUrl: poster, startTime: '2030-10-20T12:00:00', endTime: '2030-10-20T15:00:00', createdAt: '2030-09-01T08:00:00',
-  status: 'APPROVED', canEdit: true, canCancel: true, cancelReason: null, canceledAt: null,
+  status: 'APPROVED', canEdit: true, canCancel: true, cancelReason: null, canceledAt: null, rejectReason: null,
   venue: { id: 4, city: 'Hà Nội', address: '123 Nguyễn Trãi', capacity: 500 },
   ticketTypes: [
     { id: 41, name: 'Vé VIP', description: 'Khu vực gần sân khấu', imageUrl: poster, price: '1500000.50', quantity: 100,
@@ -20,6 +20,10 @@ const fixture: EventDetail = {
   guests: [{ id: 21, name: 'Nghệ sĩ A', role: 'Ca sĩ chính', description: 'Acoustic live', imageUrl: poster },
     { id: 22, name: 'Khách mời B', role: 'MC', description: null, imageUrl: null }],
 }
+const rejectedFixture: EventDetail = {
+  ...fixture, status: 'REJECTED', rejectReason: 'Bổ sung thông tin địa điểm và mô tả sự kiện.',
+  ticketTypes: fixture.ticketTypes.map(ticket => ({ ...ticket, status: 'INACTIVE', remainingQuantity: ticket.quantity, reservedQuantity: 0 })),
+}
 function summary(event: EventDetail): EventSummary {
   return { ...event, city: event.venue.city, address: event.venue.address }
 }
@@ -28,8 +32,8 @@ function eventPart(request: Request) {
   expect(match).not.toBeNull()
   return JSON.parse(match![1])
 }
-async function setup(page: Page, role = 'ORGANIZER') {
-  let current = structuredClone(fixture)
+async function setup(page: Page, role = 'ORGANIZER', initialEvent = fixture) {
+  let current = structuredClone(initialEvent)
   await page.route('**/api/auth/refresh', route => route.fulfill({ json: { ...organizer, role } }))
   await page.route('**/api/categories', route => route.fulfill({ json: [{ id: 11, name: 'Âm nhạc', description: null }] }))
   await page.route('**/event-test-poster.svg', route => route.fulfill({ contentType: 'image/svg+xml', body: '<svg xmlns="http://www.w3.org/2000/svg" width="800" height="450"><defs><linearGradient id="a"><stop stop-color="#0c3426"/><stop offset="1" stop-color="#20aa70"/></linearGradient></defs><rect width="800" height="450" fill="url(#a)"/><circle cx="650" cy="120" r="180" fill="#9be3b7" opacity=".15"/><text x="60" y="180" fill="#bef8d7" font-family="Arial" font-size="18" letter-spacing="5">LIVE MUSIC · EVENTHUB</text><text x="60" y="250" fill="white" font-family="Arial" font-size="55" font-weight="bold">ACOUSTIC NIGHT</text><text x="60" y="305" fill="#bef8d7" font-family="Arial" font-size="24">20.10.2030 · HÀ NỘI</text></svg>' }))
@@ -38,7 +42,7 @@ async function setup(page: Page, role = 'ORGANIZER') {
     const events = [summary(current), summary({ ...fixture, id: 100, name: 'Vietnam Tech Conference', status: 'PENDING_APPROVAL' }),
       summary({ ...fixture, id: 101, name: 'Lễ hội âm nhạc mùa thu', status: 'COMPLETED', canEdit: false, canCancel: false })]
     const content = events.filter(event => (!url.searchParams.get('status') || event.status === url.searchParams.get('status')) && event.name.toLowerCase().includes((url.searchParams.get('search') ?? '').toLowerCase()))
-    const statusCounts = { PENDING_APPROVAL: 0, APPROVED: 0, ONGOING: 0, COMPLETED: 0, PENDING_CANCELLATION: 0, CANCELED: 0 }
+    const statusCounts = { PENDING_APPROVAL: 0, APPROVED: 0, REJECTED: 0, ONGOING: 0, COMPLETED: 0, PENDING_CANCELLATION: 0, CANCELED: 0 }
     events.forEach(event => statusCounts[event.status]++)
     return route.fulfill({ json: { content, page: 0, size: 9, totalElements: content.length, totalPages: content.length ? 1 : 0, statusCounts } })
   })
@@ -104,6 +108,93 @@ test('editing reuses wizard, preserves images and IDs and sends UTC without uplo
   await expect(page).toHaveURL('/organizer/events/99')
   await expect(page.getByRole('status')).toContainText('Đã lưu thay đổi')
   expect(sent).toBe(1)
+})
+
+test('organizer edits a rejected event with rejection feedback and resubmits it for approval', async ({ page }) => {
+  await setup(page, 'ORGANIZER', rejectedFixture)
+  let current = structuredClone(rejectedFixture)
+  let sent = 0
+  let completeUpdate = () => {}
+  await page.route('**/api/events/99', async route => {
+    if (route.request().method() !== 'PUT') return route.fulfill({ json: current })
+    sent++
+    const body = eventPart(route.request())
+    expect(body.name).toBe('Sự kiện đã bổ sung thông tin')
+    expect(body.description).toBe('Mô tả mới theo góp ý của Admin')
+    expect(body.venue.address).toBe('123 Nguyễn Trãi, Hội trường A')
+    expect(body.ticketTypes[0].id).toBe(41)
+    expect(body.guests[0].id).toBe(21)
+    expect(body).not.toHaveProperty('status')
+    expect(body).not.toHaveProperty('rejectReason')
+    expect(route.request().postData()).not.toContain('name="bannerImage"')
+    await new Promise<void>(resolve => { completeUpdate = resolve })
+    current = { ...current, name: body.name, description: body.description, venue: { ...current.venue, ...body.venue }, status: 'PENDING_APPROVAL', rejectReason: null }
+    return route.fulfill({ json: current })
+  })
+  await page.goto('/organizer/events?status=REJECTED')
+  await expect(page.getByRole('link', { name: `Sửa ${fixture.name}`, exact: true })).toBeVisible()
+  await page.getByRole('link', { name: 'Xem chi tiết', exact: true }).click()
+  await expect(page.getByText(`Lý do: ${rejectedFixture.rejectReason}`, { exact: true })).toBeVisible()
+  await page.getByRole('link', { name: 'Chỉnh sửa và gửi duyệt lại', exact: true }).click()
+  const feedback = page.getByRole('note', { name: 'Lý do từ chối' })
+  await expect(feedback).toContainText(rejectedFixture.rejectReason!)
+  await page.getByLabel('Tên sự kiện', { exact: false }).fill('Sự kiện đã bổ sung thông tin')
+  await page.getByLabel('Mô tả sự kiện').fill('Mô tả mới theo góp ý của Admin')
+  await page.getByLabel('Địa chỉ chi tiết / Địa điểm', { exact: false }).fill('123 Nguyễn Trãi, Hội trường A')
+  expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true)
+  await page.screenshot({ path: test.info().outputPath('rejected-event-edit.png'), fullPage: true })
+  await page.getByRole('button', { name: 'Tiếp tục: Bước 2' }).click()
+  await expect(feedback).toBeVisible()
+  await page.getByRole('button', { name: 'Tiếp tục: Bước 3' }).click()
+  await expect(feedback).toBeVisible()
+  const submit = page.getByRole('button', { name: 'Lưu và gửi duyệt lại', exact: true })
+  await submit.click()
+  await expect(page.getByRole('button', { name: 'Đang gửi hồ sơ…', exact: true })).toBeDisabled()
+  await expect.poll(() => sent).toBe(1)
+  completeUpdate()
+  await expect(page).toHaveURL('/organizer/events/99')
+  await expect(page.getByRole('status')).toContainText('Đã lưu thay đổi và gửi sự kiện cho Admin duyệt lại.')
+  await expect(page.getByRole('heading', { name: 'Sự kiện đã bổ sung thông tin', exact: true })).toBeVisible()
+  await expect(page.getByText('Chờ duyệt', { exact: true }).first()).toBeVisible()
+  await expect(page.getByText('Sự kiện bị từ chối', { exact: true })).toHaveCount(0)
+  await expect(page.getByText(`Lý do: ${rejectedFixture.rejectReason}`, { exact: true })).toHaveCount(0)
+  expect(sent).toBe(1)
+})
+
+test('failed resubmission keeps organizer changes and rejection feedback for retry', async ({ page }) => {
+  await setup(page, 'ORGANIZER', rejectedFixture)
+  let attempts = 0
+  let current = structuredClone(rejectedFixture)
+  await page.route('**/api/events/99', route => {
+    if (route.request().method() !== 'PUT') return route.fulfill({ json: current })
+    if (++attempts === 1) return route.fulfill({ status: 500, json: {} })
+    const body = eventPart(route.request())
+    expect(body.name).toBe('Thông tin giữ lại khi gửi lỗi')
+    current = { ...current, name: body.name, status: 'PENDING_APPROVAL', rejectReason: null }
+    return route.fulfill({ json: current })
+  })
+  await page.goto('/organizer/events/99/edit/details')
+  await page.getByLabel('Tên sự kiện', { exact: false }).fill('Thông tin giữ lại khi gửi lỗi')
+  await page.getByRole('button', { name: 'Tiếp tục: Bước 2' }).click()
+  await page.getByRole('button', { name: 'Tiếp tục: Bước 3' }).click()
+  await page.getByRole('button', { name: 'Lưu và gửi duyệt lại', exact: true }).click()
+  await expect(page.getByRole('alert')).toContainText('Máy chủ chưa thể xử lý yêu cầu')
+  await expect(page.getByRole('note', { name: 'Lý do từ chối' })).toContainText(rejectedFixture.rejectReason!)
+  await expect(page.getByRole('button', { name: 'Lưu và gửi duyệt lại', exact: true })).toBeEnabled()
+  await page.getByRole('button', { name: 'Lưu và gửi duyệt lại', exact: true }).click()
+  await expect(page).toHaveURL('/organizer/events/99')
+  await expect(page.getByRole('heading', { name: 'Thông tin giữ lại khi gửi lỗi', exact: true })).toBeVisible()
+  expect(attempts).toBe(2)
+})
+
+test('rejected event past the edit deadline hides resubmission and blocks direct edit links', async ({ page }) => {
+  await setup(page, 'ORGANIZER', { ...rejectedFixture, startTime: '2020-10-20T12:00:00', endTime: '2020-10-20T15:00:00', canEdit: false, canCancel: false })
+  await page.goto('/organizer/events/99')
+  await expect(page.getByRole('link', { name: 'Chỉnh sửa và gửi duyệt lại', exact: true })).toHaveCount(0)
+  await expect(page.getByText(`Lý do: ${rejectedFixture.rejectReason}`, { exact: true })).toBeVisible()
+  await page.goto('/organizer/events/99/edit/details')
+  await expect(page.getByRole('heading', { name: 'Sự kiện không thể chỉnh sửa' })).toBeVisible()
+  await expect(page.getByRole('button', { name: 'Lưu và gửi duyệt lại', exact: true })).toHaveCount(0)
 })
 
 test('edit adds and removes tickets and guests with indexed uploads and protects allocated tickets', async ({ page }) => {
