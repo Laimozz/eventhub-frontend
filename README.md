@@ -7,10 +7,12 @@ Dự án Frontend được xây dựng bằng **React 19 + Vite + TypeScript**, 
 - `/customer/explore` có 12 sự kiện mỗi trang. `page` bắt đầu từ 0 trên URL, giữ các bộ lọc khi chuyển trang và hỗ trợ Back/Forward; áp dụng/xóa bộ lọc hoặc tìm kiếm mới sẽ về trang đầu.
 - Thẻ và chi tiết sự kiện dùng `status` cùng `salesStatus` từ API. Phân biệt sự kiện sắp diễn ra/đang diễn ra/đã kết thúc với vé chưa mở bán/đang mở bán/hết vé/đã đóng bán/tạm ngừng bán. Danh sách loại vé, giá và số còn lại lấy từ dữ liệu thật; chỉ mở nút đặt vé khi được bán.
 - Thời gian public hiển thị theo GMT+7. Logo EventHub dẫn về trang chính theo role đang đăng nhập: Organizer `/organizer`, Admin `/admin` (chuyển tới `/admin/events/pending`), Staff `/staff`, Customer và khách chưa đăng nhập `/customer`; áp dụng cả khi đang xem trang Customer bằng role khác.
-- Hủy sự kiện dừng bán/phát hành, vô hiệu vé chưa dùng và giải phóng booking đang giữ; thao tác hủy chưa tạo hồ sơ hoàn tiền.
+- Hủy sự kiện dừng bán/phát hành, vô hiệu vé chưa dùng và giải phóng booking đang giữ; thao tác hủy tạo hồ sơ WAITING nhưng chưa gửi lệnh hoàn tiền.
 - Kiểm thử các luồng này: `$env:PLAYWRIGHT_CHANNEL='msedge'; npm.cmd run test:e2e -- tests/public-events.spec.ts`.
 
 ## Tài chính Admin UC37–UC42
+
+- Cập nhật 01/11/2026: chi tiết refund hiển thị lastError và mã chẩn đoán từng attempt; nút đọc lại thông báo khi trạng thái chưa đổi. Query không còn báo thành công chung khi kết quả chưa xác minh; timeout riêng reconcile là 35 giây (trước đó 30 giây), không đổi timeout chung 15 giây.
 
 - `/admin/statistics`: số liệu từ API, số dư ví Organizer và doanh thu gộp/ròng. Doanh thu chưa được backend xác định hiển thị “Chưa xác định”, không đổi null thành 0.
 - `/admin/withdrawals`, `/admin/withdrawals/:requestId`: lọc/phân trang, xem chi tiết, ghi nhận chuyển khoản đã thực hiện ngoài hệ thống và từ chối có lý do. Khi lỗi quyết định, tải lại dữ liệu; chặn gửi khi chưa tải xong, yêu cầu đã xử lý hoặc đã có payout cần đối soát.
@@ -290,3 +292,7 @@ npm run build
 # Chạy test E2E Playwright
 $env:PLAYWRIGHT_CHANNEL='chrome'; npm run test:e2e
 ```
+
+### Tài khoản mua vé và hoàn tiền (26/10/2026)
+
+Checkout có phần khai báo tài khoản mua vé tùy chọn. Dữ liệu được khóa theo payment khi tạo liên kết, không mặc nhiên được xác minh. Admin xem tài khoản khai báo, xác minh trước hoàn thủ công; chỉ Admin phụ trách MANUAL_PENDING thấy form xác nhận chuyển khoản. Trang hoàn theo sự kiện có nút “Chuẩn bị hồ sơ hoàn tiền” kể cả khi danh sách rỗng; thao tác này chưa gọi ngân hàng và không yêu cầu cấu hình VNPAY.

@@ -10,7 +10,9 @@ export const financeApi = {
   queueRefund: async (paymentId: number) => (await httpClient.post(`/admin/refunds/${paymentId}/automatic`)).data,
   queueEventRefunds: async (eventId: number) =>
     (await httpClient.post<{ queuedCount: number }>(`/admin/refund-events/${eventId}/refunds`)).data,
-  reconcileRefund: async (paymentId: number) => (await httpClient.post(`/admin/refunds/${paymentId}/reconcile`, undefined, { timeout: 30000 })).data,
+  prepareEventRefunds: async (eventId: number) =>
+    (await httpClient.post<{ preparedCount: number }>(`/admin/refund-events/${eventId}/refunds/prepare`)).data,
+  reconcileRefund: async (paymentId: number) => (await httpClient.post<import('../types/refund').RefundDetail>(`/admin/refunds/${paymentId}/reconcile`, undefined, { timeout: 35000 })).data,
   saveRefundAccount: async (paymentId: number, account: import('../types/refund').BankAccountInput) =>
     (await httpClient.put(`/admin/refunds/${paymentId}/bank-account`, account)).data,
   reserveManualRefund: async (paymentId: number) => (await httpClient.post(`/admin/refunds/${paymentId}/manual-reservation`)).data,

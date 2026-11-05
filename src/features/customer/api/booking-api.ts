@@ -8,7 +8,9 @@ export const getBooking = async (id: number, signal?: AbortSignal) =>
   (await httpClient.get<BookingDetail>(`/bookings/${id}`, { signal })).data
 export const getBookings = async (page: number, signal?: AbortSignal) =>
   (await httpClient.get<PageResponse<BookingSummary>>('/bookings', { params: { page, size: 10 }, signal })).data
-export const startPayment = (bookingId: number) => post<PaymentUrl>(`/bookings/${bookingId}/payments/vnpay`)
+export interface PurchaseBankAccount { bankCode: string; accountNumber: string; accountHolderName: string }
+export const startPayment = (bookingId: number, bankAccount?: PurchaseBankAccount) =>
+  post<PaymentUrl>(`/bookings/${bookingId}/payments/vnpay`, bankAccount ? { bankAccount } : undefined)
 export const verifyPaymentReturn = async (query: string, signal?: AbortSignal) =>
   (await httpClient.get<PaymentReturn>(`/payments/vnpay/return?${query}`, { signal })).data
 export const getTickets = async (page: number, status?: string, bookingId?: number, signal?: AbortSignal) =>

@@ -12,6 +12,11 @@ const overview = { totalEvents: 1, totalUsers: 3, totalTicketsSold: 1, pendingBa
   withdrawalPendingBalance: 0, totalWithdrawn: 0, grossRevenue: 100000, netRevenue: 5000, totalRefunded: 0, revenueUnavailableReason: null }
 const refundRow = { id: 1, paymentId: 9, bookingId: 10, eventId: 8, eventName: 'Sự kiện hoàn tiền', customerName: 'Khách thử', amount: 100000, status: 'WAITING', method: null, refundedAt: null }
 async function login(page: Page, role = 'ADMIN') {
+  await page.route('**/api/admin/statistics/monthly?**', route => route.fulfill({ json: [] }))
+  await page.route('**/api/admin/statistics/status-breakdown', route => route.fulfill({ json: [] }))
+  await page.route('**/api/admin/statistics/category-breakdown', route => route.fulfill({ json: [] }))
+  await page.route('**/api/admin/statistics/refund-reconciliation/*', route => route.fulfill({ body: 'null', contentType: 'application/json' }))
+  await page.route('**/api/notifications/stream', route => route.abort())
   await page.route('**/api/notifications/unread-count', route => route.fulfill({ json: 0 }))
   await page.route('**/api/admin/refunds?**', route => route.fulfill({ json: list([]) }))
   await page.route('**/api/auth/refresh', route => route.fulfill({ json: { id: 1, fullName: 'Admin thử', email: 'admin@example.invalid', role } }))
@@ -22,10 +27,10 @@ test('manual refund saves a verified account, reserves before transfer and recor
   let status = 'WAITING', account: Record<string, unknown> | null = null, confirmations = 0
   await page.route('**/api/admin/statistics', route => route.fulfill({ json: overview }))
   await page.route('**/api/admin/refunds?**', route => route.fulfill({ json: list([{ ...refundRow, status }]) }))
-  await page.route('**/api/admin/refunds/9', route => route.fulfill({ json: { paymentId: 9, amount: 100000, status, method: status === 'WAITING' ? null : 'MANUAL', bankAccount: account, attempts: [], hasEvidence: status === 'COMPLETED' } }))
+  await page.route('**/api/admin/refunds/9', route => route.fulfill({ json: { paymentId: 9, amount: 100000, status, requestedBy: 1, method: status === 'WAITING' ? null : 'MANUAL', bankAccount: account, attempts: [], hasEvidence: status === 'COMPLETED' } }))
   await page.route('**/api/admin/refunds/9/bank-account', route => {
     expect(route.request().method()).toBe('PUT')
-    account = route.request().postDataJSON()
+    account = { ...route.request().postDataJSON(), verifiedBy: 1, verifiedAt: '2026-10-26T12:00:00' }
     expect(account?.originalAccountVerified).toBe(true)
     return route.fulfill({ json: {} })
   })
@@ -70,6 +75,33 @@ test('dashboard starts one automatic refund and blocks switching an unknown resu
   expect(requests).toBe(1)
 })
 
+test('refund query shows diagnostics and refreshing unchanged status does not query the provider', async ({ page }) => {
+  await login(page)
+  let queries = 0
+  const detail = { paymentId: 9, amount: 100000, status: 'RECONCILIATION', method: 'VNPAY', bankAccount: null,
+    attempts: [] as Record<string, unknown>[], hasEvidence: false, lastError: null as string | null }
+  await page.route('**/api/admin/statistics', route => route.fulfill({ json: overview }))
+  await page.route('**/api/admin/refunds?**', route => route.fulfill({ json: list([{ ...refundRow, status: detail.status }]) }))
+  await page.route('**/api/admin/refunds/9', route => route.fulfill({ json: detail }))
+  await page.route('**/api/admin/refunds/9/reconcile', async route => {
+    queries++
+    detail.lastError = 'Không nhận được phản hồi VNPAY do lỗi kết nối hoặc hết thời gian chờ.'
+    detail.attempts = [{ command: 'querydr', outcome: 'RECONCILIATION', createdAt: '2026-11-01T15:00:00',
+      diagnosticCode: 'PROVIDER_CONNECTION_ERROR', diagnosticMessage: detail.lastError }]
+    await route.fulfill({ json: detail })
+  })
+  await page.goto('/admin/statistics')
+  await page.getByRole('button', { name: 'Xem / Xử lý' }).click()
+  await page.getByRole('button', { name: 'Đọc lại trạng thái' }).click()
+  await expect(page.getByText('Đã đọc lại: trạng thái chưa thay đổi.')).toBeVisible()
+  expect(queries).toBe(0)
+  await page.getByRole('button', { name: 'Truy vấn VNPAY' }).click()
+  await expect(page.getByText('Mã chẩn đoán: PROVIDER_CONNECTION_ERROR')).toBeVisible()
+  await expect(page.getByText('Đã truy vấn. Kiểm tra trạng thái được xác nhận bên dưới.')).toHaveCount(0)
+  await expect(page.getByRole('button', { name: 'Chọn hoàn thủ công và khóa khoản hoàn' })).toHaveCount(0)
+  expect(queries).toBe(1)
+})
+
 test('canceled event requires confirmation before queueing all refunds', async ({ page }) => {
   await login(page)
   let requests = 0
@@ -82,6 +114,24 @@ test('canceled event requires confirmation before queueing all refunds', async (
   await page.getByRole('button', { name: 'Xác nhận hoàn hàng loạt', exact: true }).click()
   await expect(page.getByText(/Đã xếp hàng 1 khoản hoàn/)).toBeVisible()
   expect(requests).toBe(1)
+})
+
+test('an empty canceled event can prepare refund records without requesting a transfer', async ({ page }) => {
+  await login(page)
+  let prepared = false
+  await page.route('**/api/admin/refund-events/8?**', route => route.fulfill({ json: {
+    eventId: 8, eventName: 'Sự kiện hoàn tiền', cancelReason: 'Hủy', canRefund: true, payments: list([]),
+  } }))
+  await page.route('**/api/admin/refunds?**', route => route.fulfill({ json: list(prepared ? [refundRow] : []) }))
+  await page.route('**/api/admin/refund-events/8/refunds/prepare', route => {
+    prepared = true
+    return route.fulfill({ json: { preparedCount: 1 } })
+  })
+  await page.goto('/admin/refunds/8')
+  await expect(page.getByRole('button', { name: 'Hoàn tiền hàng loạt', exact: true })).toBeDisabled()
+  await page.getByRole('button', { name: 'Chuẩn bị hồ sơ hoàn tiền' }).click()
+  await expect(page.getByText('Đã tạo 1 hồ sơ chờ xử lý. Chưa gửi lệnh hoàn tiền.')).toBeVisible()
+  await expect(page.getByRole('button', { name: 'Xem / Xử lý' })).toBeVisible()
 })
 
 test('overview separates paid tickets, confirmed refunds, platform fees and wallet balances', async ({ page }) => {

@@ -16,11 +16,20 @@ export function BookingCheckoutPage() {
   const [accepted, setAccepted] = useState(false)
   const [paying, setPaying] = useState(false)
   const [paymentError, setPaymentError] = useState('')
+  const [declareAccount, setDeclareAccount] = useState(false)
+  const [bankAccount, setBankAccount] = useState({ bankCode: '', accountNumber: '', accountHolderName: '' })
   const sending = useRef(false)
   async function pay() {
     if (!booking || !accepted || !seconds || sending.current) return
+    if (declareAccount && (!bankAccount.bankCode.trim() || !bankAccount.accountHolderName.trim()
+      || !/^[0-9A-Za-z]{4,50}$/.test(bankAccount.accountNumber.trim()))) {
+      setPaymentError('Vui lòng nhập ngân hàng, số tài khoản hợp lệ và tên chủ tài khoản.'); return
+    }
     sending.current = true; setPaying(true); setPaymentError('')
-    try { redirectToPayment((await startPayment(booking.id)).paymentUrl) }
+    try { redirectToPayment((await startPayment(booking.id, declareAccount ? {
+      bankCode: bankAccount.bankCode.trim(), accountNumber: bankAccount.accountNumber.trim(),
+      accountHolderName: bankAccount.accountHolderName.trim(),
+    } : undefined)).paymentUrl) }
     catch (cause) { setPaymentError(bookingError(cause)); reload(); sending.current = false; setPaying(false) }
   }
   return <BookingShell><PageHeading title="Xác nhận & thanh toán" subtitle="Kiểm tra thông tin đặt vé trước khi chuyển sang cổng VNPay Sandbox."><BackLink /></PageHeading>
@@ -36,6 +45,16 @@ export function BookingCheckoutPage() {
         </div><p className={styles.subtle} style={{ marginTop: 16 }}>Vé điện tử được lưu trong “Vé của tôi” sau khi thanh toán được xác nhận.</p></section>
         <section className={styles.card}><h2>02 · Phương thức thanh toán</h2><div className={styles.provider}><span className={styles.providerLogo}>VN<i>PAY</i></span><div><strong>Cổng thanh toán VNPay Sandbox</strong><p>Chọn ngân hàng hoặc phương thức thanh toán trên giao diện VNPay.</p></div></div>
           <div className={styles.notice}><Info size={20} /><span>Bạn sẽ được chuyển sang VNPay để hoàn tất giao dịch thử nghiệm, sau đó quay lại EventHub xem kết quả.</span></div></section>
+        {booking.status === 'PENDING' && <section className={styles.card}>
+          <h2>03 · Tài khoản mua vé (không bắt buộc)</h2>
+          <p className={styles.subtle}>Bạn có thể khai báo tài khoản dự định dùng mua vé để hỗ trợ hoàn tiền khi cần. Admin sẽ xác minh trước khi hoàn thủ công. Thông tin được khóa khi tạo liên kết thanh toán.</p>
+          <label className={styles.check}><input type="checkbox" checked={declareAccount} disabled={paying} onChange={e => setDeclareAccount(e.target.checked)} />Khai báo tài khoản mua vé</label>
+          {declareAccount && <div className={styles.fieldGrid}>
+            <label className={styles.field}>Ngân hàng<input maxLength={50} value={bankAccount.bankCode} disabled={paying} onChange={e => setBankAccount({ ...bankAccount, bankCode: e.target.value })} /></label>
+            <label className={styles.field}>Số tài khoản<input maxLength={50} value={bankAccount.accountNumber} disabled={paying} onChange={e => setBankAccount({ ...bankAccount, accountNumber: e.target.value })} /></label>
+            <label className={`${styles.field} ${styles.fieldWide}`}>Tên chủ tài khoản<input maxLength={255} value={bankAccount.accountHolderName} disabled={paying} onChange={e => setBankAccount({ ...bankAccount, accountHolderName: e.target.value })} /></label>
+          </div>}
+        </section>}
         <section className={styles.card}><label className={styles.check}><input type="checkbox" checked={accepted} onChange={event => setAccepted(event.target.checked)} /><span>Tôi đã kiểm tra sự kiện, loại vé, số lượng và tổng tiền thanh toán.</span></label><p className={styles.subtle} style={{ marginTop: 15 }}><ShieldCheck size={14} /> Mã QR chỉ được phát hành sau khi backend xác nhận thanh toán.</p></section>
       </div><aside className={styles.stack}><EventSummaryCard event={booking.event} /><section className={styles.card}>
         <div className={styles.row}><small>MÃ BOOKING</small><strong>{bookingCode(booking.id)}</strong></div>

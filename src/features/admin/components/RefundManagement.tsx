@@ -4,6 +4,7 @@ import { errorMessage } from '../api/admin-api'
 import { useAdminData } from '../hooks/use-admin-data'
 import { Dialog, LoadState, Pagination } from './AdminComponents'
 import type { BankAccountInput } from '../types/refund'
+import { useAuth } from '../../auth/hooks/useAuth'
 import styles from '../pages/Admin.module.css'
 
 const statusLabel = (status: string) => ({ WAITING: 'Chờ Admin xử lý', QUEUED: 'Đã xếp hàng hoàn', PROCESSING: 'Đang xử lý',
@@ -26,10 +27,19 @@ export function RefundManagement({ eventId }: { eventId?: number }) {
     catch (cause) { setActionError(errorMessage(cause)); reload() }
     finally { sending.current = false; setBusy(false) }
   }
+  async function prepare() {
+    if (!eventId || sending.current) return
+    sending.current = true; setBusy(true); setActionError('')
+    try { const result = await financeApi.prepareEventRefunds(eventId); setNotice(`Đã tạo ${result.preparedCount} hồ sơ chờ xử lý. Chưa gửi lệnh hoàn tiền.`); reload() }
+    catch (cause) { setActionError(errorMessage(cause)) }
+    finally { sending.current = false; setBusy(false) }
+  }
   return <section className={styles.panel}>
     <div className={styles.heading}><h2>{eventId ? 'Xử lý hoàn tiền' : 'Hoàn tiền từng giao dịch'}</h2><button onClick={reload}>Cập nhật trạng thái</button></div>
     <p>Chỉ hoàn toàn bộ giao dịch. Khoản đang xử lý hoặc cần đối soát không được chuyển sang hoàn thủ công.</p>
     {eventId && <button className={styles.primary} disabled={loading || busy || Boolean(error) || !data?.totalElements} onClick={() => { setActionError(''); setConfirmBatch(true) }}>Hoàn tiền hàng loạt</button>}
+    {eventId && <button disabled={loading || busy || Boolean(error)} onClick={prepare}>Chuẩn bị hồ sơ hoàn tiền</button>}
+    {actionError && !confirmBatch && <p role="alert">{actionError}</p>}
     {notice && <p role="status">{notice}</p>}
     <LoadState loading={loading} error={error} retry={reload} />
     {data && <>{data.items.length === 0 ? <p>Chưa có hồ sơ hoàn tiền.</p> : <div className={styles.tableWrap}><table className={styles.table}><thead><tr><th>Giao dịch</th><th>Khách / Sự kiện</th><th>Số tiền</th><th>Trạng thái</th><th>Thao tác</th></tr></thead><tbody>{data.items.map(item => <tr key={item.id}>
@@ -44,6 +54,7 @@ export function RefundManagement({ eventId }: { eventId?: number }) {
 }
 
 function RefundEditor({ paymentId, close, changed }: { paymentId: number; close: () => void; changed: () => void }) {
+  const { user } = useAuth()
   const load = useCallback((signal: AbortSignal) => financeApi.refund(paymentId, signal), [paymentId])
   const { data, loading, error, reload } = useAdminData(load)
   const [busy, setBusy] = useState(false)
@@ -54,10 +65,10 @@ function RefundEditor({ paymentId, close, changed }: { paymentId: number; close:
   const [account, setAccount] = useState<BankAccountInput>({ bankCode: '', accountNumber: '', accountHolderName: '', originalAccountVerified: false })
   const [code, setCode] = useState('')
   const [evidence, setEvidence] = useState<File | null>(null)
-  async function act(operation: () => Promise<unknown>, message: string) {
+  async function act<T>(operation: () => Promise<T>, message: string | ((result: T) => string)) {
     if (sending.current || loading || error) return
     sending.current = true; setBusy(true); setActionError(''); setNotice('')
-    try { await operation(); setNotice(message); setConfirmAuto(false) }
+    try { const result = await operation(); setNotice(typeof message === 'function' ? message(result) : message); setConfirmAuto(false) }
     catch (cause) { setActionError(errorMessage(cause)) }
     finally { sending.current = false; setBusy(false); reload(); changed() }
   }
@@ -69,10 +80,13 @@ function RefundEditor({ paymentId, close, changed }: { paymentId: number; close:
   return <Dialog title={`Hoàn giao dịch #${paymentId}`} busy={busy} close={close}>
     <LoadState loading={loading} error={error} retry={reload} />
     {actionError && <p role="alert" className={styles.error}>{actionError}</p>}{notice && <p role="status">{notice}</p>}
-    {data && <><p>{money(data.amount)} — {statusLabel(data.status)}</p><button disabled={busy} onClick={reload}>Đọc lại trạng thái</button>
+    {data && <><p>{money(data.amount)} — {statusLabel(data.status)}</p>
+      {data.lastError && <p role="status">{data.lastError}</p>}
+      <button disabled={busy || loading} onClick={() => act(() => financeApi.refund(paymentId), result => result.status === data.status ? 'Đã đọc lại: trạng thái chưa thay đổi.' : `Trạng thái mới: ${statusLabel(result.status)}.`)}>Đọc lại trạng thái</button>
       {data.status === 'WAITING' && <><button disabled={busy || loading} onClick={() => setConfirmAuto(true)}>Hoàn qua VNPAY</button>{confirmAuto && <div><p>Xác nhận hoàn toàn bộ giao dịch về nguồn thanh toán gốc?</p><button disabled={busy || loading} onClick={() => act(() => financeApi.queueRefund(paymentId), 'Đã xếp hàng hoàn tiền. Cập nhật trạng thái để xem kết quả.')}>Xác nhận hoàn</button><button onClick={() => setConfirmAuto(false)}>Bỏ qua</button></div>}</>}
-      {data.status === 'RECONCILIATION' && <><p>Kết quả chưa rõ. Không chuyển khoản lần nữa.</p><button disabled={busy || loading} onClick={() => act(() => financeApi.reconcileRefund(paymentId), 'Đã truy vấn. Kiểm tra trạng thái được xác nhận bên dưới.')}>Truy vấn VNPAY</button></>}
+      {data.status === 'RECONCILIATION' && <><p>Kết quả chưa rõ. Không chuyển khoản lần nữa.</p><button disabled={busy || loading} onClick={() => act(() => financeApi.reconcileRefund(paymentId), result => result.status === 'COMPLETED' ? 'VNPAY đã xác nhận hoàn tiền thành công.' : result.lastError || `Kết quả kiểm tra: ${statusLabel(result.status)}. Chưa xác nhận hoàn tiền thành công.`)}>{busy ? 'Đang kiểm tra…' : 'Truy vấn VNPAY'}</button></>}
       <h3>Tài khoản hoàn thủ công — chỉ Admin</h3>
+      {data.bankAccount && !data.bankAccount.verifiedAt && <p>Tài khoản mới được khai báo, chưa xác minh. Cần kiểm tra với người mua trước khi hoàn thủ công.</p>}
       {editable && data.bankAccount && <p>Tài khoản đã lưu: {data.bankAccount.bankCode} — {data.bankAccount.accountNumber} — {data.bankAccount.accountHolderName}<br /><button onClick={() => setAccount({ ...data.bankAccount!, originalAccountVerified: false })}>Sửa tài khoản đã lưu</button></p>}
       {editable ? <form onSubmit={e => { e.preventDefault(); void act(() => financeApi.saveRefundAccount(paymentId, account), 'Đã lưu tài khoản đã xác minh.') }}>
         <label>Ngân hàng<input required maxLength={50} value={account.bankCode} onChange={e => setAccount({ ...account, bankCode: e.target.value })} /></label>
@@ -80,8 +94,9 @@ function RefundEditor({ paymentId, close, changed }: { paymentId: number; close:
         <label>Chủ tài khoản<input required maxLength={255} value={account.accountHolderName} onChange={e => setAccount({ ...account, accountHolderName: e.target.value })} /></label>
         <label><input type="checkbox" required checked={account.originalAccountVerified} onChange={e => setAccount({ ...account, originalAccountVerified: e.target.checked })} />Đã xác minh đây là tài khoản dùng mua vé</label><button disabled={!account.originalAccountVerified}>Lưu tài khoản</button>
       </form> : data.bankAccount ? <p>{data.bankAccount.bankCode} — {data.bankAccount.accountNumber}<br />{data.bankAccount.accountHolderName}</p> : <p>Chưa có tài khoản đã xác minh.</p>}
-      {editable && data.bankAccount && <><p>Giữ khoản hoàn thủ công trước khi chuyển tiền ngoài hệ thống. Thao tác này khóa hoàn tự động và thông tin tài khoản.</p><button onClick={() => act(() => financeApi.reserveManualRefund(paymentId), 'Đã giữ khoản hoàn thủ công. Chuyển đúng số tiền một lần rồi lưu chứng từ.')}>Chọn hoàn thủ công và khóa khoản hoàn</button></>}
-      {data.status === 'MANUAL_PENDING' && <form onSubmit={e => { e.preventDefault(); if (evidence) void act(() => financeApi.confirmManualRefund(paymentId, code.trim(), evidence), 'Đã ghi nhận hoàn thủ công.') }}>
+      {editable && data.bankAccount?.verifiedAt && <><p>Giữ khoản hoàn thủ công trước khi chuyển tiền ngoài hệ thống. Thao tác này khóa hoàn tự động và thông tin tài khoản.</p><button onClick={() => act(() => financeApi.reserveManualRefund(paymentId), 'Đã giữ khoản hoàn thủ công. Chuyển đúng số tiền một lần rồi lưu chứng từ.')}>Chọn hoàn thủ công và khóa khoản hoàn</button></>}
+      {data.status === 'MANUAL_PENDING' && <p>Admin phụ trách: #{data.requestedBy}. Chỉ người phụ trách thực hiện chuyển tiền; không tự chuyển thêm hoặc nhận lại khi chưa đối soát.</p>}
+      {data.status === 'MANUAL_PENDING' && data.requestedBy === user?.id && <form onSubmit={e => { e.preventDefault(); if (evidence) void act(() => financeApi.confirmManualRefund(paymentId, code.trim(), evidence), 'Đã ghi nhận hoàn thủ công.') }}>
         <p>Chỉ xác nhận sau khi chuyển khoản thành công. Nếu mất phản hồi, đọc lại hồ sơ trước khi xử lý tiếp.</p>
         <label>Mã chuyển khoản<input required maxLength={255} value={code} onChange={e => setCode(e.target.value)} disabled={busy} /></label>
         <label>Chứng từ PDF/PNG/JPEG, tối đa 5 MB<input required type="file" accept="application/pdf,image/png,image/jpeg" disabled={busy} onChange={e => { const file = e.target.files?.[0] ?? null; setEvidence(file && file.size <= 5 * 1024 * 1024 ? file : null); setActionError(file && file.size > 5 * 1024 * 1024 ? 'Chứng từ tối đa 5 MB' : '') }} /></label>
@@ -89,7 +104,9 @@ function RefundEditor({ paymentId, close, changed }: { paymentId: number; close:
       </form>}
       {data.reference && <p>Mã giao dịch: {data.reference} — {financeDate(data.refundedAt)}</p>}
       {data.hasEvidence && <button onClick={download}>Tải chứng từ</button>}
-      <h3>Lịch sử xử lý</h3>{data.attempts.length === 0 ? <p>Chưa gọi cổng thanh toán.</p> : data.attempts.map((attempt, i) => <p key={i}>{financeDate(attempt.createdAt)} — {attempt.command} — {statusLabel(attempt.outcome)} {attempt.responseCode && `(Mã ${attempt.responseCode})`}</p>)}
+      <h3>Lịch sử xử lý</h3>{data.attempts.length === 0 ? <p>Chưa gọi cổng thanh toán.</p> : data.attempts.map((attempt, i) => <p key={i}>{financeDate(attempt.createdAt)} — {attempt.command} — {statusLabel(attempt.outcome)} {attempt.responseCode && `(Mã ${attempt.responseCode})`}
+        {attempt.diagnosticCode && <><br />{attempt.diagnosticMessage} <small>Mã chẩn đoán: {attempt.diagnosticCode}{attempt.httpStatus ? ` — HTTP ${attempt.httpStatus}` : ''}</small></>}
+      </p>)}
     </>}
   </Dialog>
 }

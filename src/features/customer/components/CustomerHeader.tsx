@@ -6,6 +6,7 @@ import type { UserDetailDto } from '../types/user';
 import styles from './CustomerHeader.module.css';
 import { NotificationBell } from '../../notifications/components/NotificationBell';
 import { authErrorMessage } from '../../auth/api/auth-errors';
+import { ChevronDown, ChevronUp, Search, Ticket } from 'lucide-react';
 
 interface CustomerHeaderProps {
   user?: UserDetailDto | null;
@@ -81,7 +82,7 @@ export function CustomerHeader({ user: propUser, onSelectMode }: CustomerHeaderP
           <div style={{ display: 'flex', alignItems: 'center', gap: '24px' }}>
             <Link to={getRoleHomePath(authUser?.role)} className={styles.logoLink} aria-label="EventHub — Trang chủ">
               <span className={styles.logoBadge}>
-                <span className="material-symbols-outlined text-[22px]">confirmation_number</span>
+                <Ticket size={22} aria-hidden="true" />
               </span>
               <span>EventHub</span>
             </Link>
@@ -92,7 +93,7 @@ export function CustomerHeader({ user: propUser, onSelectMode }: CustomerHeaderP
           </div>
 
           <div className={styles.headerSearch}>
-            <span className={`material-symbols-outlined ${styles.searchIcon}`}>search</span>
+            <Search size={20} className={styles.searchIcon} aria-hidden="true" />
             <input
               type="text"
               placeholder="Tìm kiếm sự kiện, nghệ sĩ, địa điểm..."
@@ -124,7 +125,7 @@ export function CustomerHeader({ user: propUser, onSelectMode }: CustomerHeaderP
                   </Link>
                 )}
                 <Link to="/customer/ve-cua-toi" className={styles.ticketBtn}>
-                  <span className="material-symbols-outlined">confirmation_number</span>
+                  <Ticket size={18} aria-hidden="true" />
                   <span>Vé của tôi</span>
                 </Link>
 
@@ -177,9 +178,7 @@ export function CustomerHeader({ user: propUser, onSelectMode }: CustomerHeaderP
                       </div>
                     )}
                     <span className={styles.userNameHeader}>{user?.fullName || 'Người dùng'}</span>
-                    <span className="material-symbols-outlined text-[18px]" style={{ color: '#6d7b6f' }}>
-                      {userMenuOpen ? 'expand_less' : 'expand_more'}
-                    </span>
+                    {userMenuOpen ? <ChevronUp size={18} aria-hidden="true" /> : <ChevronDown size={18} aria-hidden="true" />}
                   </button>
 
                   {userMenuOpen && (

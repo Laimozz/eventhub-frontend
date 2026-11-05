@@ -14,6 +14,8 @@ function booking(status = 'PENDING', expiry = Date.now() + 14 * 60_000) {
 const callbackUrl = '/customer/payment-result?vnp_TxnRef=test-ref&vnp_SecureHash=test-signature'
 const pageResult = <T,>(items: T[], page = 0, totalPages = 1) => ({ items, page, size: 10, totalElements: items.length, totalPages })
 async function setup(page: Page, role = 'CUSTOMER') {
+  await page.route('**/api/notifications/unread-count', route => route.fulfill({ json: 0 }))
+  await page.route('**/api/notifications/stream', route => route.abort())
   await page.route('**/test-poster.svg', route => route.fulfill({ contentType: 'image/svg+xml', body: poster }))
   await page.route('**/api/auth/refresh', route => route.fulfill({ json: { ...user, role } }))
   await page.route('**/api/public/events/11', route => route.fulfill({ json: { ...event, description: 'Một đêm nhạc đáng nhớ.', bannerImageUrl: event.thumbnailImageUrl, imageZoneUrl: null, organizerName: 'EventHub Live', categoryName: 'Âm nhạc', venue: { city: event.city, address: event.address }, startingPrice: 250000, suggestedEvents: [] } }))
@@ -61,17 +63,39 @@ test('stock conflict stays on selector and displays actionable error', async ({ 
   await expect(page).toHaveURL('/customer/events/11/book')
 })
 
+test('checkout submits the optional purchase account without claiming verification', async ({ page }) => {
+  await setup(page)
+  let submitted = false
+  await page.route('**/api/bookings/42/payments/vnpay', route => {
+    expect(route.request().postDataJSON()).toEqual({ bankAccount: {
+      bankCode: 'TEST', accountNumber: '00123456', accountHolderName: 'TEST CUSTOMER',
+    } })
+    submitted = true
+    return route.fulfill({ json: { bookingId: 42, paymentUrl: 'https://sandbox.vnpayment.vn/paymentv2/test' } })
+  })
+  await page.route('https://sandbox.vnpayment.vn/**', route => route.fulfill({ body: 'Test payment destination' }))
+  await page.goto('/customer/bookings/42/checkout')
+  await page.getByLabel('Khai báo tài khoản mua vé', { exact: true }).check()
+  await page.getByLabel('Ngân hàng', { exact: true }).fill('TEST')
+  await page.getByLabel('Số tài khoản', { exact: true }).fill('00123456')
+  await page.getByLabel('Tên chủ tài khoản', { exact: true }).fill('TEST CUSTOMER')
+  await page.getByRole('checkbox', { name: 'Tôi đã kiểm tra sự kiện, loại vé, số lượng và tổng tiền thanh toán.' }).check()
+  await page.getByRole('button', { name: 'Thanh toán qua VNPay' }).click()
+  await expect(page).toHaveURL('https://sandbox.vnpayment.vn/paymentv2/test')
+  expect(submitted).toBe(true)
+})
+
 test('checkout opens backend VNPay URL, while expired hold prevents payment', async ({ page }) => {
   await setup(page)
   await page.route('**/api/bookings/42/payments/vnpay', route => route.fulfill({ json: { bookingId: 42, paymentUrl: 'https://sandbox.vnpayment.vn/paymentv2/vpcpay.html?vnp_TxnRef=test-ref' } }))
   await page.route('https://sandbox.vnpayment.vn/**', route => route.fulfill({ contentType: 'text/html', body: '<h1>VNPay test destination</h1>' }))
   await page.goto('/customer/bookings/42/checkout')
-  await page.getByRole('checkbox').check()
+  await page.getByRole('checkbox', { name: 'Tôi đã kiểm tra sự kiện, loại vé, số lượng và tổng tiền thanh toán.' }).check()
   await page.getByRole('button', { name: 'Thanh toán qua VNPay' }).click()
   await expect(page).toHaveURL(/https:\/\/sandbox.vnpayment.vn\/paymentv2\/vpcpay.html/)
   await page.route('**/api/bookings/42', route => route.fulfill({ json: booking('PENDING', Date.now() - 10_000) }))
   await page.goto('/customer/bookings/42/checkout')
-  await page.getByRole('checkbox').check()
+  await page.getByRole('checkbox', { name: 'Tôi đã kiểm tra sự kiện, loại vé, số lượng và tổng tiền thanh toán.' }).check()
   await expect(page.getByRole('button', { name: 'Thanh toán qua VNPay' })).toBeDisabled()
   await expect(page.getByRole('status')).toContainText('Đã hết thời gian thanh toán')
   await page.reload()
@@ -152,7 +176,7 @@ test('checkout enters confirmation grace automatically and cannot charge again',
   let status = 'PENDING'
   await page.route('**/api/bookings/42', route => route.fulfill({ json: { ...booking(status, expiry), paymentConfirmationDeadline: new Date(expiry + 120_000).toISOString() } }))
   await page.goto('/customer/bookings/42/checkout')
-  await page.getByRole('checkbox').check()
+  await page.getByRole('checkbox', { name: 'Tôi đã kiểm tra sự kiện, loại vé, số lượng và tổng tiền thanh toán.' }).check()
   status = 'PAYMENT_CONFIRMING'
   await page.clock.fastForward(6000)
   await expect(page.getByRole('status')).toContainText('Đang xác nhận thanh toán')
