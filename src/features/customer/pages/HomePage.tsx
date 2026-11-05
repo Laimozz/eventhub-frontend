@@ -3,30 +3,36 @@ import { Link } from 'react-router'
 import { getPublicEvents } from '../api/event-api'
 // import { getRecommendedEvents } from '../api/event-api'
 import type { PublicEventSummaryResponse } from '../types/event'
-import { useAuth } from '../../auth/hooks/useAuth'
 import { EventCard } from '../components/EventCard'
 import { CustomerHeader } from '../components/CustomerHeader'
+import { VIETNAM_CITIES } from '../../../constants/cities'
 import styles from './HomePage.module.css'
 
+const PAGE_SIZE = 12
+
 export function HomePage() {
-  const { user } = useAuth()
   const [events, setEvents] = useState<PublicEventSummaryResponse[]>([])
-  // Tạm thời comment state gợi ý AI vì hệ thống AI đang bảo trì
-  // const [aiEvents, setAiEvents] = useState<PublicEventSummaryResponse[]>([])
-  // const [aiPage, setAiPage] = useState(1)
-  // const AI_PAGE_SIZE = 5
+  const [page, setPage] = useState(0)
+  const [totalPages, setTotalPages] = useState(0)
+  const [totalElements, setTotalElements] = useState(0)
+  const [loading, setLoading] = useState(false)
+  const [selectedCity, setSelectedCity] = useState<string>('all')
 
   useEffect(() => {
-    // Fetch regular public events
-    getPublicEvents({ size: 12 })
-      .then((res) => setEvents(res.content))
+    setLoading(true)
+    getPublicEvents({
+      page,
+      size: PAGE_SIZE,
+      city: selectedCity === 'all' ? undefined : selectedCity,
+    })
+      .then((res) => {
+        setEvents(res.content)
+        setTotalPages(res.totalPages)
+        setTotalElements(res.totalElements)
+      })
       .catch((err) => console.error('Lỗi khi tải sự kiện nổi bật:', err))
-
-    // Tạm thời comment gọi gợi ý AI vì hệ thống AI đang bảo trì sửa chữa sau
-    // getRecommendedEvents(user?.id, 10)
-    //   .then((res) => setAiEvents(res.cards || []))
-    //   .catch((err) => console.warn('Lỗi khi tải gợi ý sự kiện từ AI:', err))
-  }, [user?.id])
+      .finally(() => setLoading(false))
+  }, [page, selectedCity])
 
   // const totalAiPages = Math.ceil(aiEvents.length / AI_PAGE_SIZE)
   // const visibleAiEvents = aiEvents.slice((aiPage - 1) * AI_PAGE_SIZE, aiPage * AI_PAGE_SIZE)
@@ -205,7 +211,7 @@ export function HomePage() {
         */}
 
         {/* SỰ KIỆN NỔI BẬT */}
-        <section className={styles.featuredSection}>
+        <section id="featured-events-section" className={styles.featuredSection}>
           <div className={styles.container}>
             <div className={styles.sectionHeader}>
               <div className={styles.headerLeft}>
@@ -216,20 +222,102 @@ export function HomePage() {
                 <h2 className={styles.sectionTitle}>Sự kiện nổi bật</h2>
               </div>
               
-              {/* Filter Tabs */}
-              <div className={styles.filterTabs}>
-                <button className={styles.filterTabActive}>Tất cả TP</button>
-                <button className={styles.filterTab}>TP. Hồ Chí Minh</button>
-                <button className={styles.filterTab}>Hà Nội</button>
-                <button className={styles.filterTab}>Đà Nẵng</button>
+              {/* City Filter Dropdown */}
+              <div className={styles.filterSelectWrapper}>
+                <span className={`material-symbols-outlined ${styles.filterSelectLeadingIcon}`}>
+                  location_on
+                </span>
+                <select
+                  className={`${styles.cityFilterSelect} ${selectedCity !== 'all' ? styles.cityFilterSelectActive : ''}`}
+                  value={selectedCity}
+                  onChange={(e) => {
+                    setSelectedCity(e.target.value)
+                    setPage(0)
+                  }}
+                  aria-label="Lọc theo thành phố"
+                >
+                  <option value="all">Tất cả thành phố</option>
+                  {VIETNAM_CITIES.map((c) => (
+                    <option key={c} value={c}>
+                      {c}
+                    </option>
+                  ))}
+                </select>
+                <span className={`material-symbols-outlined ${styles.filterSelectIcon}`}>
+                  expand_more
+                </span>
               </div>
             </div>
             
-            <div className={styles.grid}>
-              {events.map((e) => (
-                <EventCard key={e.id} event={e} />
-              ))}
-            </div>
+            {loading ? (
+              <div style={{ textAlign: 'center', padding: '48px 0', color: '#64748b' }}>
+                Đang tải danh sách sự kiện...
+              </div>
+            ) : events.length > 0 ? (
+              <div className={styles.grid}>
+                {events.map((e) => (
+                  <EventCard key={e.id} event={e} />
+                ))}
+              </div>
+            ) : (
+              <div style={{ textAlign: 'center', padding: '48px 0', color: '#64748b' }}>
+                Không tìm thấy sự kiện nào phù hợp.
+              </div>
+            )}
+
+            {/* Phân trang sự kiện như ảnh 2 */}
+            {totalPages > 1 && (
+              <div className={styles.pagination}>
+                <span className={styles.paginationInfo}>
+                  Hiển thị {page * PAGE_SIZE + 1} – {Math.min((page + 1) * PAGE_SIZE, totalElements)} trong số {totalElements} sự kiện
+                </span>
+
+                <div className={styles.pageControls}>
+                  <button
+                    type="button"
+                    className={styles.pageBtn}
+                    onClick={() => {
+                      setPage((p) => Math.max(0, p - 1))
+                      document.getElementById('featured-events-section')?.scrollIntoView({ behavior: 'smooth' })
+                    }}
+                    disabled={page === 0}
+                  >
+                    &larr; Trước
+                  </button>
+
+                  {Array.from({ length: Math.min(5, totalPages) }).map((_, idx) => {
+                    let pNum = page - 2 + idx
+                    if (page < 2) pNum = idx
+                    if (pNum >= totalPages) return null
+                    return (
+                      <button
+                        key={pNum}
+                        type="button"
+                        className={`${styles.pageBtn} ${page === pNum ? styles.active : ''}`}
+                        onClick={() => {
+                          setPage(pNum)
+                          document.getElementById('featured-events-section')?.scrollIntoView({ behavior: 'smooth' })
+                        }}
+                      >
+                        {pNum + 1}
+                      </button>
+                    )
+                  })}
+
+                  <button
+                    type="button"
+                    className={styles.pageBtn}
+                    onClick={() => {
+                      setPage((p) => Math.min(totalPages - 1, p + 1))
+                      document.getElementById('featured-events-section')?.scrollIntoView({ behavior: 'smooth' })
+                    }}
+                    disabled={page >= totalPages - 1}
+                  >
+                    Sau &rarr;
+                  </button>
+                </div>
+              </div>
+            )}
           </div>
         </section>
       </main>

@@ -7,6 +7,7 @@ import { EditorDialog, Field, ImageField, ImagePreview } from '../components/Eve
 import { GuestEditor, TicketEditor } from '../components/EventEditors'
 import { emptyDraft, emptyGuest, emptyTicket, eventError, formatDate, fromEvent, loadDraft, money, positiveInteger, validateDetails, validateGuest, validateTicket } from '../event-form'
 import type { Category, CreatedEvent, EventDetail, EventDraft, FieldErrors, GuestDraft, TicketDraft } from '../types/event'
+import { ALL_34_CITIES } from '../../../constants/cities'
 import styles from './CreateEventPage.module.css'
 
 const steps = [
@@ -130,7 +131,7 @@ export function CreateEventPage({ initialEvent }: { initialEvent?: EventDetail }
           <Field id="description" label="Mô tả sự kiện" error={errors.description} hint={`${draft.description.length}/255 ký tự`}><textarea id="description" value={draft.description} maxLength={255} rows={4} placeholder="Giới thiệu ngắn về sự kiện và trải nghiệm dành cho khán giả…" onChange={event => change('description', event.target.value)} /></Field>
         </section>
         <section className={styles.card}><h2><span className={styles.sectionNumber}>02</span>Địa điểm & Sức chứa</h2><div className={styles.twoColumns}>
-          <Field id="city" label="Tỉnh / Thành phố" required error={errors.city}><input id="city" list="event-cities" value={draft.city} maxLength={255} placeholder="Chọn hoặc nhập thành phố" onChange={event => change('city', event.target.value)} {...detailInput('city')} /><datalist id="event-cities">{['Hà Nội', 'TP. Hồ Chí Minh', 'Đà Nẵng', 'Hải Phòng', 'Huế', 'Cần Thơ'].map(city => <option key={city} value={city} />)}</datalist></Field>
+          <Field id="city" label="Tỉnh / Thành phố" required error={errors.city}><input id="city" list="event-cities" value={draft.city} maxLength={255} placeholder="Chọn hoặc nhập thành phố" onChange={event => change('city', event.target.value)} {...detailInput('city')} /><datalist id="event-cities">{ALL_34_CITIES.map(city => <option key={city} value={city} />)}</datalist></Field>
           <Field id="capacity" label="Sức chứa dự kiến (người)" required error={errors.capacity}><input id="capacity" type="number" value={draft.capacity} min="1" max="2147483647" placeholder="500" onChange={event => change('capacity', event.target.value)} {...detailInput('capacity')} /></Field></div>
           <Field id="address" label="Địa chỉ chi tiết / Địa điểm" required error={errors.address}><input id="address" value={draft.address} maxLength={255} placeholder="Số nhà, đường, phường/xã, tên địa điểm…" onChange={event => change('address', event.target.value)} {...detailInput('address')} /></Field>
           <p className={styles.infoNote}>Địa điểm này sẽ được lưu cùng sự kiện. Tổng số vé phát hành không được vượt quá sức chứa.</p>

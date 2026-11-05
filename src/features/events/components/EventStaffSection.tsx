@@ -192,9 +192,9 @@ export function EventStaffSection({ eventId, eventName }: Props) {
             <p className={styles.kpiLabel}>Tổng nhân viên đã phân công</p>
             <div className={styles.kpiValRow}>
               <span className={styles.kpiNumber}>{staffs.length}</span>
-              <span className={styles.kpiUnit}>nhân sự</span>
+              <span className={styles.kpiUnit}>nhân viên</span>
             </div>
-            <p className={styles.kpiSub}>Nhân sự được gán vào sự kiện</p>
+            <p className={styles.kpiSub}>Nhân viên được gán vào sự kiện</p>
           </div>
           <div className={`${styles.kpiIconBox} ${styles.iconGreen}`}>
             <Users size={24} />
@@ -208,7 +208,7 @@ export function EventStaffSection({ eventId, eventName }: Props) {
               <span className={`${styles.kpiNumber} ${styles.textGreen}`}>
                 {activeStaffCount}
               </span>
-              <span className={styles.kpiUnit}>nhân sự</span>
+              <span className={styles.kpiUnit}>nhân viên</span>
             </div>
             <p className={styles.kpiSub}>Có quyền đăng nhập và quét mã vé</p>
           </div>
@@ -222,7 +222,7 @@ export function EventStaffSection({ eventId, eventName }: Props) {
             <p className={styles.kpiLabel}>Tài khoản tạm khóa</p>
             <div className={styles.kpiValRow}>
               <span className={styles.kpiNumber}>{lockedStaffCount}</span>
-              <span className={styles.kpiUnit}>nhân sự</span>
+              <span className={styles.kpiUnit}>nhân viên</span>
             </div>
             <p className={styles.kpiSub}>Tạm ngưng quyền soát vé</p>
           </div>
@@ -248,7 +248,7 @@ export function EventStaffSection({ eventId, eventName }: Props) {
 
           <div className={styles.filterPill}>
             <span>
-              Tổng cộng: {filteredStaffs.length} / {staffs.length} nhân sự
+              Tổng cộng: {filteredStaffs.length} / {staffs.length} nhân viên
             </span>
           </div>
         </div>
@@ -257,7 +257,7 @@ export function EventStaffSection({ eventId, eventName }: Props) {
           <table className={styles.table}>
             <thead>
               <tr>
-                <th style={{ paddingLeft: '24px' }}>Nhân sự Soát vé</th>
+                <th style={{ paddingLeft: '24px' }}>Nhân viên Soát vé</th>
                 <th>Email</th>
                 <th>Số điện thoại</th>
                 <th>Thời gian phân công</th>
@@ -269,7 +269,7 @@ export function EventStaffSection({ eventId, eventName }: Props) {
               {loading ? (
                 <tr>
                   <td colSpan={6} style={{ textAlign: 'center', padding: '36px' }}>
-                    Đang đồng bộ danh sách nhân sự soát vé...
+                    Đang đồng bộ danh sách nhân viên soát vé...
                   </td>
                 </tr>
               ) : filteredStaffs.length === 0 ? (
@@ -303,7 +303,7 @@ export function EventStaffSection({ eventId, eventName }: Props) {
                               {staff.fullName || staff.email.split('@')[0]}
                             </div>
                             <div className={styles.staffIdBadge}>
-                              ID nhân sự: #{staff.staffId || staff.id}
+                              ID nhân viên: #{staff.staffId || staff.id}
                             </div>
                           </div>
                         </div>

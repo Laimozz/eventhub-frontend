@@ -47,7 +47,7 @@ export function EventReviewDetailPage() {
         <section className={styles.panel}><h2>Khách mời</h2>{event.guests.length ? event.guests.map(guest => <article className={styles.guest} key={guest.id}>{guest.imageUrl && <img src={guest.imageUrl} alt="" />}<div><strong>{guest.name}</strong><p>{guest.role}</p><p>{guest.description}</p></div></article>) : <p>Chưa có khách mời.</p>}</section>
       </aside></div>
     </>}
-    {mode && <Dialog title={mode === 'approve' ? 'Xác nhận duyệt sự kiện' : 'Từ chối sự kiện'} busy={busy} close={close}><form onSubmit={decide}>
+    {mode && <Dialog title={mode === 'approve' ? 'Xác nhận duyệt sự kiện' : 'Từ chối sự kiện'} busy={busy} close={close}><form onSubmit={decide} noValidate>
       {mode === 'approve' ? <p>Bạn có chắc chắn muốn duyệt sự kiện này?</p> : <label>Lý do từ chối<textarea name="reason" required maxLength={255} autoFocus /><small>Tối đa 255 ký tự. Lý do sẽ được gửi đến Nhà tổ chức.</small></label>}
       {formError && <p role="alert" className={styles.error}>{formError}</p>}<div className={styles.actions}><button type="button" disabled={busy} onClick={close}>Hủy bỏ</button><button disabled={busy} className={mode === 'approve' ? styles.primary : styles.danger}>{busy ? 'Đang xử lý…' : mode === 'approve' ? 'Xác nhận duyệt' : 'Xác nhận từ chối'}</button></div>
     </form></Dialog>}

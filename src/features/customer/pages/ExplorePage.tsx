@@ -4,6 +4,7 @@ import { getPublicEvents, getCategories } from '../api/event-api'
 import type { PublicEventSummaryResponse, CategoryResponse } from '../types/event'
 import { EventCard } from '../components/EventCard'
 import { CustomerHeader } from '../components/CustomerHeader'
+import { VIETNAM_CITIES } from '../../../constants/cities'
 import styles from './ExplorePage.module.css'
 
 type Filters = { city: string; categoryId: number | 'all'; timeFilter: string; fromDate: string; toDate: string }
@@ -42,6 +43,31 @@ export function ExplorePage() {
   const setCategoryId = (value: number | 'all') => changeFilters({ categoryId: value })
   const setTimeFilter = (value: string) => changeFilters({ timeFilter: value })
   const searchString = searchParams.get('search') || undefined
+  const sort = searchParams.get('sort') === 'oldest' ? 'oldest' : 'newest'
+
+  const handleSortChange = (newSort: string) => {
+    const next = new URLSearchParams(searchParams)
+    if (newSort === 'oldest') {
+      next.set('sort', 'oldest')
+    } else {
+      next.delete('sort')
+    }
+    next.delete('page')
+    setSearchParams(next)
+  }
+
+  // Client-side sort fallback to guarantee immediate re-ordering
+  const sortedEvents = useMemo(() => {
+    if (!events.length) return events
+    return [...events].sort((a, b) => {
+      const timeA = new Date(a.startTime).getTime()
+      const timeB = new Date(b.startTime).getTime()
+      if (sort === 'oldest') {
+        return timeA - timeB || a.id - b.id
+      }
+      return timeB - timeA || b.id - a.id
+    })
+  }, [events, sort])
 
   // On mount, load categories
   useEffect(() => {
@@ -100,7 +126,8 @@ export function ExplorePage() {
           city: applied.city === 'all' ? undefined : applied.city,
           fromDate: effectiveDates.from,
           toDate: effectiveDates.to,
-          search: searchString
+          search: searchString,
+          sort
         }, controller.signal)
         if (controller.signal.aborted) return
         const lastPage = Math.max(0, response.totalPages - 1)
@@ -124,7 +151,7 @@ export function ExplorePage() {
     }
     void fetchEvents()
     return () => controller.abort()
-  }, [applied.categoryId, applied.city, effectiveDates, searchString, page, revision, setSearchParams])
+  }, [applied.categoryId, applied.city, effectiveDates, searchString, page, revision, sort, setSearchParams])
 
   // Sync to URL when applying filters
   const applyFilters = () => {
@@ -138,6 +165,9 @@ export function ExplorePage() {
     }
     if (searchString) {
       params.set('search', searchString)
+    }
+    if (sort === 'oldest') {
+      params.set('sort', 'oldest')
     }
     setSearchParams(params)
   }
@@ -264,9 +294,9 @@ export function ExplorePage() {
                   <div className={styles.selectWrapper}>
                     <select className={styles.select} value={city} onChange={e => setCity(e.target.value)}>
                       <option value="all">Tất cả thành phố</option>
-                      <option value="TP. Hồ Chí Minh">TP. Hồ Chí Minh</option>
-                      <option value="Hà Nội">Hà Nội</option>
-                      <option value="Đà Nẵng">Đà Nẵng</option>
+                      {VIETNAM_CITIES.map((item) => (
+                        <option key={item} value={item}>{item}</option>
+                      ))}
                     </select>
                     <span className="material-symbols-outlined">expand_more</span>
                   </div>
@@ -296,9 +326,13 @@ export function ExplorePage() {
                 <div className={styles.sortWrapper}>
                   <span>Sắp xếp:</span>
                   <div className={styles.selectWrapper}>
-                    <select className={styles.select}>
-                      <option>Mới nhất</option>
-                      {/* Note: The backend API doesn't support custom sorting by price yet according to endpoints.md */}
+                    <select
+                      className={styles.select}
+                      value={sort}
+                      onChange={(e) => handleSortChange(e.target.value)}
+                    >
+                      <option value="newest">Mới nhất</option>
+                      <option value="oldest">Cũ nhất</option>
                     </select>
                     <span className="material-symbols-outlined">expand_more</span>
                   </div>
@@ -334,9 +368,9 @@ export function ExplorePage() {
                 <div className={styles.loading}>Đang tải danh sách sự kiện...</div>
               ) : error ? (
                 <div className={styles.empty} role="alert"><p>{error}</p><button className={styles.applyBtn} onClick={() => setRevision(value => value + 1)}>Thử lại</button></div>
-              ) : events.length > 0 ? (
+              ) : sortedEvents.length > 0 ? (
                 <div className={styles.grid}>
-                  {events.map(event => (
+                  {sortedEvents.map(event => (
                     <EventCard key={event.id} event={event} />
                   ))}
                 </div>
@@ -346,11 +380,49 @@ export function ExplorePage() {
                   <p>Vui lòng thử lại với bộ lọc khác.</p>
                 </div>
               )}
-              {!error && totalPages > 1 && <nav className={styles.pagination} aria-label="Phân trang sự kiện">
-                <button disabled={loading || page === 0} onClick={() => changePage(page - 1)}>Trang trước</button>
-                <span role="status">Trang {page + 1} / {totalPages}</span>
-                <button disabled={loading || page + 1 >= totalPages} onClick={() => changePage(page + 1)}>Trang sau</button>
-              </nav>}
+              {!error && totalPages > 1 && (
+                <nav className={styles.pagination} aria-label="Phân trang sự kiện">
+                  <span className={styles.paginationInfo}>
+                    Hiển thị {page * pageSize + 1} – {Math.min((page + 1) * pageSize, totalElements)} trong số {totalElements} sự kiện
+                  </span>
+
+                  <div className={styles.pageControls}>
+                    <button
+                      type="button"
+                      className={styles.pageBtn}
+                      disabled={loading || page === 0}
+                      onClick={() => changePage(page - 1)}
+                    >
+                      &larr; Trước
+                    </button>
+
+                    {Array.from({ length: Math.min(5, totalPages) }).map((_, idx) => {
+                      let pNum = page - 2 + idx
+                      if (page < 2) pNum = idx
+                      if (pNum >= totalPages) return null
+                      return (
+                        <button
+                          key={pNum}
+                          type="button"
+                          className={`${styles.pageBtn} ${page === pNum ? styles.active : ''}`}
+                          onClick={() => changePage(pNum)}
+                        >
+                          {pNum + 1}
+                        </button>
+                      )
+                    })}
+
+                    <button
+                      type="button"
+                      className={styles.pageBtn}
+                      disabled={loading || page + 1 >= totalPages}
+                      onClick={() => changePage(page + 1)}
+                    >
+                      Sau &rarr;
+                    </button>
+                  </div>
+                </nav>
+              )}
             </section>
           </div>
         </div>

@@ -14,15 +14,20 @@ export async function getPublicEvents(params: {
   city?: string
   fromDate?: string
   toDate?: string
+  sort?: string
 }, signal?: AbortSignal): Promise<PublicEventListResponse> {
   const queryParams = new URLSearchParams()
   if (params.page !== undefined) queryParams.append('page', params.page.toString())
   if (params.size !== undefined) queryParams.append('size', params.size.toString())
   if (params.search) queryParams.append('search', params.search)
   if (params.categoryId !== undefined) queryParams.append('categoryId', params.categoryId.toString())
-  if (params.city) queryParams.append('city', params.city)
+  if (params.city) {
+    const apiCity = (params.city === 'TP. Hồ Chí Minh' || params.city === 'Thành phố Hồ Chí Minh') ? 'Hồ Chí Minh' : params.city
+    queryParams.append('city', apiCity)
+  }
   if (params.fromDate) queryParams.append('fromDate', params.fromDate)
   if (params.toDate) queryParams.append('toDate', params.toDate)
+  if (params.sort) queryParams.append('sort', params.sort)
 
   const queryString = queryParams.toString()
   const endpoint = `/public/events${queryString ? `?${queryString}` : ''}`

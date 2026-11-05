@@ -35,7 +35,6 @@ export function OrganizerReportsPage() {
   const [selectedEventId, setSelectedEventId] = useState<number | ''>('')
   const [startDate, setStartDate] = useState<string>('')
   const [endDate, setEndDate] = useState<string>('')
-  const [chartMetric, setChartMetric] = useState<'revenue' | 'tickets'>('revenue')
   const [eventSearch, setEventSearch] = useState<string>('')
   const [sortBy, setSortBy] = useState<'revenue' | 'sold' | 'fillRate'>('revenue')
   const [refreshKey, setRefreshKey] = useState<number>(0)
@@ -119,17 +118,6 @@ export function OrganizerReportsPage() {
     return list
   }, [data, eventSearch, sortBy])
 
-  // Chart max value calculation
-  const maxChartValue = useMemo(() => {
-    if (!data?.timeSeries || data.timeSeries.length === 0) return 1
-    if (chartMetric === 'revenue') {
-      const max = Math.max(...data.timeSeries.map((d) => d.revenue || 0), 1)
-      return max
-    }
-    const max = Math.max(...data.timeSeries.map((d) => d.ticketsSold || 0), 1)
-    return max
-  }, [data, chartMetric])
-
   return (
     <div className={styles.container}>
       {/* 1. Header & Actions */}
@@ -178,7 +166,6 @@ export function OrganizerReportsPage() {
               ['7d', '7 ngày'],
               ['30d', '30 ngày'],
               ['this_month', 'Tháng này'],
-              ['3m', '3 tháng'],
               ['year', 'Năm nay'],
               ['all', 'Tất cả'],
               ['custom', 'Tùy chọn ngày'],
@@ -362,73 +349,7 @@ export function OrganizerReportsPage() {
             </div>
           </div>
 
-          {/* 4. Interactive Chart: Biến động theo thời gian */}
-          <div className={styles.chartPanel}>
-            <div className={styles.chartHeader}>
-              <div className={styles.chartTitleWrap}>
-                <h3>Biến động theo chu kỳ thời gian</h3>
-                <p>Thống kê số liệu thanh toán vé thật ghi nhận trên hệ thống</p>
-              </div>
-
-              <div className={styles.chartToggleGroup}>
-                <button
-                  type="button"
-                  className={`${styles.chartToggleBtn} ${chartMetric === 'revenue' ? styles.active : ''}`}
-                  onClick={() => setChartMetric('revenue')}
-                >
-                  Doanh thu (VNĐ)
-                </button>
-                <button
-                  type="button"
-                  className={`${styles.chartToggleBtn} ${chartMetric === 'tickets' ? styles.active : ''}`}
-                  onClick={() => setChartMetric('tickets')}
-                >
-                  Số vé bán
-                </button>
-              </div>
-            </div>
-
-            {data.timeSeries.length > 0 ? (
-              <div className={styles.barsArea}>
-                {data.timeSeries.map((point) => {
-                  const val = chartMetric === 'revenue' ? point.revenue : point.ticketsSold
-                  const heightPercent = Math.max(8, Math.round((val / maxChartValue) * 100))
-                  const tooltipText = `${point.dateLabel}: ${point.formattedRevenue} • ${point.ticketsSold} vé (${point.ordersCount} đơn)`
-
-                  return (
-                    <div key={point.dateKey} className={styles.barCol} title={tooltipText}>
-                      <span className={styles.barValueTop}>
-                        {chartMetric === 'revenue'
-                          ? val >= 1000000
-                            ? `${(val / 1000000).toFixed(1)}M`
-                            : val >= 1000
-                            ? `${(val / 1000).toFixed(0)}k`
-                            : val
-                          : val}
-                      </span>
-                      <div
-                        className={styles.barTrack}
-                        style={{
-                          height: `${heightPercent}%`,
-                          background:
-                            chartMetric === 'revenue'
-                              ? 'linear-gradient(180deg, #2dc275 0%, #00874c 100%)'
-                              : 'linear-gradient(180deg, #38bdf8 0%, #0284c7 100%)',
-                        }}
-                      />
-                      <span className={styles.barLabel}>{point.dateLabel}</span>
-                    </div>
-                  )
-                })}
-              </div>
-            ) : (
-              <div style={{ textAlign: 'center', padding: '40px 0', color: '#64748b' }}>
-                Chưa có giao dịch phát sinh trong khoảng thời gian đã chọn
-              </div>
-            )}
-          </div>
-
-          {/* 5. Phân bổ: Thể loại sự kiện & Trạng thái đơn hàng */}
+          {/* 4. Phân bổ: Thể loại sự kiện & Trạng thái đơn hàng */}
           <div className={styles.twoColGrid}>
             {/* Box A: Theo thể loại */}
             <div className={styles.sectionCard}>

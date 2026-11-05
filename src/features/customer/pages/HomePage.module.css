@@ -477,6 +477,62 @@
   color: #191c1e;
 }
 
+.filterSelectWrapper {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+}
+.cityFilterSelect {
+  padding: 8px 36px 8px 36px;
+  border-radius: 50px;
+  background-color: #ffffff;
+  color: #3d4a3f;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  white-space: nowrap;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.06);
+  border: 1px solid #e1e2e5;
+  cursor: pointer;
+  appearance: none;
+  outline: none;
+  transition: all 0.2s ease;
+}
+.cityFilterSelect:hover {
+  border-color: #2dc275;
+  color: #191c1e;
+}
+.cityFilterSelectActive {
+  background-color: #1E2329;
+  color: #ffffff;
+  border-color: #1E2329;
+}
+.cityFilterSelectActive:hover {
+  border-color: #1E2329;
+  color: #ffffff;
+}
+.filterSelectLeadingIcon {
+  position: absolute;
+  left: 12px;
+  pointer-events: none;
+  font-size: 1.125rem !important;
+  color: #2dc275;
+  transition: color 0.2s;
+}
+.cityFilterSelectActive ~ .filterSelectLeadingIcon {
+  color: #72fca9;
+}
+.filterSelectIcon {
+  position: absolute;
+  right: 12px;
+  pointer-events: none;
+  font-size: 1.125rem !important;
+  color: #64748b;
+  transition: color 0.2s;
+}
+.cityFilterSelectActive ~ .filterSelectIcon {
+  color: #ffffff;
+}
+
 /* LƯỚI 4 CỘT NHƯ TRANG CHỦ GỐC */
 .grid {
   display: grid;
@@ -574,4 +630,63 @@
     grid-template-columns: repeat(5, 1fr);
   }
 }
+
+/* Pagination matching Image 2 */
+.pagination {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  margin-top: 32px;
+  padding-top: 24px;
+  border-top: 1px solid #e2e8f0;
+}
+
+.paginationInfo {
+  font-size: 13px;
+  color: #64748b;
+  font-weight: 500;
+}
+
+.pageControls {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.pageBtn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 34px;
+  height: 34px;
+  padding: 0 10px;
+  font-size: 13px;
+  font-weight: 600;
+  color: #475569;
+  background: #ffffff;
+  border: 1px solid #cbd5e1;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.pageBtn:hover:not(:disabled) {
+  background: #f8fafc;
+  color: #0f172a;
+  border-color: #94a3b8;
+}
+
+.pageBtn.active {
+  background: #00874c;
+  color: #ffffff;
+  border-color: #00874c;
+}
+
+.pageBtn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
 

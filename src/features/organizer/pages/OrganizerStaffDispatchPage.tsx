@@ -102,7 +102,7 @@ export function OrganizerStaffDispatchPage() {
               <h1 className={styles.pageTitle}>Phân công &amp; Điều phối nhân viên soát vé</h1>
             </div>
             <p className={styles.pageSubtitle}>
-              Theo dõi tình hình phân bổ nhân viên soát vé cho từng sự kiện và thực hiện phân công nhân sự.
+              Theo dõi tình hình phân bổ nhân viên soát vé cho từng sự kiện và thực hiện phân công nhân viên.
             </p>
           </div>
         </div>
@@ -135,7 +135,7 @@ export function OrganizerStaffDispatchPage() {
             <p className={styles.kpiLabel}>Tổng nhân viên đã phân</p>
             <div className={styles.kpiValRow}>
               <span className={styles.kpiNumber}>{summary?.totalAssignedStaff ?? 0}</span>
-              <span className={styles.kpiUnit}>nhân sự</span>
+              <span className={styles.kpiUnit}>nhân viên</span>
             </div>
             <p className={`${styles.kpiSub} ${styles.textWarning}`}>
               <AlertCircle size={14} />
@@ -153,7 +153,7 @@ export function OrganizerStaffDispatchPage() {
             <p className={styles.kpiLabel}>Nhân viên đang kích hoạt</p>
             <div className={styles.kpiValRow}>
               <span className={styles.kpiNumber}>{summary?.activeStaff ?? 0}</span>
-              <span className={styles.kpiUnit}>nhân sự</span>
+              <span className={styles.kpiUnit}>nhân viên</span>
             </div>
             <p className={styles.kpiSub}>Sẵn sàng làm nhiệm vụ quét vé</p>
           </div>
@@ -289,7 +289,7 @@ export function OrganizerStaffDispatchPage() {
                       ) : isNeedStaff ? (
                         <span className={styles.badgeSecondary}>
                           <Calendar size={13} />
-                          CHƯA CÓ NHÂN SỰ
+                          CHƯA CÓ NHÂN VIÊN
                         </span>
                       ) : (
                         <span className={styles.badgeSelling}>
@@ -367,7 +367,7 @@ export function OrganizerStaffDispatchPage() {
                       <div className={styles.pastResultRow}>
                         <div className={styles.pastResultLeft}>
                           <ShieldCheck size={18} className={styles.metaIconPrimary} />
-                          <span>Tổng số nhân sự phục vụ sự kiện: {assignedCount} Staff</span>
+                          <span>Tổng số nhân viên phục vụ sự kiện: {assignedCount} Staff</span>
                         </div>
                         <span className={styles.metaTextBold} style={{ color: '#006d3d' }}>
                           Hoàn tất ✓
@@ -375,7 +375,7 @@ export function OrganizerStaffDispatchPage() {
                       </div>
                       {staffNames && (
                         <div className={styles.staffAvatarsRow} style={{ marginTop: '8px' }}>
-                          <span className={styles.staffNames}>Nhân sự: {staffNames}</span>
+                          <span className={styles.staffNames}>Nhân viên: {staffNames}</span>
                         </div>
                       )}
                     </div>
@@ -383,7 +383,7 @@ export function OrganizerStaffDispatchPage() {
                     <div className={styles.calloutAlert}>
                       <AlertCircle size={20} className={styles.calloutIcon} />
                       <div>
-                        <h4 className={styles.calloutTitle}>Chưa chỉ định nhân sự soát vé</h4>
+                        <h4 className={styles.calloutTitle}>Chưa chỉ định nhân viên soát vé</h4>
                         <p className={styles.calloutDesc}>
                           Sự kiện chưa có nhân viên soát vé. Nhấn "Bắt đầu phân công Staff" bên dưới để gán nhân viên vào sự kiện.
                         </p>
@@ -392,7 +392,7 @@ export function OrganizerStaffDispatchPage() {
                   ) : (
                     <div className={styles.gatesBox}>
                       <div className={styles.gatesHeader}>
-                        <span className={styles.gatesTitle}>Bố trí nhân sự soát vé:</span>
+                        <span className={styles.gatesTitle}>Bố trí soát vé:</span>
                         <span className={styles.gatesTarget}>
                           {activeCount} Staff đã kích hoạt ứng dụng
                         </span>
@@ -400,7 +400,7 @@ export function OrganizerStaffDispatchPage() {
 
                       <div className={styles.gatesGrid3}>
                         <div className={styles.gateCol}>
-                          <div className={styles.gateLabel}>Tổng nhân sự</div>
+                          <div className={styles.gateLabel}>Tổng nhân viên</div>
                           <div className={styles.gateStaffVal}>{assignedCount} Staff</div>
                           <div className={styles.gateSub}>Đã phân công</div>
                         </div>
@@ -425,7 +425,7 @@ export function OrganizerStaffDispatchPage() {
                         <div className={styles.avatarGroup}>
                           <Users size={18} className={styles.metaIconPrimary} />
                           <span className={styles.staffNames}>
-                            {staffNames ? `Nhân sự: ${staffNames}` : 'Chưa có thông tin nhân viên'}
+                            {staffNames ? `Nhân viên: ${staffNames}` : 'Chưa có thông tin nhân viên'}
                           </span>
                         </div>
                         <span className={activeCount > 0 ? styles.textActiveStatus : styles.textSecondaryStatus}>
@@ -447,7 +447,7 @@ export function OrganizerStaffDispatchPage() {
                         to={`/organizer/events/${event.id}?tab=staffs`}
                         className={styles.btnManageStaff}
                       >
-                        <span>Xem nhân sự sự kiện</span>
+                        <span>Xem nhân viên sự kiện</span>
                         <ArrowRight size={18} />
                       </Link>
                     </>

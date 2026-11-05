@@ -79,6 +79,7 @@ export function RegisterPage() {
             <p>Tạo tài khoản để săn vé sự kiện hot và nhận đặc quyền thành viên</p>
           </div>
           <form
+            noValidate
             className={`${styles.form} ${styles.register}`}
             onSubmit={handleSubmit}
             aria-busy={pending}
