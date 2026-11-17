@@ -246,7 +246,7 @@ test('cancel validates reason, cancels immediately and hides further actions', a
   await expect(page.getByRole('alert')).toContainText('Vui lòng nhập lý do')
   await page.getByLabel('Lý do hủy').fill('Địa điểm không còn khả dụng')
   await page.getByRole('button', { name: 'Xác nhận hủy', exact: true }).click()
-  await expect(page.getByText('Đã hủy sự kiện. Admin sẽ xử lý các khoản hoàn tiền.')).toBeVisible()
+  await expect(page.getByText('Đã hủy sự kiện. Các khoản hoàn tiền đang chờ Admin kích hoạt theo sự kiện.')).toBeVisible()
   await expect(page.getByRole('button', { name: 'Hủy sự kiện', exact: true })).toHaveCount(0)
   await expect(page.getByRole('link', { name: 'Chỉnh sửa thông tin' })).toHaveCount(0)
   await expect(page.getByText('Lý do: Địa điểm không còn khả dụng')).toBeVisible()

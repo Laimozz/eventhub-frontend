@@ -1,15 +1,21 @@
 import { useCallback, useRef, useState } from 'react'
+import { RefreshCw } from 'lucide-react'
 import { financeApi, financeDate, money } from '../api/admin-finance-api'
 import { errorMessage } from '../api/admin-api'
 import { useAdminData } from '../hooks/use-admin-data'
 import { Dialog, LoadState, Pagination } from './AdminComponents'
-import type { BankAccountInput } from '../types/refund'
 import styles from '../pages/Admin.module.css'
+import ui from './RefundManagement.module.css'
 
-const statusLabel = (status: string) => ({ WAITING: 'Chờ Admin xử lý', QUEUED: 'Đã xếp hàng hoàn', PROCESSING: 'Đang xử lý',
-  RECONCILIATION: 'Cần đối soát', FAILED: 'Hoàn bị từ chối', MANUAL_PENDING: 'Đang hoàn thủ công', COMPLETED: 'Đã hoàn' } as Record<string, string>)[status] ?? status
+const statusLabel = (status: string) => ({ WAITING: 'Chờ hoàn tiền', QUEUED: 'Đã xếp hàng', PROCESSING: 'Đang hoàn tiền',
+  RECONCILIATION: 'Cần đối soát', FAILED: 'Bị từ chối', COMPLETED: 'Đã hoàn tiền' } as Record<string, string>)[status] ?? status
+function RefundBadge({ status }: { status: string }) {
+  return <span className={`${ui.badge} ${status === 'COMPLETED' ? ui.completed : ['FAILED', 'RECONCILIATION'].includes(status) ? ui.warning : ['QUEUED', 'PROCESSING'].includes(status) ? ui.processing : ''}`}>{statusLabel(status)}</span>
+}
 
-export function RefundManagement({ eventId }: { eventId?: number }) {
+export function RefundManagement({ eventId, canRefund = true, unavailableReason = '' }: {
+  eventId?: number; canRefund?: boolean; unavailableReason?: string
+}) {
   const [page, setPage] = useState(0)
   const [selected, setSelected] = useState<number | null>(null)
   const [confirmBatch, setConfirmBatch] = useState(false)
@@ -19,25 +25,46 @@ export function RefundManagement({ eventId }: { eventId?: number }) {
   const [actionError, setActionError] = useState('')
   const load = useCallback((signal: AbortSignal) => financeApi.refunds(eventId, page, signal), [eventId, page])
   const { data, loading, error, reload } = useAdminData(load)
+  function refresh() { reload() }
   async function batch() {
-    if (!eventId || sending.current) return
-    sending.current = true; setBusy(true); setActionError('')
-    try { const result = await financeApi.queueEventRefunds(eventId); setNotice(`Đã xếp hàng ${result.queuedCount} khoản hoàn. Theo dõi kết quả trước khi xử lý tiếp.`); setConfirmBatch(false); reload() }
-    catch (cause) { setActionError(errorMessage(cause)); reload() }
-    finally { sending.current = false; setBusy(false) }
+    if (!eventId || sending.current || !canRefund) return
+    sending.current = true; setBusy(true); setActionError(''); setNotice('')
+    try {
+      const result = await financeApi.refundEvent(eventId)
+      setNotice(result.refundedCount > 0 ? `Đã hoàn tiền ${result.refundedCount} giao dịch.` : 'Không có khoản mới đủ điều kiện hoàn tiền.')
+      setConfirmBatch(false)
+    } catch (cause) { setActionError(errorMessage(cause)) }
+    finally { sending.current = false; setBusy(false); reload() }
   }
-  return <section className={styles.panel}>
-    <div className={styles.heading}><h2>{eventId ? 'Xử lý hoàn tiền' : 'Hoàn tiền từng giao dịch'}</h2><button onClick={reload}>Cập nhật trạng thái</button></div>
-    <p>Chỉ hoàn toàn bộ giao dịch. Khoản đang xử lý hoặc cần đối soát không được chuyển sang hoàn thủ công.</p>
-    {eventId && <button className={styles.primary} disabled={loading || busy || Boolean(error) || !data?.totalElements} onClick={() => { setActionError(''); setConfirmBatch(true) }}>Hoàn tiền hàng loạt</button>}
-    {notice && <p role="status">{notice}</p>}
+  return <section className={`${styles.panel} ${ui.root}`}>
+    <div className={ui.toolbar}><div><h2>{eventId ? 'Hoàn tiền cho sự kiện' : 'Theo dõi hoàn tiền'}</h2>
+      <p>{eventId ? 'Admin xác nhận hoàn tiền cho các giao dịch đủ điều kiện.' : 'Chọn một khoản để xem chi tiết hoặc hoàn tiền.'}</p>
+    </div><div className={ui.actions}>
+      <button onClick={refresh} disabled={busy} aria-label="Cập nhật trạng thái"><RefreshCw size={16} /> Làm mới</button>
+      {eventId && <button className={ui.primary} disabled={loading || busy || Boolean(error) || !canRefund}
+        onClick={() => { setActionError(''); setConfirmBatch(true) }}>Hoàn tiền hàng loạt</button>}
+    </div></div>
+    {!canRefund && <p role="alert" className={ui.alert}>{unavailableReason || 'Sự kiện chưa đủ điều kiện hoàn tiền.'}</p>}
+    {notice && <p role="status" className={ui.feedback}>{notice}</p>}
+    {actionError && !confirmBatch && <p role="alert" className={ui.alert}>{actionError}</p>}
     <LoadState loading={loading} error={error} retry={reload} />
-    {data && <>{data.items.length === 0 ? <p>Chưa có hồ sơ hoàn tiền.</p> : <div className={styles.tableWrap}><table className={styles.table}><thead><tr><th>Giao dịch</th><th>Khách / Sự kiện</th><th>Số tiền</th><th>Trạng thái</th><th>Thao tác</th></tr></thead><tbody>{data.items.map(item => <tr key={item.id}>
-      <td>#{item.paymentId}<small>Booking #{item.bookingId}</small></td><td>{item.customerName}<small>{item.eventName}</small></td><td>{money(item.amount)}</td><td>{statusLabel(item.status)}</td><td><button onClick={() => setSelected(item.paymentId)}>Xem / Xử lý</button></td>
-    </tr>)}</tbody></table></div>}<Pagination page={page} totalPages={data.totalPages} totalElements={data.totalElements} change={setPage} /></>}
+    {data && <>{data.items.length === 0 ? <p className={ui.empty}>Chưa có hồ sơ hoàn tiền.</p> : <div className={styles.tableWrap}>
+      <table className={`${styles.table} ${ui.table}`}><thead><tr><th>Khách hàng</th><th>Số tiền</th><th>Trạng thái</th><th><span className={ui.visuallyHidden}>Chi tiết</span></th></tr></thead>
+        <tbody>{data.items.map(item => <tr key={item.id}>
+          <td><strong>{item.customerName || 'Khách hàng'}</strong><small>Payment #{item.paymentId} · Booking #{item.bookingId}{!eventId && ` · ${item.eventName}`}</small></td>
+          <td className={ui.amount}>{money(item.amount)}</td><td><RefundBadge status={item.status} /></td>
+          <td><button onClick={() => setSelected(item.paymentId)}>Chi tiết</button></td>
+        </tr>)}</tbody></table></div>}
+      {data.totalPages > 1 ? <Pagination page={page} totalPages={data.totalPages} totalElements={data.totalElements} change={setPage} />
+        : data.totalElements > 0 && <p className={ui.count}>{data.totalElements} khoản hoàn</p>}
+    </>}
     {confirmBatch && <Dialog title="Xác nhận hoàn tiền hàng loạt" busy={busy} close={() => setConfirmBatch(false)}>
-      <p>Xếp hàng các khoản VNPAY đang chờ của toàn bộ sự kiện này, bao gồm các trang khác. Tiền được hoàn về giao dịch thanh toán gốc.</p>
-      {actionError && <p role="alert">{actionError}</p>}<button disabled={busy} onClick={batch}>{busy ? 'Đang gửi…' : 'Xác nhận hoàn hàng loạt'}</button>
+      <div className={ui.dialogBody}><p>Hoàn toàn bộ các giao dịch đủ điều kiện của sự kiện này.</p><p className={ui.muted}>Các khoản đã xử lý sẽ được bỏ qua.</p>
+        {actionError && <p role="alert" className={ui.alert}>{actionError}</p>}
+      </div><div className={ui.dialogActions}>
+        <button disabled={busy} onClick={() => setConfirmBatch(false)}>Hủy</button>
+        <button className={ui.primary} disabled={busy} onClick={batch}>{busy ? 'Đang gửi…' : 'Xác nhận hoàn hàng loạt'}</button>
+      </div>
     </Dialog>}
     {selected !== null && <RefundEditor key={selected} paymentId={selected} close={() => { setSelected(null); reload() }} changed={reload} />}
   </section>
@@ -50,46 +77,32 @@ function RefundEditor({ paymentId, close, changed }: { paymentId: number; close:
   const sending = useRef(false)
   const [actionError, setActionError] = useState('')
   const [notice, setNotice] = useState('')
-  const [confirmAuto, setConfirmAuto] = useState(false)
-  const [account, setAccount] = useState<BankAccountInput>({ bankCode: '', accountNumber: '', accountHolderName: '', originalAccountVerified: false })
-  const [code, setCode] = useState('')
-  const [evidence, setEvidence] = useState<File | null>(null)
-  async function act(operation: () => Promise<unknown>, message: string) {
-    if (sending.current || loading || error) return
+  const [confirm, setConfirm] = useState(false)
+  async function complete() {
+    if (sending.current || loading || error || !data || data.status === 'COMPLETED') return
     sending.current = true; setBusy(true); setActionError(''); setNotice('')
-    try { await operation(); setNotice(message); setConfirmAuto(false) }
-    catch (cause) { setActionError(errorMessage(cause)) }
+    try {
+      await financeApi.completeRefund(paymentId)
+      setNotice('Hoàn tiền thành công.'); setConfirm(false)
+    } catch (cause) { setActionError(errorMessage(cause)) }
     finally { sending.current = false; setBusy(false); reload(); changed() }
   }
-  async function download() {
-    try { const blob = await financeApi.refundEvidence(paymentId); const url = URL.createObjectURL(blob); const link = document.createElement('a'); link.href = url; link.download = `refund-${paymentId}`; link.click(); setTimeout(() => URL.revokeObjectURL(url), 1000) }
-    catch (cause) { setActionError(errorMessage(cause)) }
-  }
-  const editable = data && ['WAITING', 'FAILED'].includes(data.status) && !loading && !busy && !error
   return <Dialog title={`Hoàn giao dịch #${paymentId}`} busy={busy} close={close}>
     <LoadState loading={loading} error={error} retry={reload} />
-    {actionError && <p role="alert" className={styles.error}>{actionError}</p>}{notice && <p role="status">{notice}</p>}
-    {data && <><p>{money(data.amount)} — {statusLabel(data.status)}</p><button disabled={busy} onClick={reload}>Đọc lại trạng thái</button>
-      {data.status === 'WAITING' && <><button disabled={busy || loading} onClick={() => setConfirmAuto(true)}>Hoàn qua VNPAY</button>{confirmAuto && <div><p>Xác nhận hoàn toàn bộ giao dịch về nguồn thanh toán gốc?</p><button disabled={busy || loading} onClick={() => act(() => financeApi.queueRefund(paymentId), 'Đã xếp hàng hoàn tiền. Cập nhật trạng thái để xem kết quả.')}>Xác nhận hoàn</button><button onClick={() => setConfirmAuto(false)}>Bỏ qua</button></div>}</>}
-      {data.status === 'RECONCILIATION' && <><p>Kết quả chưa rõ. Không chuyển khoản lần nữa.</p><button disabled={busy || loading} onClick={() => act(() => financeApi.reconcileRefund(paymentId), 'Đã truy vấn. Kiểm tra trạng thái được xác nhận bên dưới.')}>Truy vấn VNPAY</button></>}
-      <h3>Tài khoản hoàn thủ công — chỉ Admin</h3>
-      {editable && data.bankAccount && <p>Tài khoản đã lưu: {data.bankAccount.bankCode} — {data.bankAccount.accountNumber} — {data.bankAccount.accountHolderName}<br /><button onClick={() => setAccount({ ...data.bankAccount!, originalAccountVerified: false })}>Sửa tài khoản đã lưu</button></p>}
-      {editable ? <form onSubmit={e => { e.preventDefault(); void act(() => financeApi.saveRefundAccount(paymentId, account), 'Đã lưu tài khoản đã xác minh.') }}>
-        <label>Ngân hàng<input required maxLength={50} value={account.bankCode} onChange={e => setAccount({ ...account, bankCode: e.target.value })} /></label>
-        <label>Số tài khoản<input required pattern="[0-9A-Za-z]{4,50}" maxLength={50} value={account.accountNumber} onChange={e => setAccount({ ...account, accountNumber: e.target.value })} /></label>
-        <label>Chủ tài khoản<input required maxLength={255} value={account.accountHolderName} onChange={e => setAccount({ ...account, accountHolderName: e.target.value })} /></label>
-        <label><input type="checkbox" required checked={account.originalAccountVerified} onChange={e => setAccount({ ...account, originalAccountVerified: e.target.checked })} />Đã xác minh đây là tài khoản dùng mua vé</label><button disabled={!account.originalAccountVerified}>Lưu tài khoản</button>
-      </form> : data.bankAccount ? <p>{data.bankAccount.bankCode} — {data.bankAccount.accountNumber}<br />{data.bankAccount.accountHolderName}</p> : <p>Chưa có tài khoản đã xác minh.</p>}
-      {editable && data.bankAccount && <><p>Giữ khoản hoàn thủ công trước khi chuyển tiền ngoài hệ thống. Thao tác này khóa hoàn tự động và thông tin tài khoản.</p><button onClick={() => act(() => financeApi.reserveManualRefund(paymentId), 'Đã giữ khoản hoàn thủ công. Chuyển đúng số tiền một lần rồi lưu chứng từ.')}>Chọn hoàn thủ công và khóa khoản hoàn</button></>}
-      {data.status === 'MANUAL_PENDING' && <form onSubmit={e => { e.preventDefault(); if (evidence) void act(() => financeApi.confirmManualRefund(paymentId, code.trim(), evidence), 'Đã ghi nhận hoàn thủ công.') }}>
-        <p>Chỉ xác nhận sau khi chuyển khoản thành công. Nếu mất phản hồi, đọc lại hồ sơ trước khi xử lý tiếp.</p>
-        <label>Mã chuyển khoản<input required maxLength={255} value={code} onChange={e => setCode(e.target.value)} disabled={busy} /></label>
-        <label>Chứng từ PDF/PNG/JPEG, tối đa 5 MB<input required type="file" accept="application/pdf,image/png,image/jpeg" disabled={busy} onChange={e => { const file = e.target.files?.[0] ?? null; setEvidence(file && file.size <= 5 * 1024 * 1024 ? file : null); setActionError(file && file.size > 5 * 1024 * 1024 ? 'Chứng từ tối đa 5 MB' : '') }} /></label>
-        <button disabled={busy || loading || !code.trim() || !evidence}>Xác nhận đã chuyển khoản</button>
-      </form>}
-      {data.reference && <p>Mã giao dịch: {data.reference} — {financeDate(data.refundedAt)}</p>}
-      {data.hasEvidence && <button onClick={download}>Tải chứng từ</button>}
-      <h3>Lịch sử xử lý</h3>{data.attempts.length === 0 ? <p>Chưa gọi cổng thanh toán.</p> : data.attempts.map((attempt, i) => <p key={i}>{financeDate(attempt.createdAt)} — {attempt.command} — {statusLabel(attempt.outcome)} {attempt.responseCode && `(Mã ${attempt.responseCode})`}</p>)}
-    </>}
+    {actionError && <p role="alert" className={ui.alert}>{actionError}</p>}
+    {notice && <p role="status" className={ui.feedback}>{notice}</p>}
+    {data && <div className={ui.dialogBody}>
+      <div className={ui.detailTotal}><strong>{money(data.amount)}</strong><RefundBadge status={data.status} /></div>
+      {data.status !== 'COMPLETED' && <>
+        <button className={ui.primary} disabled={busy || loading} onClick={() => { setConfirm(true); setActionError('') }}>Hoàn tiền</button>
+        {confirm && <div><p>Xác nhận hoàn toàn bộ giao dịch này?</p><div className={ui.dialogActions}>
+          <button disabled={busy} onClick={() => setConfirm(false)}>Hủy</button>
+          <button className={ui.primary} disabled={busy || loading} onClick={complete}>{busy ? 'Đang xử lý…' : 'Xác nhận hoàn tiền'}</button>
+        </div></div>}
+      </>}
+      {data.reference && <p>Mã hoàn tiền: <strong>{data.reference}</strong><br /><span className={ui.muted}>{financeDate(data.refundedAt)}</span></p>}
+      {data.processedBy && <p className={ui.muted}>Người xử lý: Admin #{data.processedBy}</p>}
+      <div className={ui.dialogActions}><button disabled={busy} onClick={reload}>Cập nhật trạng thái</button><button disabled={busy} onClick={close}>Đóng</button></div>
+    </div>}
   </Dialog>
 }

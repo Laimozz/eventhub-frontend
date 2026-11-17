@@ -22,7 +22,8 @@ export function useBooking(id: number | null) {
         const result = await getBooking(bookingId, controller.signal)
         if (controller.signal.aborted) return
         setData(result)
-        if (result.status === 'PENDING' || result.status === 'PAYMENT_CONFIRMING') {
+        if (result.status === 'PENDING' || result.status === 'PAYMENT_CONFIRMING'
+          || result.payments.some(payment => payment.refund && ['WAITING', 'QUEUED', 'PROCESSING', 'RECONCILIATION'].includes(payment.refund.status))) {
           timer = window.setTimeout(fetchBooking, 5000)
         }
       } catch (cause) {

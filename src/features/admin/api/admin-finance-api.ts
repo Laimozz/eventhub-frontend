@@ -7,18 +7,9 @@ export const financeApi = {
     (await httpClient.get<import('../types/refund').RefundPage>('/admin/refunds', { signal, params: { eventId, page, pageSize: 20 } })).data,
   refund: async (paymentId: number, signal?: AbortSignal) =>
     (await httpClient.get<import('../types/refund').RefundDetail>(`/admin/refunds/${paymentId}`, { signal })).data,
-  queueRefund: async (paymentId: number) => (await httpClient.post(`/admin/refunds/${paymentId}/automatic`)).data,
-  queueEventRefunds: async (eventId: number) =>
-    (await httpClient.post<{ queuedCount: number }>(`/admin/refund-events/${eventId}/refunds`)).data,
-  reconcileRefund: async (paymentId: number) => (await httpClient.post(`/admin/refunds/${paymentId}/reconcile`, undefined, { timeout: 30000 })).data,
-  saveRefundAccount: async (paymentId: number, account: import('../types/refund').BankAccountInput) =>
-    (await httpClient.put(`/admin/refunds/${paymentId}/bank-account`, account)).data,
-  reserveManualRefund: async (paymentId: number) => (await httpClient.post(`/admin/refunds/${paymentId}/manual-reservation`)).data,
-  confirmManualRefund: async (paymentId: number, transactionCode: string, evidence: File) => {
-    const body = new FormData(); body.append('transactionCode', transactionCode); body.append('evidence', evidence)
-    return (await httpClient.post(`/admin/refunds/${paymentId}/manual-confirmation`, body)).data
-  },
-  refundEvidence: async (paymentId: number) => (await httpClient.get<Blob>(`/admin/refunds/${paymentId}/evidence`, { responseType: 'blob' })).data,
+  completeRefund: async (paymentId: number) => (await httpClient.post(`/admin/refunds/${paymentId}/complete`)).data,
+  refundEvent: async (eventId: number) =>
+    (await httpClient.post<{ refundedCount: number }>(`/admin/refund-events/${eventId}/refunds`)).data,
   overview: async (signal: AbortSignal) => (await httpClient.get<Overview>('/admin/statistics', { signal })).data,
   monthlyStats: async (months: number = 6, signal?: AbortSignal) =>
     (await httpClient.get<AdminMonthlyTrend[]>('/admin/statistics/monthly', { params: { months }, signal })).data,

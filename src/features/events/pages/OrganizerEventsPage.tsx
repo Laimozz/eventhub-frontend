@@ -60,6 +60,6 @@ export function OrganizerEventsPage() {
       </article>)}<Link className={styles.newCard} to="/organizer/events/new/details"><CirclePlus size={35} /><strong>Tạo thêm sự kiện mới</strong><span>Bắt đầu một trải nghiệm tiếp theo</span></Link></div>
       <div className={styles.pagination}><small>Hiển thị {page * data.size + 1}–{page * data.size + data.content.length} trong {data.totalElements} sự kiện</small><div><button className={styles.secondary} disabled={page === 0} aria-label="Trang trước" onClick={() => filter(status, search, page - 1)}><ChevronLeft size={17} /></button><span>Trang {page + 1} / {data.totalPages}</span><button className={styles.secondary} disabled={page + 1 >= data.totalPages} aria-label="Trang sau" onClick={() => filter(status, search, page + 1)}><ChevronRight size={17} /></button></div></div>
     </>}
-    {canceling && <CancelEventDialog event={canceling} onClose={() => setCanceling(null)} onCanceled={() => { setCanceling(null); setNotice('Đã gửi yêu cầu hủy sự kiện. Vui lòng chờ Admin xét duyệt.'); setReload(value => value + 1) }} />}
+    {canceling && <CancelEventDialog event={canceling} onClose={() => setCanceling(null)} onCanceled={() => { setCanceling(null); setNotice('Đã hủy sự kiện. Các khoản hoàn tiền đang chờ Admin kích hoạt theo sự kiện.'); setReload(value => value + 1) }} />}
   </div>
 }

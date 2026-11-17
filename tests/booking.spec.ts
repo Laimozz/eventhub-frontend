@@ -1,6 +1,20 @@
 import { expect, test } from '@playwright/test'
 import type { Page } from '@playwright/test'
 
+test('completed refund shows result and reference without a simulation label', async ({ page }) => {
+  await setup(page)
+  await page.route('**/api/bookings/42', route => {
+    const data = booking('PAID')
+    return route.fulfill({ json: { ...data, event: { ...event, status: 'CANCELED' }, payments: data.payments.map(payment => ({ ...payment,
+      refund: { amount: 500000, status: 'COMPLETED', method: 'INTERNAL', reference: 'RF-test', refundedAt: null } })) } })
+  })
+  await page.goto('/customer/bookings/42')
+  await expect(page.getByRole('heading', { name: 'Đã hoàn tiền' })).toBeVisible()
+  await expect(page.getByText('Giao dịch đã được hoàn tiền.')).toBeVisible()
+  await expect(page.getByText(/mô phỏng/i)).toHaveCount(0)
+  await expect(page.getByText('VNPAY Sandbox đã xác nhận hoàn tiền thành công.')).toHaveCount(0)
+})
+
 const user = { id: 1, email: 'member@example.test', fullName: 'Nguyễn An', phone: '0901234567', role: 'CUSTOMER' }
 const token = '8d05ac9a-5c4c-4d9f-8805-7e0d847720c2'
 const poster = `<svg xmlns="http://www.w3.org/2000/svg" width="800" height="650"><defs><linearGradient id="g" x2="1" y2="1"><stop stop-color="#133b42"/><stop offset="1" stop-color="#174f28"/></linearGradient></defs><path fill="url(#g)" d="M0 0h800v650H0z"/><circle cx="560" cy="200" r="180" fill="#25bd7a" opacity=".15"/><text x="65" y="235" fill="#a5efd0" font-family="sans-serif" font-size="23" letter-spacing="9">EVENTHUB PRESENTS</text><text x="60" y="340" fill="white" font-family="sans-serif" font-size="72" font-weight="bold">LIVE MUSIC</text><text x="65" y="405" fill="#cce9d8" font-family="sans-serif" font-size="32">A NIGHT TO REMEMBER</text></svg>`
@@ -14,6 +28,7 @@ function booking(status = 'PENDING', expiry = Date.now() + 14 * 60_000) {
 const callbackUrl = '/customer/payment-result?vnp_TxnRef=test-ref&vnp_SecureHash=test-signature'
 const pageResult = <T,>(items: T[], page = 0, totalPages = 1) => ({ items, page, size: 10, totalElements: items.length, totalPages })
 async function setup(page: Page, role = 'CUSTOMER') {
+  await page.route('**/api/notifications/unread-count', route => route.fulfill({ json: 0 }))
   await page.route('**/test-poster.svg', route => route.fulfill({ contentType: 'image/svg+xml', body: poster }))
   await page.route('**/api/auth/refresh', route => route.fulfill({ json: { ...user, role } }))
   await page.route('**/api/public/events/11', route => route.fulfill({ json: { ...event, description: 'Một đêm nhạc đáng nhớ.', bannerImageUrl: event.thumbnailImageUrl, imageZoneUrl: null, organizerName: 'EventHub Live', categoryName: 'Âm nhạc', venue: { city: event.city, address: event.address }, startingPrice: 250000, suggestedEvents: [] } }))
@@ -27,6 +42,53 @@ async function screenshot(page: Page, name: string) {
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true)
   await page.screenshot({ path: test.info().outputPath(`${name}.png`), fullPage: true })
 }
+
+test('canceled event automatically refreshes refund status and hides ticket action', async ({ page }) => {
+  await setup(page)
+  await page.clock.install()
+  let completed = false, mutations = 0
+  await page.route('**/api/bookings/42', route => {
+    if (route.request().method() !== 'GET') { mutations++; return route.abort() }
+    const data = booking('PAID')
+    return route.fulfill({ json: { ...data, event: { ...event, status: 'CANCELED' },
+      items: data.items.map(item => ({ ...item, tickets: item.tickets.map(ticket => ({ ...ticket, status: 'CANCELED', qrToken: null })) })),
+      payments: data.payments.map(payment => ({ ...payment, refund: { amount: 500000, status: completed ? 'COMPLETED' : 'QUEUED', method: 'VNPAY',
+        reference: completed ? '54321' : null, refundedAt: completed ? '2026-11-17T03:00:00' : null } })) } })
+  })
+  await page.goto('/customer/bookings/42')
+  await expect(page.getByText('Đã xếp hàng hoàn tiền', { exact: true })).toBeVisible()
+  await expect(page.getByRole('link', { name: 'Xem vé điện tử / QR' })).toHaveCount(0)
+  completed = true
+  await page.clock.fastForward(6000)
+  await expect(page.getByText('Đã hoàn tiền', { exact: true })).toBeVisible()
+  await expect(page.getByText('54321', { exact: true })).toBeVisible()
+  expect(mutations).toBe(0)
+  await screenshot(page, 'automatic-refund-completed')
+})
+
+test('paid without tickets shows reconciliation rather than a refund button', async ({ page }) => {
+  await setup(page)
+  const data = booking('PAID')
+  await page.route('**/api/bookings/42', route => route.fulfill({ json: { ...data, status: 'PAYMENT_REVIEW', items: [],
+    payments: data.payments.map(payment => ({ ...payment, refund: { amount: 500000, status: 'RECONCILIATION', method: 'VNPAY', reference: null, refundedAt: null } })) } }))
+  await page.goto('/customer/bookings/42')
+  await expect(page.getByText('Đang xác minh kết quả hoàn tiền', { exact: true })).toBeVisible()
+  await expect(page.getByRole('button', { name: /Yêu cầu hoàn|Hoàn tiền/ })).toHaveCount(0)
+  await expect(page.getByRole('link', { name: 'Xem vé điện tử / QR' })).toHaveCount(0)
+})
+
+test('payment return for a refunded canceled event displays refund instead of ticket success', async ({ page }) => {
+  await setup(page)
+  await page.route('**/api/payments/vnpay/return?*', route => route.fulfill({ json: { bookingId: 42, bookingStatus: 'PAID', paymentStatus: 'SUCCESS', responseCode: '00', transactionStatus: '00' } }))
+  const data = booking('PAID')
+  await page.route('**/api/bookings/42', route => route.fulfill({ json: { ...data, event: { ...event, status: 'CANCELED' },
+    payments: data.payments.map(payment => ({ ...payment, refund: { amount: 500000, status: 'COMPLETED', method: 'VNPAY', reference: '54321', refundedAt: '2026-11-17T03:00:00' } })) } }))
+  await page.goto(callbackUrl)
+  await expect(page.getByRole('heading', { name: 'Theo dõi hoàn tiền' })).toBeVisible()
+  await expect(page.getByRole('heading', { name: 'Đã hoàn tiền', exact: true })).toBeVisible()
+  await expect(page.getByRole('link', { name: 'Xem vé điện tử / QR' })).toHaveCount(0)
+  await expect(page.getByText('Thanh toán thành công!', { exact: true })).toHaveCount(0)
+})
 
 test('select tickets uses server stock, creates booking and redirects to checkout', async ({ page }) => {
   await setup(page)

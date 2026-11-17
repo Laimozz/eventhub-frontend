@@ -26,6 +26,8 @@ export function errorMessage(error: unknown): string {
     TRANSACTION_CODE_IN_USE: 'Mã giao dịch chuyển khoản đã được ghi nhận.',
     PAYOUT_REQUIRES_RECONCILIATION: 'Yêu cầu đã có giao dịch chi trả. Cần đối soát trước khi xử lý.',
     EVENT_NOT_CANCELED: 'Sự kiện chưa được hủy chính thức, chưa đủ điều kiện hoàn tiền.',
+    REFUND_NOT_ELIGIBLE: 'Giao dịch chưa đủ điều kiện hoàn tiền.',
+    FINANCE_REQUIRES_RECONCILIATION: 'Giao dịch cần được đối soát tài chính trước khi hoàn tiền.',
     EMAIL_ALREADY_EXISTS: 'Email đã được sử dụng.', CATEGORY_NAME_ALREADY_EXISTS: 'Tên danh mục đã tồn tại.',
     CATEGORY_IN_USE: 'Danh mục đang được sử dụng, không thể xóa.', CANNOT_LOCK_SELF: 'Không thể khóa chính tài khoản của bạn.',
     EVENT_VERSION_CONFLICT: 'Nội dung sự kiện đã thay đổi. Vui lòng tải lại để xem trước khi quyết định.',
@@ -36,6 +38,7 @@ export function errorMessage(error: unknown): string {
   if (status === 404) return 'Không tìm thấy dữ liệu.'
   if (status === 400) return 'Thông tin chưa hợp lệ. Vui lòng kiểm tra các trường đã nhập.'
   if (status === 409) return 'Dữ liệu bị trùng hoặc đã thay đổi. Vui lòng tải lại.'
+  if (status === 503) return 'Dịch vụ tạm thời chưa sẵn sàng. Vui lòng thử lại sau.'
   return 'Không thể kết nối máy chủ. Vui lòng thử lại.'
 }
 

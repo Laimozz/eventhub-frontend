@@ -11,78 +11,15 @@ const list = <T>(items: T[], page = 0) => ({ items, page, pageSize: 20, totalEle
 const overview = { totalEvents: 1, totalUsers: 3, totalTicketsSold: 1, pendingBalance: 95000, availableBalance: 0,
   withdrawalPendingBalance: 0, totalWithdrawn: 0, grossRevenue: 100000, netRevenue: 5000, totalRefunded: 0, revenueUnavailableReason: null }
 const refundRow = { id: 1, paymentId: 9, bookingId: 10, eventId: 8, eventName: 'Sự kiện hoàn tiền', customerName: 'Khách thử', amount: 100000, status: 'WAITING', method: null, refundedAt: null }
+
 async function login(page: Page, role = 'ADMIN') {
+  // Keep unmocked dashboard/SSE calls isolated from the developer's running backend.
+  await page.route(url => url.pathname.startsWith('/api/'), route => route.fulfill({ status: 404, json: { message: 'No fixture for this endpoint' } }))
+  await page.route('**/api/admin/refund-events/8?**', route => route.fulfill({ json: { eventId: 8, eventName: 'Sự kiện hoàn tiền', cancelReason: 'Hủy', canRefund: true, unavailableReason: '', payments: list([]) } }))
   await page.route('**/api/notifications/unread-count', route => route.fulfill({ json: 0 }))
   await page.route('**/api/admin/refunds?**', route => route.fulfill({ json: list([]) }))
   await page.route('**/api/auth/refresh', route => route.fulfill({ json: { id: 1, fullName: 'Admin thử', email: 'admin@example.invalid', role } }))
 }
-
-test('manual refund saves a verified account, reserves before transfer and records private evidence', async ({ page }) => {
-  await login(page)
-  let status = 'WAITING', account: Record<string, unknown> | null = null, confirmations = 0
-  await page.route('**/api/admin/statistics', route => route.fulfill({ json: overview }))
-  await page.route('**/api/admin/refunds?**', route => route.fulfill({ json: list([{ ...refundRow, status }]) }))
-  await page.route('**/api/admin/refunds/9', route => route.fulfill({ json: { paymentId: 9, amount: 100000, status, method: status === 'WAITING' ? null : 'MANUAL', bankAccount: account, attempts: [], hasEvidence: status === 'COMPLETED' } }))
-  await page.route('**/api/admin/refunds/9/bank-account', route => {
-    expect(route.request().method()).toBe('PUT')
-    account = route.request().postDataJSON()
-    expect(account?.originalAccountVerified).toBe(true)
-    return route.fulfill({ json: {} })
-  })
-  await page.route('**/api/admin/refunds/9/manual-reservation', route => { status = 'MANUAL_PENDING'; return route.fulfill({ json: {} }) })
-  await page.route('**/api/admin/refunds/9/manual-confirmation', route => {
-    expect(status).toBe('MANUAL_PENDING')
-    expect(route.request().headers()['x-csrf-protection']).toBe('1')
-    expect(route.request().postData()).toContain('BANK-123')
-    confirmations++; status = 'COMPLETED'
-    return route.fulfill({ json: {} })
-  })
-  await page.goto('/admin/statistics')
-  await page.getByRole('button', { name: 'Xem / Xử lý' }).click()
-  await page.getByLabel('Ngân hàng', { exact: true }).fill('VCB')
-  await page.getByLabel('Số tài khoản', { exact: true }).fill('12345678')
-  await page.getByLabel('Chủ tài khoản', { exact: true }).fill('NGUYEN VAN A')
-  await page.getByLabel('Đã xác minh đây là tài khoản dùng mua vé').check()
-  await page.getByRole('button', { name: 'Lưu tài khoản', exact: true }).click()
-  await page.getByRole('button', { name: 'Chọn hoàn thủ công và khóa khoản hoàn' }).click()
-  await expect(page.getByRole('button', { name: 'Hoàn qua VNPAY' })).toHaveCount(0)
-  await page.getByLabel('Mã chuyển khoản', { exact: true }).fill('BANK-123')
-  await page.getByLabel('Chứng từ PDF/PNG/JPEG, tối đa 5 MB').setInputFiles({ name: 'evidence.pdf', mimeType: 'application/pdf', buffer: Buffer.from('%PDF-1.7 evidence') })
-  await page.getByRole('button', { name: 'Xác nhận đã chuyển khoản' }).click()
-  await expect(page.getByRole('button', { name: 'Tải chứng từ' })).toBeVisible()
-  expect(confirmations).toBe(1)
-})
-
-test('dashboard starts one automatic refund and blocks switching an unknown result to manual', async ({ page }) => {
-  await login(page)
-  let status = 'WAITING', requests = 0
-  await page.route('**/api/admin/statistics', route => route.fulfill({ json: overview }))
-  await page.route('**/api/admin/refunds?**', route => route.fulfill({ json: list([{ ...refundRow, status }]) }))
-  await page.route('**/api/admin/refunds/9', route => route.fulfill({ json: { paymentId: 9, amount: 100000, status, method: status === 'WAITING' ? null : 'VNPAY', bankAccount: null, attempts: [], hasEvidence: false } }))
-  await page.route('**/api/admin/refunds/9/automatic', async route => { requests++; status = 'RECONCILIATION'; await route.fulfill({ json: {} }) })
-  await page.goto('/admin/statistics')
-  await page.getByRole('button', { name: 'Xem / Xử lý' }).click()
-  await page.getByRole('button', { name: 'Hoàn qua VNPAY', exact: true }).click()
-  await page.getByRole('button', { name: 'Xác nhận hoàn', exact: true }).click()
-  await expect(page.getByText('Kết quả chưa rõ. Không chuyển khoản lần nữa.')).toBeVisible()
-  await expect(page.getByRole('button', { name: 'Truy vấn VNPAY' })).toBeVisible()
-  await expect(page.getByRole('button', { name: 'Chọn hoàn thủ công và khóa khoản hoàn' })).toHaveCount(0)
-  expect(requests).toBe(1)
-})
-
-test('canceled event requires confirmation before queueing all refunds', async ({ page }) => {
-  await login(page)
-  let requests = 0
-  await page.route('**/api/admin/refund-events/8?**', route => route.fulfill({ json: { eventId: 8, eventName: 'Sự kiện hoàn tiền', cancelReason: 'Hủy', canRefund: true, unavailableReason: '', payments: list([]) } }))
-  await page.route('**/api/admin/refunds?**', route => route.fulfill({ json: list([refundRow]) }))
-  await page.route('**/api/admin/refund-events/8/refunds', route => { requests++; return route.fulfill({ json: { queuedCount: 1 } }) })
-  await page.goto('/admin/refunds/8')
-  await page.getByRole('button', { name: 'Hoàn tiền hàng loạt', exact: true }).click()
-  expect(requests).toBe(0)
-  await page.getByRole('button', { name: 'Xác nhận hoàn hàng loạt', exact: true }).click()
-  await expect(page.getByText(/Đã xếp hàng 1 khoản hoàn/)).toBeVisible()
-  expect(requests).toBe(1)
-})
 
 test('overview separates paid tickets, confirmed refunds, platform fees and wallet balances', async ({ page }) => {
   await login(page)
@@ -172,6 +109,7 @@ test('failed decision keeps input and explains insufficient held balance', async
 })
 test('refund inspection shows actual history and never offers an unsupported transfer', async ({ page }) => {
   await login(page)
+  await page.route('**/api/admin/refunds?**', route => route.fulfill({ json: list([{ ...refundRow, status: 'Provider refund status' }]) }))
   await page.route('**/api/admin/refund-events/8?**', route => route.fulfill({ json: {
     eventId: 8, eventName: 'Sự kiện đã hủy thử', cancelReason: 'Thời tiết', canRefund: false,
     unavailableReason: 'Chưa tích hợp cổng hoàn tiền.', payments: list([{
@@ -183,7 +121,7 @@ test('refund inspection shows actual history and never offers an unsupported tra
   await page.goto('/admin/refunds/8')
   await expect(page.getByText('Chưa tích hợp cổng hoàn tiền.')).toBeVisible()
   await expect(page.getByText('Provider refund status')).toBeVisible()
-  await expect(page.getByRole('button', { name: 'Hoàn tiền', exact: true })).toHaveCount(0)
+  await expect(page.getByRole('button', { name: 'Hoàn tiền hàng loạt', exact: true })).toBeDisabled()
 })
 test('finance loading, error, retry, and non-admin routing work', async ({ page }) => {
   await login(page)
@@ -235,4 +173,74 @@ test('concurrent payout discovered on reload blocks the still-open decision dial
   await expect(page.getByText('Yêu cầu đã có giao dịch chi trả, cần đối soát trước khi xử lý.')).toBeVisible()
   await expect(page.getByRole('dialog').getByRole('button', { name: 'Xác nhận', exact: true })).toBeDisabled()
   expect(calls).toBe(1)
+})
+
+test('batch refund requires confirmation and completes immediately', async ({ page }) => {
+  await login(page)
+  let calls = 0
+  await page.route('**/api/admin/refunds?**', route => route.fulfill({ json: list([refundRow]) }))
+  await page.route('**/api/admin/refund-events/8/refunds', route => {
+    calls++
+    expect(route.request().headers()['x-csrf-protection']).toBe('1')
+    return route.fulfill({ json: { refundedCount: 1 } })
+  })
+  await page.goto('/admin/refunds/8')
+  expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(page.viewportSize()!.width)
+  await expect(page.getByText(/mô phỏng/i)).toHaveCount(0)
+  await page.getByRole('button', { name: 'Hoàn tiền hàng loạt', exact: true }).click()
+  expect(calls).toBe(0)
+  await page.getByRole('button', { name: 'Xác nhận hoàn hàng loạt', exact: true }).click()
+  await expect(page.getByText('Đã hoàn tiền 1 giao dịch.')).toBeVisible()
+  expect(calls).toBe(1)
+})
+
+for (const initialStatus of ['WAITING', 'FAILED', 'RECONCILIATION', 'PROCESSING']) {
+  test(`Admin completes ${initialStatus} refund with one confirmation`, async ({ page }) => {
+    await login(page)
+    let completed = false, calls = 0
+    await page.route('**/api/admin/refunds?**', route => route.fulfill({ json: list([{ ...refundRow,
+      status: completed ? 'COMPLETED' : initialStatus }]) }))
+    await page.route('**/api/admin/refunds/9', route => route.fulfill({ json: { paymentId: 9, amount: 100000,
+      status: completed ? 'COMPLETED' : initialStatus, method: completed ? 'INTERNAL' : null,
+      paymentMethod: 'VNPAY', eventId: 8, eventCanceled: true, processedBy: completed ? 1 : null,
+      reference: completed ? 'RF-test' : null, refundedAt: completed ? '2026-11-17T03:00:00' : null } }))
+    await page.route('**/api/admin/refunds/9/complete', route => {
+      calls++; completed = true
+      expect(route.request().headers()['x-csrf-protection']).toBe('1')
+      return route.fulfill({ json: {} })
+    })
+    await page.goto('/admin/refunds/8')
+    await page.getByRole('button', { name: 'Chi tiết', exact: true }).click()
+    const dialog = page.getByRole('dialog')
+    await expect(dialog.getByRole('button', { name: 'Truy vấn VNPAY' })).toHaveCount(0)
+    await expect(dialog.getByText(/mô phỏng/i)).toHaveCount(0)
+    await dialog.getByRole('button', { name: 'Hoàn tiền', exact: true }).click()
+    expect(calls).toBe(0)
+    await dialog.getByRole('button', { name: 'Xác nhận hoàn tiền', exact: true }).click()
+    await expect(dialog.getByText('Đã hoàn tiền', { exact: true })).toBeVisible()
+    await expect(dialog.getByText('RF-test', { exact: true })).toBeVisible()
+    await expect(dialog.getByRole('button', { name: 'Hoàn tiền', exact: true })).toHaveCount(0)
+    expect(calls).toBe(1)
+  })
+}
+
+test('refund failure stays in the confirmation dialog and allows retry', async ({ page }) => {
+  await login(page)
+  await page.route('**/api/admin/refund-events/8/refunds', route => route.fulfill({ status: 409,
+    json: { code: 'REFUND_NOT_ELIGIBLE', message: 'Giao dịch chưa đủ điều kiện hoàn tiền.' } }))
+  await page.goto('/admin/refunds/8')
+  await page.getByRole('button', { name: 'Hoàn tiền hàng loạt', exact: true }).click()
+  await page.getByRole('button', { name: 'Xác nhận hoàn hàng loạt', exact: true }).click()
+  const dialog = page.getByRole('dialog')
+  await expect(dialog.getByRole('alert')).toHaveText('Giao dịch chưa đủ điều kiện hoàn tiền.')
+  await expect(dialog.getByRole('button', { name: 'Xác nhận hoàn hàng loạt', exact: true })).toBeEnabled()
+})
+
+test('zero refunds explains that no eligible transactions were found', async ({ page }) => {
+  await login(page)
+  await page.route('**/api/admin/refund-events/8/refunds', route => route.fulfill({ json: { refundedCount: 0 } }))
+  await page.goto('/admin/refunds/8')
+  await page.getByRole('button', { name: 'Hoàn tiền hàng loạt', exact: true }).click()
+  await page.getByRole('button', { name: 'Xác nhận hoàn hàng loạt', exact: true }).click()
+  await expect(page.getByText('Không có khoản mới đủ điều kiện hoàn tiền.')).toBeVisible()
 })

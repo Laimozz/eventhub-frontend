@@ -14,6 +14,7 @@ export interface BookingPayment {
   id: number; transactionId: string; gatewayTransactionId: string | null
   paymentMethod: string; amount: number; status: string; responseCode: string | null
   createdAt: string; paidAt: string | null
+  refund?: { amount: number; status: string; method: string | null; reference: string | null; refundedAt: string | null } | null
 }
 export interface BookingSummary {
   id: number; status: BookingStatus; totalAmount: number; currency: string

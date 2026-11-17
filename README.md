@@ -7,15 +7,16 @@ Dự án Frontend được xây dựng bằng **React 19 + Vite + TypeScript**, 
 - `/customer/explore` có 12 sự kiện mỗi trang. `page` bắt đầu từ 0 trên URL, giữ các bộ lọc khi chuyển trang và hỗ trợ Back/Forward; áp dụng/xóa bộ lọc hoặc tìm kiếm mới sẽ về trang đầu.
 - Thẻ và chi tiết sự kiện dùng `status` cùng `salesStatus` từ API. Phân biệt sự kiện sắp diễn ra/đang diễn ra/đã kết thúc với vé chưa mở bán/đang mở bán/hết vé/đã đóng bán/tạm ngừng bán. Danh sách loại vé, giá và số còn lại lấy từ dữ liệu thật; chỉ mở nút đặt vé khi được bán.
 - Thời gian public hiển thị theo GMT+7. Logo EventHub dẫn về trang chính theo role đang đăng nhập: Organizer `/organizer`, Admin `/admin` (chuyển tới `/admin/events/pending`), Staff `/staff`, Customer và khách chưa đăng nhập `/customer`; áp dụng cả khi đang xem trang Customer bằng role khác.
-- Hủy sự kiện dừng bán/phát hành, vô hiệu vé chưa dùng và giải phóng booking đang giữ; thao tác hủy chưa tạo hồ sơ hoàn tiền.
+- Hủy sự kiện dừng bán/phát hành, vô hiệu vé chưa dùng và giải phóng booking đang giữ; backend tạo hồ sơ hoàn chờ Admin. Admin mở sự kiện đã hủy và xác nhận Hoàn tiền hàng loạt để hoàn tiền ngay trong hệ thống. Booking người mua hiển thị trạng thái chờ/đang xử lý/đã hoàn và tự cập nhật.
 - Kiểm thử các luồng này: `$env:PLAYWRIGHT_CHANNEL='msedge'; npm.cmd run test:e2e -- tests/public-events.spec.ts`.
 
 ## Tài chính Admin UC37–UC42
 
-- `/admin/statistics`: số liệu từ API, số dư ví Organizer và doanh thu gộp/ròng. Doanh thu chưa được backend xác định hiển thị “Chưa xác định”, không đổi null thành 0.
-- `/admin/withdrawals`, `/admin/withdrawals/:requestId`: lọc/phân trang, xem chi tiết, ghi nhận chuyển khoản đã thực hiện ngoài hệ thống và từ chối có lý do. Khi lỗi quyết định, tải lại dữ liệu; chặn gửi khi chưa tải xong, yêu cầu đã xử lý hoặc đã có payout cần đối soát.
-- `/admin/refunds`, `/admin/refunds/:eventId`: danh sách sự kiện CANCELED, hoàn hàng loạt; dashboard hỗ trợ hoàn cá nhân, truy vấn kết quả và hoàn thủ công với tài khoản/chứng từ chỉ Admin được xem.
-- API dùng client cookie/CSRF hiện có. Kiểm thử giả lập ở `tests/admin-finance.spec.ts`; chạy `npm.cmd run test:e2e -- tests/admin-finance.spec.ts`. Đã nối UC11/UC25; nghiệm thu VNPAY sandbox cần quyền merchant và cấu hình thực tế; xem `../plan.md`.
+- Refund chỉ xử lý nội bộ để mô phỏng, không gửi VNPAY Refund/QueryDR và không chuyển tiền thật. FE không hiển thị chữ mô phỏng; thanh toán VNPAY giữ nguyên.
+- `/admin/statistics`: thống kê và theo dõi hoàn tiền; `/admin/withdrawals` và `/admin/withdrawals/:requestId`: quản lý yêu cầu rút tiền.
+- `/admin/refunds`, `/admin/refunds/:eventId`: Admin xem hồ sơ, xác nhận hoàn từng giao dịch hoặc hoàn hàng loạt. Kết quả hoàn thành ngay, cập nhật sổ tài chính và thông báo; khoản đã hoàn không xử lý lại. Các trạng thái lỗi/cần đối soát cũ cũng dùng nút Hoàn tiền.
+- Dùng `POST /admin/refunds/:paymentId/complete` và `POST /admin/refund-events/:eventId/refunds` qua client cookie/CSRF hiện có. Không gọi endpoint cấu hình, truy vấn hay xác minh VNPAY refund.
+- Chi tiết hiển thị số tiền, trạng thái, mã hoàn, thời gian và Admin xử lý; không có bảng lịch sử attempts. Kiểm thử: `npm.cmd run test:e2e -- tests/admin-finance.spec.ts tests/booking.spec.ts`.
 
 ## Quản trị UC31–36
 
