@@ -1,0 +1,51 @@
+server {
+    listen 80;
+    server_name _;
+    root /usr/share/nginx/html;
+    index index.html;
+    server_tokens off;
+    client_max_body_size 50m;
+
+    # Resolve the backend again after Compose replaces its container.
+    resolver 127.0.0.11 valid=10s ipv6=off;
+    set $backend_url "${BACKEND_URL}";
+
+    location = /health {
+        access_log off;
+        default_type text/plain;
+        return 200 "ok\n";
+    }
+
+    location /api/ {
+        # No trailing slash: preserve /api and the original query string.
+        proxy_pass $backend_url;
+        proxy_http_version 1.1;
+        proxy_set_header Host $http_host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+        proxy_set_header Connection "";
+
+        # Notifications use SSE; send each event immediately.
+        proxy_buffering off;
+        proxy_cache off;
+        gzip off;
+        proxy_read_timeout 3600s;
+        proxy_send_timeout 120s;
+    }
+
+    location /assets/ {
+        try_files $uri =404;
+        expires 1y;
+        add_header Cache-Control "public, immutable";
+    }
+
+    location = /index.html {
+        add_header Cache-Control "no-cache";
+    }
+
+    # React Router routes must also work on refresh/direct navigation.
+    location / {
+        try_files $uri $uri/ /index.html;
+    }
+}

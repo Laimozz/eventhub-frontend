@@ -1,0 +1,9 @@
+# Optional: use an existing database instead of starting a new PostgreSQL.
+# docker compose --env-file .env.docker -f compose.yml -f compose.external-db.yml up -d --build
+services:
+  postgres:
+    profiles: [bundled-db]
+  backend:
+    depends_on: !reset {}
+    environment:
+      DB_URL: ${DB_URL:?Set DB_URL when using compose.external-db.yml}

@@ -1,5 +1,7 @@
 # EventHub Frontend — Tài Liệu Kiến Trúc & Hướng Dẫn Phát Triển
 
+Chạy cả FE, BE và PostgreSQL bằng Docker: xem [DOCKER.md](DOCKER.md) và điền [.env.docker.example](.env.docker.example) vào `.env.docker`.
+
 Dự án Frontend được xây dựng bằng **React 19 + Vite + TypeScript**, áp dụng kiến trúc **Feature-driven (hướng phân hệ và tính năng)** kết hợp với phân quyền người dùng **RBAC (Role-Based Access Control)** và cơ chế bảo mật xác thực qua **HttpOnly Cookie**. Đã triển khai đăng ký, đăng nhập; thông tin cá nhân và đổi mật khẩu; Organizer tạo sự kiện theo ba bước, xem danh sách/chi tiết, sửa và hủy trước giờ bắt đầu, kết nối API của `eventhub-backend`.
 
 ## Khám phá và trạng thái bán vé
