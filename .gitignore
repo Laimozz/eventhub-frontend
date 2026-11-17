@@ -16,7 +16,7 @@ playwright-report/
 .env
 .env.*
 !.env.example
-package-lock.json
+!.env.docker.example
 
 # Editor directories and files
 .vscode/*
